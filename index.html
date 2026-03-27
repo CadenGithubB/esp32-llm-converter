@@ -584,9 +584,10 @@ function buildOutputBin({ config, tokBuf, embedData, layers, finalNorm, lmHead, 
   parts.push(tokSize.buffer, tokBuf);
   console.log('[format] tokenizer block:', tokBuf.byteLength, 'bytes');
 
-  // Embedding
-  parts.push(...tensorBlock(embedData.length, { mode: 'f32', data: embedData }));
-  console.log('[format] embedding table:', embedData.length, 'elements');
+  // Embedding (F32 or INT8 — same weight shape as layers)
+  const embedN = embedData.mode === 'int8' ? embedData.quant.length : embedData.data.length;
+  parts.push(...tensorBlock(embedN, embedData));
+  console.log('[format] embedding table:', embedN, 'elements');
 
   // Layers
   const KEYS = ['attn_norm','q','k','v','o','ffn_norm','gate','up','down'];
@@ -640,7 +641,11 @@ function estimateSize({ config, tokBufSize, quantType, groupSize }) {
     const n = r * c;
     return n + Math.ceil(n / groupSize) * 4;
   }
-  let s = 64 + 4 + tokBufSize + 4 + vocab_size * dim * 4;
+  const nEmbed = vocab_size * dim;
+  const embedBytes = quantType === QUANT.F32
+    ? 4 + nEmbed * 4
+    : 4 + nEmbed + Math.ceil(nEmbed / groupSize) * 4;
+  let s = 64 + 4 + tokBufSize + embedBytes;
   for (let i = 0; i < n_layers; i++) {
     s += 4 + dim * 4;          // attn_norm
     s += 4 + mat(dim, dim);    // q
