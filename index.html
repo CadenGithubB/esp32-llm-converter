@@ -162,9 +162,9 @@
         <button id="hf-fetch-btn">Fetch</button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">
-        Tip: Start with
-        <code style="font-family:var(--mono);color:var(--accent2)">roneneldan/TinyStories-1M</code>
-        (~5 MB) to verify the full pipeline.
+        Tip: Try <code style="font-family:var(--mono);color:var(--accent2)">HuggingFaceTB/SmolLM-135M</code>
+        (Llama-arch, safetensors, ~270 MB download). The tool will detect
+        architecture and warn if the output exceeds your partition size.
       </div>
     </div>
   </div>
@@ -418,8 +418,10 @@ function buildOutputBin({ config, tokBuf, embedData, layers, finalNorm, lmHead, 
   dv.setUint8 (14, config.n_kv_heads);
   dv.setUint32(15, config.vocab_size,  true);
   dv.setUint16(19, config.seq_len,     true);
+  dv.setUint8 (21, config.arch_type ?? 0);  // 0=Llama, 1=GPT-2
+  // bytes 22-63 remain zero (pad)
   parts.push(hdr);
-  console.log('[format] header written (64 bytes)');
+  console.log('[format] header written (64 bytes) arch_type=' + (config.arch_type ?? 0));
 
   // Tokenizer
   const tokSize = new Uint32Array([tokBuf.byteLength]);
@@ -628,60 +630,86 @@ async function fetchFromHF() {
   console.group('[app] fetchFromHF:', modelId);
   const btn = $('hf-fetch-btn');
   btn.disabled = true; btn.textContent = 'Fetching…';
-
   show('log');
-  uiLog('info', 'Fetching ' + modelId + ' from HuggingFace…');
+  uiLog('info', 'Querying HuggingFace API for ' + modelId + '…');
 
   const base = 'https://huggingface.co/' + modelId + '/resolve/main';
-  const synthetic = [];
 
   try {
-    // config.json
+    // ── Step 1: query the API to list all available files ──
+    const apiResp = await fetch('https://huggingface.co/api/models/' + modelId);
+    if (!apiResp.ok) throw new Error('Model not found (HTTP ' + apiResp.status + '). Check the model ID.');
+    const apiData  = await apiResp.json();
+    const allFiles = (apiData.siblings ?? []).map(s => s.rfilename);
+    console.log('[app] model files on HF:', allFiles);
+    uiLog('info', 'Files available: ' + allFiles.join(', '));
+
+    // ── Step 2: find safetensors files ──
+    const stFiles  = allFiles.filter(f => f.endsWith('.safetensors'));
+    const hasST    = stFiles.length > 0;
+    const hasIndex = allFiles.includes('model.safetensors.index.json');
+    const hasPT    = allFiles.some(f => f.endsWith('.bin') && f.startsWith('pytorch_model'));
+
+    if (!hasST) {
+      if (hasPT) {
+        uiLog('err', 'This model only has pytorch_model.bin (pickle format) — not parseable in the browser.');
+        uiLog('warn', 'Choose a model that provides .safetensors files. Most models uploaded after 2023 do.');
+        uiLog('info', 'Suggested alternatives with safetensors: HuggingFaceTB/SmolLM-135M · Qwen/Qwen2-0.5B');
+        throw new Error('No .safetensors files found — pytorch_model.bin is not supported');
+      } else {
+        throw new Error('No .safetensors files found in this model repository.');
+      }
+    }
+    uiLog('ok', 'Found ' + stFiles.length + ' safetensors file(s): ' + stFiles.join(', '));
+
+    const synthetic = [];
+
+    // ── Step 3: config.json ──
     uiLog('info', 'Downloading config.json…');
     const cfgResp = await fetch(base + '/config.json');
     if (!cfgResp.ok) throw new Error('config.json HTTP ' + cfgResp.status);
     synthetic.push(new File([await cfgResp.blob()], 'config.json'));
     uiLog('ok', 'config.json ✓');
 
-    // tokenizer.json
-    uiLog('info', 'Downloading tokenizer.json…');
-    const tokResp = await fetch(base + '/tokenizer.json');
-    if (tokResp.ok) {
-      synthetic.push(new File([await tokResp.blob()], 'tokenizer.json'));
-      uiLog('ok', 'tokenizer.json ✓');
-    } else {
-      uiLog('warn', 'tokenizer.json not available (HTTP ' + tokResp.status + ')');
-    }
-
-    // Check for multi-shard index
-    const idxResp = await fetch(base + '/model.safetensors.index.json');
-    if (idxResp.ok) {
-      const idx    = await idxResp.json();
-      const shards = [...new Set(Object.values(idx.weight_map))].sort();
-      uiLog('info', 'Multi-shard model: ' + shards.length + ' shards');
-      console.log('[app] shards:', shards);
-      for (const shard of shards) {
-        uiLog('info', 'Downloading ' + shard + '…');
-        const r = await fetch(base + '/' + shard);
-        if (!r.ok) throw new Error(shard + ' HTTP ' + r.status);
-        const blob = await r.blob();
-        synthetic.push(new File([blob], shard));
-        uiLog('ok', shard + ' ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
+    // ── Step 4: tokenizer.json ──
+    if (allFiles.includes('tokenizer.json')) {
+      uiLog('info', 'Downloading tokenizer.json…');
+      const tokResp = await fetch(base + '/tokenizer.json');
+      if (tokResp.ok) {
+        synthetic.push(new File([await tokResp.blob()], 'tokenizer.json'));
+        uiLog('ok', 'tokenizer.json ✓');
       }
     } else {
-      // Single shard
-      uiLog('info', 'Downloading model.safetensors…');
-      const r = await fetch(base + '/model.safetensors');
-      if (!r.ok) throw new Error('model.safetensors HTTP ' + r.status);
+      uiLog('warn', 'tokenizer.json not in repository — tokenizer block will be empty');
+    }
+
+    // ── Step 5: safetensors shards ──
+    let shardsToDownload = [];
+    if (hasIndex) {
+      uiLog('info', 'Downloading shard index…');
+      const idxResp = await fetch(base + '/model.safetensors.index.json');
+      if (idxResp.ok) {
+        const idx = await idxResp.json();
+        shardsToDownload = [...new Set(Object.values(idx.weight_map))].sort();
+        uiLog('info', 'Multi-shard: ' + shardsToDownload.length + ' shards');
+      }
+    } else {
+      shardsToDownload = stFiles; // single or named shards
+    }
+
+    for (const shard of shardsToDownload) {
+      uiLog('info', 'Downloading ' + shard + '…');
+      const r = await fetch(base + '/' + shard);
+      if (!r.ok) throw new Error(shard + ' HTTP ' + r.status);
       const blob = await r.blob();
-      synthetic.push(new File([blob], 'model.safetensors'));
-      uiLog('ok', 'model.safetensors ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
+      synthetic.push(new File([blob], shard));
+      uiLog('ok', shard + ' ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
     }
 
     await handleFiles(synthetic);
 
   } catch (err) {
-    uiLog('err', 'HuggingFace fetch failed: ' + err.message);
+    uiLog('err', 'Fetch failed: ' + err.message);
     console.error('[app] fetch error:', err);
   } finally {
     btn.disabled = false; btn.textContent = 'Fetch';
@@ -691,24 +719,33 @@ async function fetchFromHF() {
 
 // ── Config normalisation ──────────────────────────────────────────────
 function normalizeConfig(c) {
+  // Detect architecture family
+  const isGPT2  = c.model_type === 'gpt2'  || ('n_embd' in c && 'n_layer' in c && !('hidden_size' in c));
+  const archType = isGPT2 ? 1 : 0;   // 0=Llama-style, 1=GPT-2
+
+  const dim     = c.hidden_size ?? c.n_embd ?? c.dim ?? 0;
+  const n_heads = c.num_attention_heads ?? c.n_head ?? c.n_heads ?? 0;
+
   return {
-    dim:        c.hidden_size            ?? c.dim        ?? 0,
-    hidden_dim: c.intermediate_size      ?? c.hidden_dim ?? 0,
-    n_layers:   c.num_hidden_layers      ?? c.n_layers   ?? 0,
-    n_heads:    c.num_attention_heads    ?? c.n_heads    ?? 0,
-    n_kv_heads: c.num_key_value_heads    ?? c.n_heads    ?? 0,
-    vocab_size: c.vocab_size             ?? 0,
-    seq_len:    c.max_position_embeddings ?? c.seq_len   ?? 2048,
+    dim,
+    hidden_dim:  c.intermediate_size ?? (isGPT2 ? (c.n_inner ?? dim * 4) : 0) ?? c.hidden_dim ?? 0,
+    n_layers:    c.num_hidden_layers  ?? c.n_layer  ?? c.n_layers  ?? 0,
+    n_heads,
+    n_kv_heads:  c.num_key_value_heads ?? n_heads,
+    vocab_size:  c.vocab_size ?? 0,
+    seq_len:     c.max_position_embeddings ?? c.n_positions ?? c.seq_len ?? 2048,
+    arch_type:   archType,
   };
 }
 
 // ── Architecture display ──────────────────────────────────────────────
 function renderArch(cfg, modelType) {
-  $('arch-model-name').textContent = modelType;
+  const archLabel = cfg.arch_type === 1 ? 'GPT-2' : 'Llama';
+  $('arch-model-name').textContent = modelType + '  [' + archLabel + ']';
   const p = estimateParams(cfg);
   const items = [
-    ['dim', cfg.dim], ['hidden', cfg.hidden_dim], ['layers', cfg.n_layers],
-    ['heads', cfg.n_heads], ['kv heads', cfg.n_kv_heads],
+    ['arch', archLabel], ['dim', cfg.dim], ['hidden', cfg.hidden_dim],
+    ['layers', cfg.n_layers], ['heads', cfg.n_heads], ['kv heads', cfg.n_kv_heads],
     ['vocab', cfg.vocab_size], ['seq len', cfg.seq_len], ['params', fmtParams(p)],
   ];
   $('arch-grid').innerHTML = items.map(([l, v]) =>
@@ -745,6 +782,36 @@ function updateEstimate() {
   $('size-estimate').innerHTML =
     `<span style="color:var(--muted);">~${kb} KB (${pct}%)</span><span class="size-pill ${cls}">${icon}</span>`;
   console.log('[app] size estimate:', kb, 'KB,', pct + '%', cls);
+}
+
+// ── GPT-2 matrix helpers ──────────────────────────────────────────────
+// GPT-2 uses Conv1D weights stored as [in_features, out_features].
+// Our binary format expects [out_features, in_features] (same as nn.Linear).
+// Transpose is required for c_attn, c_proj, c_fc.
+function transposeF32(data, rows, cols) {
+  // Input shape: [rows, cols] → output shape: [cols, rows]
+  const out = new Float32Array(rows * cols);
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      out[c * rows + r] = data[r * cols + c];
+  return out;
+}
+
+// Split GPT-2 c_attn.weight [dim, 3*dim] into Q, K, V each [dim, dim] in [out, in] convention
+function splitGPT2QKV(cAttn, dim) {
+  const q = new Float32Array(dim * dim);
+  const k = new Float32Array(dim * dim);
+  const v = new Float32Array(dim * dim);
+  // cAttn is [in=dim, out=3*dim]; we want q/k/v each [out=dim, in=dim]
+  for (let i = 0; i < dim; i++) {
+    for (let j = 0; j < dim; j++) {
+      q[j * dim + i] = cAttn[i * (3 * dim) + j];
+      k[j * dim + i] = cAttn[i * (3 * dim) + dim + j];
+      v[j * dim + i] = cAttn[i * (3 * dim) + 2 * dim + j];
+    }
+  }
+  console.log(`[gpt2] QKV split: dim=${dim} total_elements=${cAttn.length}`);
+  return { q, k, v };
 }
 
 // ── Conversion ────────────────────────────────────────────────────────
@@ -808,31 +875,24 @@ async function startConversion() {
       });
     }
 
+    const isGPT2 = state.config.arch_type === 1;
+    uiLog('info', 'Architecture: ' + (isGPT2 ? 'GPT-2' : 'Llama-style'));
+    console.log('[app] arch:', isGPT2 ? 'gpt2' : 'llama');
+
     // ── Embedding ──
     setProgress(5, 'Loading embedding table…');
-    const embedRaw = await getTensor('model.embed_tokens.weight');
-    if (!embedRaw) throw new Error('model.embed_tokens.weight not found. Available: ' + allNames.slice(0,10).join(', '));
+    const embedName = isGPT2 ? 'transformer.wte.weight' : 'model.embed_tokens.weight';
+    const embedRaw  = await getTensor(embedName);
+    if (!embedRaw) throw new Error(embedName + ' not found. Available: ' + allNames.slice(0,10).join(', '));
     uiLog('ok', `Embedding: ${embedRaw.length.toLocaleString()} elements`);
 
     // ── Tokenizer ──
     const tokBuf = state.tokenizer ? encodeTokenizerBinary(state.tokenizer) : new ArrayBuffer(8);
 
     // ── Layer weights ──
-    const LAYER_KEYS = {
-      attn_norm: i => `model.layers.${i}.input_layernorm.weight`,
-      q:         i => `model.layers.${i}.self_attn.q_proj.weight`,
-      k:         i => `model.layers.${i}.self_attn.k_proj.weight`,
-      v:         i => `model.layers.${i}.self_attn.v_proj.weight`,
-      o:         i => `model.layers.${i}.self_attn.o_proj.weight`,
-      ffn_norm:  i => `model.layers.${i}.post_attention_layernorm.weight`,
-      gate:      i => `model.layers.${i}.mlp.gate_proj.weight`,
-      up:        i => `model.layers.${i}.mlp.up_proj.weight`,
-      down:      i => `model.layers.${i}.mlp.down_proj.weight`,
-    };
-    const NORM_KEYS = new Set(['attn_norm', 'ffn_norm']);
-
-    const layers   = [];
-    const nLayers  = state.config.n_layers;
+    const dim    = state.config.dim;
+    const layers = [];
+    const nLayers = state.config.n_layers;
 
     for (let li = 0; li < nLayers; li++) {
       const pct = 10 + Math.round((li / nLayers) * 80);
@@ -840,16 +900,87 @@ async function startConversion() {
       uiLog('info', `Layer ${li+1}/${nLayers}`);
       const layer = {};
 
-      for (const [key, nameFn] of Object.entries(LAYER_KEYS)) {
-        const tname  = nameFn(li);
-        const f32    = await getTensor(tname);
-        if (!f32) throw new Error('Missing: ' + tname);
-        const isNorm = NORM_KEYS.has(key) || quantType === QUANT.F32;
-        const result = await quantizeTensor(tname, f32, isNorm);
-        layer[key]   = result.mode === 'int8'
-          ? { mode: 'int8', scales: result.scales, quant: result.quant }
-          : { mode: 'f32',  data:   result.data };
+      if (isGPT2) {
+        // ── GPT-2 layer ─────────────────────────────────────────────
+        const L = `transformer.h.${li}`;
+
+        // Attention norms
+        const attnNorm = await getTensor(`${L}.ln_1.weight`);
+        if (!attnNorm) throw new Error(`Missing: ${L}.ln_1.weight`);
+        layer.attn_norm = { mode: 'f32', data: attnNorm };
+
+        // QKV: split c_attn.weight [dim, 3*dim] → q, k, v [dim, dim] (transposed)
+        const cAttn = await getTensor(`${L}.attn.c_attn.weight`);
+        if (!cAttn) throw new Error(`Missing: ${L}.attn.c_attn.weight`);
+        const { q: qRaw, k: kRaw, v: vRaw } = splitGPT2QKV(cAttn, dim);
+        const kv_dim = state.config.n_kv_heads * Math.floor(dim / state.config.n_heads);
+
+        // For standard GPT-2 (no GQA), kv_dim === dim, so no reshape needed
+        const [qRes, kRes, vRes] = await Promise.all([
+          quantizeTensor(`${L}.q`, qRaw, false),
+          quantizeTensor(`${L}.k`, kRaw, false),
+          quantizeTensor(`${L}.v`, vRaw, false),
+        ]);
+        layer.q = qRes.mode === 'int8' ? { mode:'int8', scales:qRes.scales, quant:qRes.quant } : { mode:'f32', data:qRes.data };
+        layer.k = kRes.mode === 'int8' ? { mode:'int8', scales:kRes.scales, quant:kRes.quant } : { mode:'f32', data:kRes.data };
+        layer.v = vRes.mode === 'int8' ? { mode:'int8', scales:vRes.scales, quant:vRes.quant } : { mode:'f32', data:vRes.data };
+
+        // Output projection: c_proj is [dim, dim] Conv1D → transpose to [dim, dim]
+        const cProjRaw = await getTensor(`${L}.attn.c_proj.weight`);
+        if (!cProjRaw) throw new Error(`Missing: ${L}.attn.c_proj.weight`);
+        const cProjT  = transposeF32(cProjRaw, dim, dim);
+        const oRes    = await quantizeTensor(`${L}.o`, cProjT, false);
+        layer.o = oRes.mode === 'int8' ? { mode:'int8', scales:oRes.scales, quant:oRes.quant } : { mode:'f32', data:oRes.data };
+
+        // FFN norm
+        const ffnNorm = await getTensor(`${L}.ln_2.weight`);
+        if (!ffnNorm) throw new Error(`Missing: ${L}.ln_2.weight`);
+        layer.ffn_norm = { mode: 'f32', data: ffnNorm };
+
+        // GPT-2 FFN: c_fc [dim, 4*dim] + c_proj [4*dim, dim] — no gate
+        // gate slot: dummy 1-element zero (inference engine checks arch_type and skips)
+        layer.gate = { mode: 'f32', data: new Float32Array([0]) };
+
+        const hiddenDim = state.config.hidden_dim;
+        const cFcRaw  = await getTensor(`${L}.mlp.c_fc.weight`);
+        if (!cFcRaw) throw new Error(`Missing: ${L}.mlp.c_fc.weight`);
+        const cFcT    = transposeF32(cFcRaw, dim, hiddenDim);   // [dim,hidden]→[hidden,dim]
+        const upRes   = await quantizeTensor(`${L}.up`, cFcT, false);
+        layer.up = upRes.mode === 'int8' ? { mode:'int8', scales:upRes.scales, quant:upRes.quant } : { mode:'f32', data:upRes.data };
+
+        const cMlpProjRaw = await getTensor(`${L}.mlp.c_proj.weight`);
+        if (!cMlpProjRaw) throw new Error(`Missing: ${L}.mlp.c_proj.weight`);
+        const cMlpProjT = transposeF32(cMlpProjRaw, hiddenDim, dim); // [hidden,dim]→[dim,hidden]
+        const downRes   = await quantizeTensor(`${L}.down`, cMlpProjT, false);
+        layer.down = downRes.mode === 'int8' ? { mode:'int8', scales:downRes.scales, quant:downRes.quant } : { mode:'f32', data:downRes.data };
+
+      } else {
+        // ── Llama-style layer ────────────────────────────────────────
+        const LAYER_KEYS = {
+          attn_norm: i => `model.layers.${i}.input_layernorm.weight`,
+          q:         i => `model.layers.${i}.self_attn.q_proj.weight`,
+          k:         i => `model.layers.${i}.self_attn.k_proj.weight`,
+          v:         i => `model.layers.${i}.self_attn.v_proj.weight`,
+          o:         i => `model.layers.${i}.self_attn.o_proj.weight`,
+          ffn_norm:  i => `model.layers.${i}.post_attention_layernorm.weight`,
+          gate:      i => `model.layers.${i}.mlp.gate_proj.weight`,
+          up:        i => `model.layers.${i}.mlp.up_proj.weight`,
+          down:      i => `model.layers.${i}.mlp.down_proj.weight`,
+        };
+        const NORM_KEYS = new Set(['attn_norm', 'ffn_norm']);
+
+        for (const [key, nameFn] of Object.entries(LAYER_KEYS)) {
+          const tname  = nameFn(li);
+          const f32    = await getTensor(tname);
+          if (!f32) throw new Error('Missing: ' + tname);
+          const isNorm = NORM_KEYS.has(key) || quantType === QUANT.F32;
+          const result = await quantizeTensor(tname, f32, isNorm);
+          layer[key]   = result.mode === 'int8'
+            ? { mode: 'int8', scales: result.scales, quant: result.quant }
+            : { mode: 'f32',  data:   result.data };
+        }
       }
+
       layers.push(layer);
     }
     worker.terminate();
@@ -857,8 +988,9 @@ async function startConversion() {
 
     // ── Final norm ──
     setProgress(92, 'Final norm…');
-    const finalNorm = await getTensor('model.norm.weight');
-    if (!finalNorm) throw new Error('model.norm.weight not found');
+    const finalNormName = isGPT2 ? 'transformer.ln_f.weight' : 'model.norm.weight';
+    const finalNorm     = await getTensor(finalNormName);
+    if (!finalNorm) throw new Error(finalNormName + ' not found');
 
     // ── LM head ──
     setProgress(94, 'LM head…');

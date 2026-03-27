@@ -14,6 +14,7 @@
  * │  n_kv_heads   uint8   key/value heads (GQA)             │
  * │  vocab_size   uint32  vocabulary size                   │
  * │  seq_len      uint16  max sequence length               │
+ * │  arch_type    uint8   0=Llama  1=GPT-2                  │
  * │  pad to 64 bytes                                        │
  * ├─────────────────────────────────────────────────────────┤
  * │  TOKENIZER BLOCK                                        │
@@ -94,7 +95,8 @@ export function buildOutputBin({
   dv.setUint8 (14, config.n_kv_heads);
   dv.setUint32(15, config.vocab_size,  true);
   dv.setUint16(19, config.seq_len,     true);
-  // bytes 21-63 remain zero (pad)
+  dv.setUint8 (21, config.arch_type ?? 0);  // 0=Llama, 1=GPT-2
+  // bytes 22-63 remain zero (pad)
   parts.push(hdr);
 
   // ── Tokenizer block ─────────────────────────────────────
