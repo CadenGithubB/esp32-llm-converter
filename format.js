@@ -104,8 +104,9 @@ export function buildOutputBin({
   parts.push(tokSize.buffer);
   parts.push(tokBuf);
 
-  // ── Embedding table (always F32) ────────────────────────
-  parts.push(...tensorBlock(embedData.length, { mode: 'f32', data: embedData }));
+  // ── Embedding table (F32 or INT8 depending on quantType) ──
+  const embedN = embedData.mode === 'int8' ? embedData.quant.length : embedData.data.length;
+  parts.push(...tensorBlock(embedN, embedData));
 
   // ── Layers ──────────────────────────────────────────────
   const LAYER_KEYS = ['attn_norm', 'q', 'k', 'v', 'o', 'ffn_norm', 'gate', 'up', 'down'];
@@ -175,7 +176,7 @@ export function estimateSize({ config, tokBufSize, quantType, groupSize }) {
 
   let size = 64;                              // header
   size += 4 + tokBufSize;                     // tokenizer
-  size += 4 + vocab_size * dim * 4;           // embedding (f32)
+  size += 4 + matSize(vocab_size, dim);        // embedding
 
   for (let i = 0; i < n_layers; i++) {
     size += 4 + dim * 4;                      // attn_norm (f32)

@@ -1,155 +1,316 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESP32-S3 LLM Converter</title>
+
+  <script>
+    (function() {
+      try {
+        const saved = localStorage.getItem('hw_llm_converter_theme');
+        const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved === 'light' || saved === 'dark' ? saved : (systemDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (_) {}
+    })();
+  </script>
+
   <style>
     :root {
-      --bg:       #08080e;
-      --surface:  #10101a;
-      --panel:    #16162040;
-      --border:   #25253a;
-      --text:     #d8d8f0;
-      --muted:    #5a5a80;
-      --accent:   #7c6af7;
-      --accent2:  #4fc3f7;
-      --green:    #4caf50;
-      --orange:   #ff9800;
-      --red:      #ef5350;
-      --mono:     'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --bg: linear-gradient(135deg, #667eea 0%, #764ba2 60%);
+      --fg: #fff;
+      --muted: rgba(255,255,255,.75);
+      --card-bg: rgba(255,255,255,.10);
+      --card-border: rgba(255,255,255,.20);
+      --panel-elevated: rgba(255,255,255,.14);
+      --border: rgba(255,255,255,.22);
+      --accent: #bcd0ff;
+      --accent-strong: #dbe7ff;
+      --accent-contrast: #1b1e2f;
+      --secondary-bg: rgba(255,255,255,.80);
+      --secondary-fg: #333;
+      --secondary-hover: rgba(255,255,255,.92);
+      --field-bg: rgba(255,255,255,.10);
+      --field-border: rgba(255,255,255,.22);
+      --field-fg: #fff;
+      --surface-soft: rgba(255,255,255,.08);
+      --surface-strong: rgba(255,255,255,.12);
+      --status-ready-bg: rgba(40,167,69,.16);    --status-ready-fg: #d4edda;
+      --status-working-bg: rgba(255,193,7,.16);  --status-working-fg: #fff3cd;
+      --status-error-bg: rgba(220,53,69,.18);    --status-error-fg: #f8d7da;
+      --status-success-bg: rgba(40,167,69,.16);  --status-success-fg: #d4edda;
+      --danger: #dc3545;
+      --danger-soft: rgba(220,53,69,.16);
+      --green:  #4caf50;
+      --orange: #ff9800;
+      --red:    #ef5350;
+      --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
     }
+    html[data-theme="dark"] {
+      --bg: linear-gradient(135deg, #07070b 0%, #151520 100%);
+      --fg: #f2f2f7;
+      --muted: rgba(242,242,247,.72);
+      --card-bg: rgba(255,255,255,.04);
+      --card-border: rgba(255,255,255,.12);
+      --panel-elevated: rgba(30,30,40,.92);
+      --border: rgba(255,255,255,.14);
+      --accent: #8ab4ff;
+      --accent-strong: #b9d0ff;
+      --accent-contrast: #0b1020;
+      --secondary-bg: rgba(30,30,40,.92);
+      --secondary-fg: #f2f2f7;
+      --secondary-hover: rgba(52,52,66,.96);
+      --field-bg: rgba(255,255,255,.06);
+      --field-border: rgba(255,255,255,.14);
+      --field-fg: #f2f2f7;
+      --surface-soft: rgba(255,255,255,.05);
+      --surface-strong: rgba(255,255,255,.09);
+      --status-ready-bg: rgba(34,197,94,.16);    --status-ready-fg: #86efac;
+      --status-working-bg: rgba(245,158,11,.16); --status-working-fg: #fcd34d;
+      --status-error-bg: rgba(239,68,68,.16);    --status-error-fg: #fca5a5;
+      --status-success-bg: rgba(34,197,94,.16);  --status-success-fg: #86efac;
+      --danger: #ff5a6a;
+      --danger-soft: rgba(255,90,106,.14);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 14px; line-height: 1.6; min-height: 100vh; padding: 0 0 60px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding-bottom: 60px;
     }
-    .topbar {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 14px 32px; display: flex; align-items: center; gap: 16px;
-      position: sticky; top: 0; z-index: 10;
+
+    /* ── Header ── */
+    header { text-align: center; padding: 28px 20px 18px; }
+    .header-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 6px;
     }
-    .topbar-logo { font-family: var(--mono); font-size: 13px; font-weight: 700;
-      color: var(--accent); letter-spacing: .05em; text-transform: uppercase; white-space: nowrap; }
-    .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); }
-    .topbar-sub { font-size: 12px; color: var(--muted); margin-left: auto; font-family: var(--mono); }
-    .page { max-width: 860px; margin: 0 auto; padding: 32px 24px;
-      display: flex; flex-direction: column; gap: 20px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .card-header { padding: 12px 18px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px; background: #ffffff06; }
-    .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .08em; color: var(--muted); }
+    .header-copy { flex: 1; text-align: center; }
+    header h1 { font-size: 1.5em; font-weight: 700; letter-spacing: -0.02em; }
+    header p  { color: var(--muted); font-size: 0.9em; margin-top: 4px; }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 44px; min-height: 40px; padding: .4rem .8rem;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--secondary-bg); color: var(--secondary-fg);
+      cursor: pointer; font-size: 1.15rem; transition: all .2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,.1); flex-shrink: 0;
+    }
+    .theme-toggle:hover {
+      transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,.15);
+      background: var(--secondary-hover);
+    }
+
+    /* ── Layout ── */
+    .app-container {
+      max-width: 720px; margin: 0 auto; padding: 0 16px 40px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden; backdrop-filter: blur(8px);
+    }
+    .card-header {
+      padding: 12px 18px; border-bottom: 1px solid var(--card-border);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface-soft);
+    }
+    .card-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted);
+    }
     .card-body { padding: 18px; }
-    .step-badge { width: 20px; height: 20px; border-radius: 50%; background: var(--accent);
-      color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center;
-      justify-content: center; flex-shrink: 0; font-family: var(--mono); }
-    .step-badge.done { background: var(--green); }
-    .dropzone { border: 2px dashed var(--border); border-radius: 8px; padding: 36px 20px;
-      text-align: center; cursor: pointer; transition: border-color .2s, background .2s; position: relative; }
-    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: #7c6af710; }
-    .dropzone input[type=file] { position: absolute; inset: 0; opacity: 0;
-      cursor: pointer; width: 100%; height: 100%; }
-    .dropzone-icon { font-size: 32px; margin-bottom: 8px; display: block; }
-    .dropzone-label { font-size: 14px; color: var(--text); font-weight: 500; }
-    .dropzone-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-    .or-divider { display: flex; align-items: center; gap: 12px; color: var(--muted);
-      font-size: 12px; margin: 14px 0; }
+
+    .step-badge {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--accent); color: var(--accent-contrast);
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-family: var(--mono);
+    }
+    .step-badge.done { background: var(--green); color: #fff; }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: 8px; padding: 36px 20px;
+      text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--accent); background: var(--surface-soft);
+    }
+    .drop-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0;
+      cursor: pointer; width: 100%; height: 100%;
+    }
+    .dropzone-icon  { font-size: 32px; margin-bottom: 8px; display: block; }
+    .dropzone-label { font-size: 14px; color: var(--fg); font-weight: 500; }
+    .dropzone-sub   { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Divider + HF row ── */
+    .or-divider {
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 12px; margin: 14px 0;
+    }
     .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
     .hf-row { display: flex; gap: 8px; }
-    input[type=text] { flex: 1; background: #ffffff08; border: 1px solid var(--border);
-      border-radius: 6px; padding: 9px 12px; color: var(--text); font-family: var(--mono);
-      font-size: 13px; outline: none; transition: border-color .2s; }
+
+    /* ── Form elements ── */
+    input[type=text] {
+      flex: 1; background: var(--field-bg); border: 1px solid var(--field-border);
+      border-radius: 8px; padding: 10px 12px; color: var(--field-fg);
+      font-family: var(--mono); font-size: 13px; outline: none; transition: border-color .2s;
+    }
     input[type=text]:focus { border-color: var(--accent); }
     input[type=text]::placeholder { color: var(--muted); }
-    button { background: var(--accent); color: #fff; border: none; border-radius: 6px;
-      padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: opacity .15s, transform .1s; white-space: nowrap; }
-    button:hover { opacity: .85; } button:active { transform: scale(.98); }
-    button:disabled { opacity: .35; cursor: default; }
-    button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    button.secondary:hover { border-color: var(--accent); color: var(--accent); }
-    button.big { padding: 13px 32px; font-size: 14px; width: 100%; border-radius: 8px; }
-    button.green { background: var(--green); }
+    select {
+      background: var(--field-bg); border: 1px solid var(--field-border);
+      border-radius: 8px; padding: 8px 10px; color: var(--field-fg);
+      font-size: 13px; font-family: var(--mono); outline: none; cursor: pointer;
+    }
+    select:focus { border-color: var(--accent); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 10px 20px; border: none; border-radius: 8px;
+      font-size: 0.95em; font-weight: 600; cursor: pointer;
+      transition: all .2s; white-space: nowrap;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: default; }
+    .btn-primary { background: var(--accent); color: var(--accent-contrast); }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-strong); }
+    .btn-secondary { background: var(--secondary-bg); color: var(--secondary-fg); }
+    .btn-secondary:hover:not(:disabled) { background: var(--secondary-hover); }
+    .btn-full { width: 100%; padding: 13px 32px; font-size: 14px; }
+
+    /* ── Architecture grid ── */
     .arch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-    .arch-item { background: #ffffff06; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
-    .arch-item label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
-      color: var(--muted); display: block; margin-bottom: 2px; }
-    .arch-item .val { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--accent2); }
+    .arch-item {
+      background: var(--surface-soft); border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 12px;
+    }
+    .arch-item label {
+      font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted); display: block; margin-bottom: 2px;
+    }
+    .arch-item .val { font-family: var(--mono); font-size: 17px; font-weight: 700; color: var(--accent-strong); }
+
+    /* ── Radio options ── */
     .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
     .radio-option { position: relative; }
     .radio-option input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .radio-option label { display: flex; align-items: center; gap: 6px; padding: 8px 14px;
-      border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 13px;
-      font-weight: 500; transition: border-color .15s, background .15s; user-select: none; }
-    .radio-option input:checked + label { border-color: var(--accent); background: #7c6af718; color: var(--accent); }
+    .radio-option label {
+      display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+      border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--fg);
+      transition: border-color .15s, background .15s; user-select: none;
+    }
+    .radio-option input:checked + label {
+      border-color: var(--accent); background: var(--surface-strong); color: var(--accent-strong);
+    }
     .radio-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
     .radio-option input:checked + label .radio-dot { background: var(--accent); }
-    .settings-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+    /* ── Settings row ── */
+    .settings-row {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+    }
     .settings-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-    select { background: #ffffff08; border: 1px solid var(--border); border-radius: 6px;
-      padding: 7px 10px; color: var(--text); font-size: 13px; font-family: var(--mono);
-      outline: none; cursor: pointer; }
-    select:focus { border-color: var(--accent); }
-    .size-estimate { margin-left: auto; display: flex; align-items: center; gap: 8px;
-      font-family: var(--mono); font-size: 12px; }
+
+    /* ── Size pill ── */
+    .size-estimate { margin-left: auto; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; }
     .size-pill { padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; }
-    .size-pill.ok   { background: #4caf5022; color: var(--green); border: 1px solid #4caf5040; }
-    .size-pill.warn { background: #ff980022; color: var(--orange); border: 1px solid #ff980040; }
-    .size-pill.over { background: #ef535022; color: var(--red); border: 1px solid #ef535040; }
+    .size-pill.ok   { background: var(--status-success-bg); color: var(--status-success-fg); border: 1px solid rgba(34,197,94,.3); }
+    .size-pill.warn { background: var(--status-working-bg); color: var(--status-working-fg); border: 1px solid rgba(245,158,11,.3); }
+    .size-pill.over { background: var(--status-error-bg);   color: var(--status-error-fg);   border: 1px solid rgba(239,68,68,.3); }
+
+    /* ── Progress ── */
     .progress-wrap { margin-top: 4px; }
-    .progress-bar-track { background: #ffffff10; border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 8px; }
-    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 4px; transition: width .3s ease; width: 0%; }
-    .progress-label { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .log { background: #000000a0; border-radius: 6px; padding: 12px 14px; font-family: var(--mono);
-      font-size: 11px; line-height: 1.7; max-height: 200px; overflow-y: auto;
-      color: var(--muted); margin-top: 12px; }
-    .log .ok   { color: var(--green); }
-    .log .warn { color: var(--orange); }
-    .log .err  { color: var(--red); }
-    .log .info { color: var(--accent2); }
-    .download-info { display: flex; align-items: center; gap: 16px; background: #4caf5010;
-      border: 1px solid #4caf5030; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+    .progress-bar-track { background: var(--surface-soft); border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 8px; }
+    .progress-bar-fill  { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-strong)); border-radius: 4px; transition: width .3s ease; width: 0%; }
+    .progress-label     { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+    /* ── Log ── */
+    .log {
+      background: rgba(0,0,0,.25); border-radius: 6px; padding: 12px 14px;
+      font-family: var(--mono); font-size: 11px; line-height: 1.7;
+      max-height: 200px; overflow-y: auto; color: var(--muted); margin-top: 12px;
+    }
+    .log .ok   { color: var(--status-success-fg); }
+    .log .warn { color: var(--status-working-fg); }
+    .log .err  { color: var(--status-error-fg); }
+    .log .info { color: var(--accent-strong); }
+
+    /* ── Download card ── */
+    .download-info {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--status-success-bg); border: 1px solid rgba(34,197,94,.25);
+      border-radius: 8px; padding: 14px 16px; margin-bottom: 14px;
+    }
     .download-icon { font-size: 28px; }
-    .download-name { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--green); }
+    .download-name { font-family: var(--mono); font-weight: 700; font-size: 14px; color: var(--status-success-fg); }
     .download-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .upload-instructions { background: #ffffff05; border: 1px solid var(--border);
-      border-radius: 6px; padding: 12px 14px; font-size: 12px; line-height: 1.8; color: var(--muted); }
-    .upload-instructions code { font-family: var(--mono); color: var(--accent2);
-      background: #ffffff0a; padding: 1px 5px; border-radius: 3px; }
-    .hidden { display: none !important; }
+
+    .upload-instructions {
+      background: var(--surface-soft); border: 1px solid var(--border);
+      border-radius: 6px; padding: 12px 14px; font-size: 12px; line-height: 1.8; color: var(--muted);
+    }
+    .upload-instructions code {
+      font-family: var(--mono); color: var(--accent-strong);
+      background: var(--surface-strong); padding: 1px 5px; border-radius: 3px;
+    }
+
+    /* ── Status dot ── */
     .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     .dot-idle   { background: var(--muted); }
     .dot-active { background: var(--orange); animation: pulse 1.2s ease-in-out infinite; }
     .dot-done   { background: var(--green); }
     .dot-error  { background: var(--red); }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+
+    .hidden { display: none !important; }
+
     @media (max-width: 600px) {
-      .page { padding: 16px 12px; } .topbar { padding: 12px 16px; }
-      .topbar-sub { display: none; } .arch-grid { grid-template-columns: repeat(3, 1fr); }
+      header { padding: 18px 16px 12px; }
+      .app-container { padding: 0 12px 40px; }
+      .arch-grid { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
 <body>
 
-<header class="topbar">
-  <span class="topbar-logo">ESP32-S3</span>
-  <span class="topbar-title">LLM Model Converter</span>
-  <span class="topbar-sub">HuggingFace → INT8 binary for on-device inference</span>
+<header>
+  <div class="header-top">
+    <div style="min-width:44px;"></div>
+    <div class="header-copy">
+      <h1>LLM Model Converter</h1>
+      <p>HuggingFace → INT8 binary for ESP32-S3 on-device inference</p>
+    </div>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Toggle theme">🌙</button>
+  </div>
 </header>
 
-<main class="page">
+<main class="app-container">
   <!-- Step 1 -->
   <div class="card" id="card-source">
     <div class="card-header">
-      <span class="step-badge" id="badge-source">1</span>
       <span class="card-title">Model Source</span>
     </div>
     <div class="card-body">
-      <div class="dropzone" id="dropzone">
+      <div class="drop-zone" id="dropzone">
         <input type="file" id="folder-input" webkitdirectory multiple>
         <span class="dropzone-icon">📂</span>
         <div class="dropzone-label">Drop model folder here</div>
@@ -157,14 +318,14 @@
       </div>
       <div class="or-divider">or fetch from HuggingFace</div>
       <div class="hf-row">
-        <input type="text" id="hf-input" placeholder="e.g. roneneldan/TinyStories-1M"
+        <input type="text" id="hf-input" placeholder="e.g. HuggingFaceTB/SmolLM-135M"
           autocomplete="off" spellcheck="false">
-        <button id="hf-fetch-btn">Fetch</button>
+        <button class="btn btn-primary" id="hf-fetch-btn">Fetch</button>
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:8px;">
-        Tip: Try <code style="font-family:var(--mono);color:var(--accent2)">HuggingFaceTB/SmolLM-135M</code>
-        (Llama-arch, safetensors, ~270 MB download). The tool will detect
-        architecture and warn if the output exceeds your partition size.
+        Tip: Try <code style="font-family:var(--mono);color:var(--accent-strong)">HuggingFaceTB/SmolLM-135M</code>
+        (Llama-arch, ~270 MB). Models with only pytorch_model.bin: run
+        <code style="font-family:var(--mono);color:var(--accent-strong)">python convert.py &lt;model-id&gt;</code> first.
       </div>
     </div>
   </div>
@@ -172,9 +333,8 @@
   <!-- Step 2 -->
   <div class="card hidden" id="card-arch">
     <div class="card-header">
-      <span class="step-badge" id="badge-arch">2</span>
       <span class="card-title">Detected Architecture</span>
-      <span id="arch-model-name" style="font-size:12px;color:var(--accent2);margin-left:auto;font-family:var(--mono);"></span>
+      <span id="arch-model-name" style="font-size:12px;color:var(--accent-strong);margin-left:auto;font-family:var(--mono);"></span>
     </div>
     <div class="card-body">
       <div class="arch-grid" id="arch-grid"></div>
@@ -184,7 +344,6 @@
   <!-- Step 3 -->
   <div class="card hidden" id="card-settings">
     <div class="card-header">
-      <span class="step-badge" id="badge-settings">3</span>
       <span class="card-title">Quantization Settings</span>
     </div>
     <div class="card-body">
@@ -218,12 +377,11 @@
   <!-- Step 4 -->
   <div class="card hidden" id="card-convert">
     <div class="card-header">
-      <span class="step-badge" id="badge-convert">4</span>
       <span class="card-title">Convert</span>
       <span id="convert-status-dot" class="status-dot dot-idle" style="margin-left:auto;"></span>
     </div>
     <div class="card-body">
-      <button class="big" id="convert-btn" disabled>Convert &amp; Download</button>
+      <button class="btn btn-primary btn-full" id="convert-btn" disabled>Convert &amp; Download</button>
       <div class="progress-wrap hidden" id="progress-wrap">
         <div style="height:12px;"></div>
         <div class="progress-bar-track">
@@ -238,7 +396,6 @@
   <!-- Step 5 -->
   <div class="card hidden" id="card-download">
     <div class="card-header">
-      <span class="step-badge done">✓</span>
       <span class="card-title">Ready to Flash</span>
     </div>
     <div class="card-body">
@@ -248,10 +405,10 @@
           <div class="download-name" id="dl-filename">model.bin</div>
           <div class="download-meta" id="dl-meta"></div>
         </div>
-        <button class="green" id="dl-btn" style="margin-left:auto;">Download</button>
+        <button class="btn btn-primary" id="dl-btn" style="margin-left:auto;">Download</button>
       </div>
       <div class="upload-instructions">
-        <strong style="color:var(--text);">Upload to device:</strong><br>
+        <strong style="color:var(--fg);">Upload to device:</strong><br>
         1. Open the <strong>Files</strong> page on your HardwareOne device<br>
         2. Navigate to (or create) <code>/system/llm/</code><br>
         3. Upload the downloaded <code>model.bin</code><br>
@@ -503,6 +660,257 @@ function estimateSize({ config, tokBufSize, quantType, groupSize }) {
 console.groupEnd();
 </script>
 
+<!-- ── PyTorch .bin parser ───────────────────────────────────────────── -->
+<script>
+'use strict';
+console.group('[pytorch] module loaded');
+
+// ── Public entry point — same interface as parseSafetensors ──────────────
+async function parsePytorchBin(file) {
+  console.group('[pytorch] parsing', file.name, (file.size/1024/1024).toFixed(2) + ' MB');
+  const buf      = await file.arrayBuffer();
+  const zipFiles = unzipPytorch(buf);
+  console.log('[pytorch] ZIP entries:', Object.keys(zipFiles).length, Object.keys(zipFiles).join(', '));
+
+  const pkl = zipFiles['archive/data.pkl'];
+  if (!pkl) throw new Error('archive/data.pkl not found — is this a valid pytorch_model.bin?');
+
+  const tensors = parseTorchPickle(new Uint8Array(pkl));
+  const names   = Object.keys(tensors);
+  console.log('[pytorch] tensors:', names.length);
+  console.groupEnd();
+
+  return {
+    names,
+    async getTensor(name) {
+      const t = tensors[name];
+      if (!t) { console.warn('[pytorch] missing:', name); return null; }
+      const storage = zipFiles['archive/data/' + t.storageKey];
+      if (!storage) throw new Error('[pytorch] missing storage key: ' + t.storageKey);
+      const numel  = t.shape.reduce((a, b) => a * b, 1);
+      const bpe    = ({ F32:4, F16:2, BF16:2, F64:8, I64:8, I32:4, I16:2, I8:1, U8:1 })[t.dtype] ?? 4;
+      const sliced = storage.slice(t.storageOffset * bpe, (t.storageOffset + numel) * bpe);
+      const f32    = convertToF32(sliced, t.dtype, t.shape);
+      console.log('[pytorch]', name, t.dtype, '[' + t.shape + ']', f32.length);
+      return f32;
+    },
+    getMeta(name)  { const t = tensors[name]; return t ? { dtype: t.dtype, shape: t.shape } : null; },
+    getNumel(name) { return (tensors[name]?.shape ?? []).reduce((a, b) => a * b, 1); },
+  };
+}
+
+// ── ZIP reader — reads from central directory (robust vs data-descriptor flag) ──
+function unzipPytorch(buf) {
+  const b   = new Uint8Array(buf);
+  const dec = new TextDecoder();
+  const files = {};
+
+  // ── 1. Find End-of-Central-Directory (EOCD)  PK\x05\x06 ──────────────
+  let eocd = -1;
+  for (let i = b.length - 22; i >= Math.max(0, b.length - 66000); i--) {
+    if (b[i]===0x50 && b[i+1]===0x4b && b[i+2]===0x05 && b[i+3]===0x06) { eocd = i; break; }
+  }
+  if (eocd < 0) { console.warn('[pytorch] unzip: EOCD not found'); return files; }
+
+  const eocdDv  = new DataView(buf, eocd);
+  let cdCount   = eocdDv.getUint16(8,  true);   // total entries
+  let cdOffset  = eocdDv.getUint32(16, true);   // central directory offset
+
+  // ── 2. ZIP64 EOCD locator  PK\x06\x07 at eocd-20 ────────────────────
+  if (eocd >= 20) {
+    const loc = eocd - 20;
+    if (b[loc]===0x50 && b[loc+1]===0x4b && b[loc+2]===0x06 && b[loc+3]===0x07) {
+      const z64off = new DataView(buf, loc).getUint32(8, true); // lower 32 bits of offset
+      if (b[z64off]===0x50 && b[z64off+1]===0x4b && b[z64off+2]===0x06 && b[z64off+3]===0x06) {
+        const z64 = new DataView(buf, z64off);
+        cdCount  = z64.getUint32(32, true);
+        cdOffset = z64.getUint32(48, true);
+      }
+    }
+  }
+
+  // ── 3. Walk central directory  PK\x01\x02 ────────────────────────────
+  let p = cdOffset;
+  for (let i = 0; i < cdCount; i++) {
+    if (p + 46 > b.length || b[p]!==0x50||b[p+1]!==0x4b||b[p+2]!==0x01||b[p+3]!==0x02) break;
+    const dv      = new DataView(buf, p);
+    const meth    = dv.getUint16(10, true);
+    let   compSz  = dv.getUint32(20, true);
+    let   uncompSz= dv.getUint32(24, true);
+    const nLen    = dv.getUint16(28, true);
+    const xLen    = dv.getUint16(30, true);
+    const cLen    = dv.getUint16(32, true);
+    let   lhOff   = dv.getUint32(42, true);
+    const name    = dec.decode(b.subarray(p+46, p+46+nLen));
+
+    // ZIP64 extra field (tag 0x0001) overrides 0xFFFFFFFF sentinels
+    let xp = p+46+nLen, xEnd = xp+xLen;
+    while (xp+4 <= xEnd) {
+      const tag = b[xp] | b[xp+1]<<8, sz = b[xp+2] | b[xp+3]<<8;
+      if (tag === 0x0001 && sz >= 8) {
+        let off = 0;
+        if (uncompSz === 0xFFFFFFFF) { uncompSz = new DataView(buf,xp+4+off).getUint32(0,true); off+=8; }
+        if (compSz   === 0xFFFFFFFF) { compSz   = new DataView(buf,xp+4+off).getUint32(0,true); off+=8; }
+        if (lhOff    === 0xFFFFFFFF) { lhOff    = new DataView(buf,xp+4+off).getUint32(0,true); }
+      }
+      xp += 4+sz;
+    }
+    p += 46+nLen+xLen+cLen;
+
+    if (meth !== 0) { console.warn('[pytorch] ZIP: compressed entry skipped:', name, 'method='+meth); continue; }
+
+    // Use local file header only to find the data start (sizes come from central dir)
+    const lhNLen   = new DataView(buf, lhOff+26).getUint16(0, true);
+    const lhXLen   = new DataView(buf, lhOff+28).getUint16(0, true);
+    const dataStart = lhOff + 30 + lhNLen + lhXLen;
+    files[name] = buf.slice(dataStart, dataStart + uncompSz);
+  }
+
+  console.log('[pytorch] ZIP entries (' + Object.keys(files).length + '):', Object.keys(files).join(', '));
+  return files;
+}
+
+// ── Pickle parser (PyTorch protocol 2/4 subset) ──────────────────────────
+function parseTorchPickle(b) {
+  let p = 0, memoIdx = 0;
+  const stack = [], memo = {}, marks = [];
+  const dec = new TextDecoder();
+  const u8  = () => b[p++];
+  const u16 = () => { const v = b[p] | b[p+1] << 8; p += 2; return v; };
+  const u32 = () => { const v = (b[p] | b[p+1]<<8 | b[p+2]<<16 | b[p+3]<<24) >>> 0; p += 4; return v; };
+  const str = n  => { const s = dec.decode(b.subarray(p, p + n)); p += n; return s; };
+  const ln  = () => { let s = p; while (b[p] !== 10) p++; const r = dec.decode(b.subarray(s, p)); p++; return r; };
+
+  const SDTYPE = {
+    'torch FloatStorage':'F32',    'torch HalfStorage':'F16',
+    'torch BFloat16Storage':'BF16','torch DoubleStorage':'F64',
+    'torch LongStorage':'I64',     'torch IntStorage':'I32',
+    'torch ShortStorage':'I16',    'torch ByteStorage':'U8',
+    'torch CharStorage':'I8',
+  };
+
+  function applyReduce(fn, args) {
+    if (!fn?.__class) return null;
+    const c = fn.__class;
+    if (c.endsWith('_rebuild_tensor_v2')) {
+      const [stor, off, size, stride] = args;
+      return { __type:'tensor', storageKey: stor?.key, dtype: stor?.dtype ?? 'F32',
+               storageOffset: off | 0, shape: [...size], stride: [...stride] };
+    }
+    if (SDTYPE[c]) return { __type:'storage_alloc', dtype: SDTYPE[c] };
+    if (c.includes('OrderedDict')) {
+      const d = {};
+      const src = Array.isArray(args[0]) ? args[0] : Object.entries(args[0] ?? {});
+      for (const [k, v] of src) d[k] = v;
+      return d;
+    }
+    return { __class: c, __args: args };
+  }
+
+  let result = null;
+  loop: while (p < b.length) {
+    const op = u8();
+    switch (op) {
+      // Header / framing
+      case 0x80: u8(); break;                            // PROTO
+      case 0x95: p += 8; break;                          // FRAME (8-byte length)
+      case 0x2e: result = stack.pop(); break loop;        // STOP
+      // Stack control
+      case 0x28: marks.push(stack.length); break;         // MARK
+      case 0x31: { const m = marks.pop(); stack.length = m; break; } // POP_MARK
+      case 0x30: stack.pop(); break;                     // POP
+      case 0x32: stack.push(stack[stack.length - 1]); break; // DUP
+      // Singletons
+      case 0x4e: stack.push(null);  break;               // NONE
+      case 0x88: stack.push(true);  break;               // NEWTRUE
+      case 0x89: stack.push(false); break;               // NEWFALSE
+      // Numbers
+      case 0x47: { stack.push(new DataView(b.buffer, p, 8).getFloat64(0, false)); p += 8; break; } // BINFLOAT (BE)
+      case 0x4b: stack.push(u8()); break;                // BININT1
+      case 0x4d: stack.push(u16()); break;               // BININT2
+      case 0x4a: stack.push(u32() | 0); break;           // BININT (signed)
+      case 0x49: { const s = ln(); stack.push(s === '01' ? true : s === '00' ? false : +s); break; } // INT
+      case 0x4c: stack.push(+ln().replace(/L$/, '')); break; // LONG (text)
+      case 0x8a: { // LONG1
+        const n = u8(); let v = 0n;
+        for (let i = 0; i < n; i++) v |= BigInt(u8()) << BigInt(i * 8);
+        if (n > 0 && b[p-1] & 0x80) v -= 1n << BigInt(n * 8);
+        stack.push(Number(v)); break;
+      }
+      case 0x8b: { // LONG4
+        const n = u32(); let v = 0n;
+        for (let i = 0; i < n; i++) v |= BigInt(u8()) << BigInt(i * 8);
+        if (n > 0 && b[p-1] & 0x80) v -= 1n << BigInt(n * 8);
+        stack.push(Number(v)); break;
+      }
+      // Strings
+      case 0x58: stack.push(str(u32())); break;          // BINUNICODE
+      case 0x8c: stack.push(str(u8())); break;           // SHORT_BINUNICODE
+      case 0x54: stack.push(str(u32())); break;          // BINSTRING
+      case 0x55: stack.push(str(u8())); break;           // SHORT_BINSTRING
+      case 0x56: stack.push(ln()); break;                // UNICODE (text)
+      // Tuples
+      case 0x29: stack.push([]); break;                  // EMPTY_TUPLE
+      case 0x85: { const a = stack.pop(); stack.push([a]); break; } // TUPLE1
+      case 0x86: { const b2 = stack.pop(), a = stack.pop(); stack.push([a, b2]); break; } // TUPLE2
+      case 0x87: { const c = stack.pop(), b2 = stack.pop(), a = stack.pop(); stack.push([a, b2, c]); break; } // TUPLE3
+      case 0x74: { const m = marks.pop(); stack.push(stack.splice(m)); break; } // TUPLE
+      // Dicts
+      case 0x7d: stack.push({}); break;                  // EMPTY_DICT
+      case 0x64: { const m = marks.pop(); const it = stack.splice(m); const d = {}; for (let i = 0; i < it.length; i += 2) d[it[i]] = it[i+1]; stack.push(d); break; } // DICT
+      case 0x73: { const v = stack.pop(), k = stack.pop(); stack[stack.length-1][k] = v; break; } // SETITEM
+      case 0x75: { const m = marks.pop(); const it = stack.splice(m); const d = stack[stack.length-1]; for (let i = 0; i < it.length; i += 2) d[it[i]] = it[i+1]; break; } // SETITEMS
+      // Lists
+      case 0x5d: stack.push([]); break;                  // EMPTY_LIST
+      case 0x61: { const v = stack.pop(); stack[stack.length-1].push(v); break; } // APPEND
+      case 0x65: { const m = marks.pop(); const it = stack.splice(m); stack[stack.length-1].push(...it); break; } // APPENDS
+      // Callables
+      case 0x63: { const mod = ln(), nm = ln(); stack.push({ __class: mod + ' ' + nm }); break; } // GLOBAL
+      case 0x93: { const nm = stack.pop(), mod = stack.pop(); stack.push({ __class: (typeof mod === 'string' ? mod : (mod?.__class ?? '')) + ' ' + nm }); break; } // STACK_GLOBAL
+      case 0x52: { const args = stack.pop(), fn = stack.pop(); stack.push(applyReduce(fn, args ?? [])); break; } // REDUCE
+      case 0x81: { const args = stack.pop(), cls = stack.pop(); stack.push({ __class: cls?.__class, __args: args }); break; } // NEWOBJ
+      case 0x92: { const kw = stack.pop(), args = stack.pop(), cls = stack.pop(); stack.push({ __class: cls?.__class, __args: args, __kwargs: kw }); break; } // NEWOBJ_EX
+      case 0x62: { // BUILD — obj.__setstate__(state)
+        const state = stack.pop(), obj = stack[stack.length-1];
+        if (obj && typeof obj === 'object' && typeof state === 'object' && state !== null && !Array.isArray(state))
+          Object.assign(obj, state);
+        break;
+      }
+      // Persistent reference (storage objects)
+      case 0x51: { // BINPERSID
+        const pid = stack.pop();
+        if (Array.isArray(pid) && pid[0] === 'storage') {
+          const dtype = SDTYPE[pid[1]?.__class ?? ''] ?? 'F32';
+          stack.push({ __type: 'storage', key: String(pid[2]), dtype });
+        } else stack.push(pid);
+        break;
+      }
+      // Memo
+      case 0x71: memo[u8()]  = stack[stack.length-1]; break; // BINPUT
+      case 0x72: memo[u32()] = stack[stack.length-1]; break; // LONG_BINPUT
+      case 0x70: memo[+ln()] = stack[stack.length-1]; break; // PUT
+      case 0x94: memo[memoIdx++] = stack[stack.length-1]; break; // MEMOIZE
+      case 0x68: stack.push(memo[u8()]); break;          // BINGET
+      case 0x6a: stack.push(memo[u32()]); break;         // LONG_BINGET
+      case 0x67: stack.push(memo[+ln()]); break;         // GET
+      default: console.warn('[pytorch] unknown pickle opcode: 0x' + op.toString(16).padStart(2,'0') + ' @' + (p-1));
+    }
+  }
+
+  if (!result || typeof result !== 'object') throw new Error('[pytorch] pickle did not produce a dict');
+
+  // State dict is flat (dotted keys → tensor metadata)
+  const flat = {};
+  for (const [k, v] of Object.entries(result)) {
+    if (v?.__type === 'tensor') flat[k] = v;
+  }
+  console.log('[pytorch] state dict:', Object.keys(flat).length, 'tensors');
+  return flat;
+}
+
+console.groupEnd();
+</script>
+
 <!-- ── App ───────────────────────────────────────────────────────────── -->
 <script>
 'use strict';
@@ -572,15 +980,22 @@ async function handleFiles(files) {
 
   const stFiles = files.filter(f => f.name.endsWith('.safetensors'))
     .sort((a, b) => a.name.localeCompare(b.name));
-  console.log('[app] safetensors shards:', stFiles.map(f => f.name));
+  const ptFiles = files.filter(f => f.name === 'pytorch_model.bin' ||
+    (f.name.startsWith('pytorch_model-') && f.name.endsWith('.bin')))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
-  if (stFiles.length === 0) {
-    uiLog('err', 'No .safetensors files found');
+  const isPytorch = stFiles.length === 0 && ptFiles.length > 0;
+  const modelFiles = isPytorch ? ptFiles : stFiles;
+  console.log('[app] model files:', isPytorch ? 'pytorch' : 'safetensors', modelFiles.map(f => f.name));
+
+  if (modelFiles.length === 0) {
+    uiLog('err', 'No .safetensors or pytorch_model.bin files found');
     console.groupEnd();
     return;
   }
 
-  uiLog('ok', `Found ${stFiles.length} shard(s): ${stFiles.map(f => f.name).join(', ')}`);
+  if (isPytorch) uiLog('ok', `Found pytorch_model.bin — parsing in browser`);
+  else uiLog('ok', `Found ${stFiles.length} shard(s): ${stFiles.map(f => f.name).join(', ')}`);
 
   try {
     const configJson = JSON.parse(await configFile.text());
@@ -596,13 +1011,14 @@ async function handleFiles(files) {
       uiLog('ok', `Tokenizer: vocab_size=${state.tokenizer.vocabSize} merges=${state.tokenizer.merges.length}`);
     }
 
-    state.stFiles = stFiles;
+    state.stFiles   = modelFiles;
+    state.isPytorch = isPytorch;
     state.ready   = true;
 
     show('card-arch'); show('card-settings'); show('card-convert');
     updateEstimate();
     $('convert-btn').disabled = false;
-    $('badge-source').classList.add('done');
+    // (badge-source removed)
     uiLog('info', 'Ready — click Convert to begin quantization');
 
   } catch (err) {
@@ -650,17 +1066,9 @@ async function fetchFromHF() {
     const hasIndex = allFiles.includes('model.safetensors.index.json');
     const hasPT    = allFiles.some(f => f.endsWith('.bin') && f.startsWith('pytorch_model'));
 
-    if (!hasST) {
-      if (hasPT) {
-        uiLog('err', 'This model only has pytorch_model.bin (pickle format) — not parseable in the browser.');
-        uiLog('warn', 'Choose a model that provides .safetensors files. Most models uploaded after 2023 do.');
-        uiLog('info', 'Suggested alternatives with safetensors: HuggingFaceTB/SmolLM-135M · Qwen/Qwen2-0.5B');
-        throw new Error('No .safetensors files found — pytorch_model.bin is not supported');
-      } else {
-        throw new Error('No .safetensors files found in this model repository.');
-      }
-    }
-    uiLog('ok', 'Found ' + stFiles.length + ' safetensors file(s): ' + stFiles.join(', '));
+    if (!hasST && !hasPT) throw new Error('No .safetensors or pytorch_model.bin files found.');
+    if (!hasST)  uiLog('info', 'No safetensors — will download pytorch_model.bin and parse in browser');
+    else         uiLog('ok',   'Found ' + stFiles.length + ' safetensors file(s): ' + stFiles.join(', '));
 
     const synthetic = [];
 
@@ -683,27 +1091,42 @@ async function fetchFromHF() {
       uiLog('warn', 'tokenizer.json not in repository — tokenizer block will be empty');
     }
 
-    // ── Step 5: safetensors shards ──
-    let shardsToDownload = [];
-    if (hasIndex) {
-      uiLog('info', 'Downloading shard index…');
-      const idxResp = await fetch(base + '/model.safetensors.index.json');
-      if (idxResp.ok) {
-        const idx = await idxResp.json();
-        shardsToDownload = [...new Set(Object.values(idx.weight_map))].sort();
-        uiLog('info', 'Multi-shard: ' + shardsToDownload.length + ' shards');
+    // ── Step 5: weights ──
+    if (hasST) {
+      // Safetensors path
+      let shardsToDownload = [];
+      if (hasIndex) {
+        uiLog('info', 'Downloading shard index…');
+        const idxResp = await fetch(base + '/model.safetensors.index.json');
+        if (idxResp.ok) {
+          const idx = await idxResp.json();
+          shardsToDownload = [...new Set(Object.values(idx.weight_map))].sort();
+          uiLog('info', 'Multi-shard: ' + shardsToDownload.length + ' shards');
+        }
+      } else {
+        shardsToDownload = stFiles;
+      }
+      for (const shard of shardsToDownload) {
+        uiLog('info', 'Downloading ' + shard + '…');
+        const r = await fetch(base + '/' + shard);
+        if (!r.ok) throw new Error(shard + ' HTTP ' + r.status);
+        const blob = await r.blob();
+        synthetic.push(new File([blob], shard));
+        uiLog('ok', shard + ' ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
       }
     } else {
-      shardsToDownload = stFiles; // single or named shards
-    }
-
-    for (const shard of shardsToDownload) {
-      uiLog('info', 'Downloading ' + shard + '…');
-      const r = await fetch(base + '/' + shard);
-      if (!r.ok) throw new Error(shard + ' HTTP ' + r.status);
-      const blob = await r.blob();
-      synthetic.push(new File([blob], shard));
-      uiLog('ok', shard + ' ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
+      // PyTorch path — download all pytorch_model*.bin shards
+      const ptShards = allFiles.filter(f =>
+        f === 'pytorch_model.bin' || (f.startsWith('pytorch_model-') && f.endsWith('.bin'))
+      ).sort();
+      for (const shard of ptShards) {
+        uiLog('info', 'Downloading ' + shard + ' (pytorch format)…');
+        const r = await fetch(base + '/' + shard);
+        if (!r.ok) throw new Error(shard + ' HTTP ' + r.status);
+        const blob = await r.blob();
+        synthetic.push(new File([blob], shard));
+        uiLog('ok', shard + ' ✓ (' + (blob.size / 1024 / 1024).toFixed(1) + ' MB)');
+      }
     }
 
     await handleFiles(synthetic);
@@ -720,27 +1143,31 @@ async function fetchFromHF() {
 // ── Config normalisation ──────────────────────────────────────────────
 function normalizeConfig(c) {
   // Detect architecture family
-  const isGPT2  = c.model_type === 'gpt2'  || ('n_embd' in c && 'n_layer' in c && !('hidden_size' in c));
-  const archType = isGPT2 ? 1 : 0;   // 0=Llama-style, 1=GPT-2
+  const isGPTNeo = c.model_type === 'gpt_neo' || (Array.isArray(c.architectures) && c.architectures.some(a => a.includes('GPTNeo')));
+  const isGPT2   = !isGPTNeo && (c.model_type === 'gpt2' || ('n_embd' in c && 'n_layer' in c && !('hidden_size' in c)));
+  const archType = (isGPT2 || isGPTNeo) ? 1 : 0;  // 0=Llama-style, 1=GPT-2/GPT-Neo
 
   const dim     = c.hidden_size ?? c.n_embd ?? c.dim ?? 0;
-  const n_heads = c.num_attention_heads ?? c.n_head ?? c.n_heads ?? 0;
+  // GPT-Neo uses num_heads; GPT-2 uses n_head; Llama uses num_attention_heads
+  const n_heads = c.num_attention_heads ?? c.n_head ?? c.num_heads ?? c.n_heads ?? 0;
 
   return {
     dim,
-    hidden_dim:  c.intermediate_size ?? (isGPT2 ? (c.n_inner ?? dim * 4) : 0) ?? c.hidden_dim ?? 0,
-    n_layers:    c.num_hidden_layers  ?? c.n_layer  ?? c.n_layers  ?? 0,
+    hidden_dim:  c.intermediate_size ?? ((isGPT2 || isGPTNeo) ? (c.n_inner ?? dim * 4) : 0) ?? c.hidden_dim ?? 0,
+    // GPT-Neo uses num_layers; GPT-2 uses n_layer; Llama uses num_hidden_layers
+    n_layers:    c.num_hidden_layers  ?? c.n_layer  ?? c.num_layers ?? c.n_layers ?? 0,
     n_heads,
     n_kv_heads:  c.num_key_value_heads ?? n_heads,
     vocab_size:  c.vocab_size ?? 0,
     seq_len:     c.max_position_embeddings ?? c.n_positions ?? c.seq_len ?? 2048,
     arch_type:   archType,
+    is_gpt_neo:  isGPTNeo,
   };
 }
 
 // ── Architecture display ──────────────────────────────────────────────
 function renderArch(cfg, modelType) {
-  const archLabel = cfg.arch_type === 1 ? 'GPT-2' : 'Llama';
+  const archLabel = cfg.is_gpt_neo ? 'GPT-Neo' : cfg.arch_type === 1 ? 'GPT-2' : 'Llama';
   $('arch-model-name').textContent = modelType + '  [' + archLabel + ']';
   const p = estimateParams(cfg);
   const items = [
@@ -834,7 +1261,8 @@ async function startConversion() {
     const allParsed = [];
     for (let si = 0; si < state.stFiles.length; si++) {
       uiLog('info', `Parsing shard ${si+1}/${state.stFiles.length}: ${state.stFiles[si].name}`);
-      allParsed.push(await parseSafetensors(state.stFiles[si]));
+      const parseFn = state.stFiles[si].name.endsWith('.bin') ? parsePytorchBin : parseSafetensors;
+      allParsed.push(await parseFn(state.stFiles[si]));
     }
 
     // Build unified tensor name → shard lookup
@@ -855,9 +1283,34 @@ async function startConversion() {
       return st.getTensor(name);
     }
 
-    // ── Worker pool — one worker per logical CPU core ──
-    const workerUrl  = new URL('worker.js', window.location.href).href;
-    const numWorkers = Math.max(2, Math.min(navigator.hardwareConcurrency ?? 4, 16));
+    // ── Worker pool — inlined as Blob so it works under file:// ──
+    const _WORKER_SRC = `
+self.onmessage = function ({ data }) {
+  if (data.type !== 'quantize') return;
+  const { name, tensor, groupSize, isNorm } = data;
+  if (isNorm) {
+    self.postMessage({ type:'done', name, mode:'f32', data:tensor }, [tensor.buffer]);
+    return;
+  }
+  const len = tensor.length, nGroups = Math.ceil(len / groupSize);
+  const scales = new Float32Array(nGroups), quant = new Int8Array(len);
+  for (let g = 0; g < nGroups; g++) {
+    const start = g * groupSize, end = Math.min(start + groupSize, len);
+    let absMax = 0;
+    for (let i = start; i < end; i++) { const v = Math.abs(tensor[i]); if (v > absMax) absMax = v; }
+    const scale = absMax > 0 ? absMax / 127.0 : 1.0;
+    scales[g] = scale;
+    const inv = 1.0 / scale;
+    for (let i = start; i < end; i++) {
+      let q = Math.round(tensor[i] * inv);
+      quant[i] = q > 127 ? 127 : q < -128 ? -128 : q;
+    }
+  }
+  self.postMessage({ type:'done', name, mode:'int8', scales, quant }, [scales.buffer, quant.buffer]);
+};`;
+    const _workerBlob = new Blob([_WORKER_SRC], { type: 'application/javascript' });
+    const workerUrl   = URL.createObjectURL(_workerBlob);
+    const numWorkers  = Math.max(2, Math.min(navigator.hardwareConcurrency ?? 4, 16));
     console.log('[app] worker pool: ' + numWorkers + ' threads (hardwareConcurrency=' + (navigator.hardwareConcurrency ?? '?') + ')');
     uiLog('info', 'Worker pool: ' + numWorkers + ' threads');
 
@@ -885,18 +1338,28 @@ async function startConversion() {
         else _queue.push(task);
       });
     }
-    function terminatePool() { _workers.forEach(w => w.terminate()); }
+    function terminatePool() { _workers.forEach(w => w.terminate()); URL.revokeObjectURL(workerUrl); }
 
-    const isGPT2 = state.config.arch_type === 1;
-    uiLog('info', 'Architecture: ' + (isGPT2 ? 'GPT-2' : 'Llama-style'));
-    console.log('[app] arch:', isGPT2 ? 'gpt2' : 'llama');
+    const isGPTNeo = state.config.is_gpt_neo;
+    const isGPT2   = !isGPTNeo && state.config.arch_type === 1;
+    const archName  = isGPTNeo ? 'GPT-Neo' : isGPT2 ? 'GPT-2' : 'Llama-style';
+    uiLog('info', 'Architecture: ' + archName);
+    console.log('[app] arch:', archName.toLowerCase().replace('-',''));
 
     // ── Embedding ──
     setProgress(5, 'Loading embedding table…');
-    const embedName = isGPT2 ? 'transformer.wte.weight' : 'model.embed_tokens.weight';
+    const embedName = (isGPT2 || isGPTNeo) ? 'transformer.wte.weight' : 'model.embed_tokens.weight';
     const embedRaw  = await getTensor(embedName);
     if (!embedRaw) throw new Error(embedName + ' not found. Available: ' + allNames.slice(0,10).join(', '));
     uiLog('ok', `Embedding: ${embedRaw.length.toLocaleString()} elements`);
+
+    // ── Quantize embedding (INT8 reduces vocab*dim*4 → vocab*dim*1 + scales) ──
+    setProgress(7, 'Quantizing embedding…');
+    const _embedRes = await quantizeTensor(embedName, embedRaw, quantType === QUANT.F32);
+    const embedData = _embedRes.mode === 'int8'
+      ? { mode: 'int8', scales: _embedRes.scales, quant: _embedRes.quant }
+      : { mode: 'f32',  data:   _embedRes.data };
+    uiLog('ok', `Embedding quantized: ${_embedRes.mode}`);
 
     // ── Tokenizer ──
     const tokBuf = state.tokenizer ? encodeTokenizerBinary(state.tokenizer) : new ArrayBuffer(8);
@@ -912,7 +1375,47 @@ async function startConversion() {
       uiLog('info', `Layer ${li+1}/${nLayers}`);
       const layer = {};
 
-      if (isGPT2) {
+      if (isGPTNeo) {
+        // ── GPT-Neo layer — separate Q/K/V projections, nn.Linear (no transpose) ──
+        const L = `transformer.h.${li}`;
+
+        const [ln1, qRaw, kRaw, vRaw, oRaw, ln2, fcRaw, projRaw] = await Promise.all([
+          getTensor(`${L}.ln_1.weight`),
+          getTensor(`${L}.attn.attention.q_proj.weight`),
+          getTensor(`${L}.attn.attention.k_proj.weight`),
+          getTensor(`${L}.attn.attention.v_proj.weight`),
+          getTensor(`${L}.attn.attention.out_proj.weight`),
+          getTensor(`${L}.ln_2.weight`),
+          getTensor(`${L}.mlp.c_fc.weight`),
+          getTensor(`${L}.mlp.c_proj.weight`),
+        ]);
+        if (!ln1)     throw new Error(`Missing: ${L}.ln_1.weight`);
+        if (!qRaw)    throw new Error(`Missing: ${L}.attn.attention.q_proj.weight`);
+        if (!kRaw)    throw new Error(`Missing: ${L}.attn.attention.k_proj.weight`);
+        if (!vRaw)    throw new Error(`Missing: ${L}.attn.attention.v_proj.weight`);
+        if (!oRaw)    throw new Error(`Missing: ${L}.attn.attention.out_proj.weight`);
+        if (!ln2)     throw new Error(`Missing: ${L}.ln_2.weight`);
+        if (!fcRaw)   throw new Error(`Missing: ${L}.mlp.c_fc.weight`);
+        if (!projRaw) throw new Error(`Missing: ${L}.mlp.c_proj.weight`);
+
+        layer.attn_norm = { mode: 'f32', data: ln1 };
+        layer.ffn_norm  = { mode: 'f32', data: ln2 };
+        layer.gate      = { mode: 'f32', data: new Float32Array([0]) };
+
+        // nn.Linear weights already [out, in] — no transpose needed
+        const [qRes, kRes, vRes, oRes, upRes, downRes] = await Promise.all([
+          quantizeTensor(`${L}.q`,    qRaw,    false),
+          quantizeTensor(`${L}.k`,    kRaw,    false),
+          quantizeTensor(`${L}.v`,    vRaw,    false),
+          quantizeTensor(`${L}.o`,    oRaw,    false),
+          quantizeTensor(`${L}.up`,   fcRaw,   false),
+          quantizeTensor(`${L}.down`, projRaw, false),
+        ]);
+        const toW = r => r.mode === 'int8' ? { mode:'int8', scales:r.scales, quant:r.quant } : { mode:'f32', data:r.data };
+        layer.q = toW(qRes); layer.k = toW(kRes); layer.v = toW(vRes);
+        layer.o = toW(oRes); layer.up = toW(upRes); layer.down = toW(downRes);
+
+      } else if (isGPT2) {
         // ── GPT-2 layer — load all 6 matrices in parallel, then quantize all in parallel ──
         const L = `transformer.h.${li}`;
         const hiddenDim = state.config.hidden_dim;
@@ -995,7 +1498,7 @@ async function startConversion() {
 
     // ── Final norm ──
     setProgress(92, 'Final norm…');
-    const finalNormName = isGPT2 ? 'transformer.ln_f.weight' : 'model.norm.weight';
+    const finalNormName = (isGPT2 || isGPTNeo) ? 'transformer.ln_f.weight' : 'model.norm.weight';
     const finalNorm     = await getTensor(finalNormName);
     if (!finalNorm) throw new Error(finalNormName + ' not found');
 
@@ -1008,7 +1511,7 @@ async function startConversion() {
 
     // ── Build binary ──
     setProgress(97, 'Packing binary…');
-    const blob    = buildOutputBin({ config: state.config, tokBuf, embedData: embedRaw,
+    const blob    = buildOutputBin({ config: state.config, tokBuf, embedData,
       layers, finalNorm, lmHead, quantType, groupSize });
     const sizeMB  = (blob.size / 1024 / 1024).toFixed(2);
 
@@ -1063,6 +1566,20 @@ function uiLog(level, msg) {
 }
 
 console.log('[app] script parsed OK');
+
+// ── Theme toggle ──────────────────────────────────────────────────────────
+(function () {
+  const btn = document.getElementById('theme-toggle-btn');
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    try { localStorage.setItem('hw_llm_converter_theme', t); } catch (_) {}
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+  btn.addEventListener('click', () => {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
 </script>
 
 </body>
