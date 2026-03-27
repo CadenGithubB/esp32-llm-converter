@@ -664,11 +664,11 @@ console.groupEnd();
 'use strict';
 console.group('[pytorch] module loaded');
 
-/** HF / torch.save uses pytorch_model/…; older checkpoints used archive/… */
+/** HF checkpoints use pytorch_model/…; older torch.save used archive/… — prefer HF first */
 function detectPytorchZipPrefix(zipFiles) {
   const keys = Object.keys(zipFiles);
-  if (keys.includes('archive/data.pkl')) return 'archive';
   if (keys.includes('pytorch_model/data.pkl')) return 'pytorch_model';
+  if (keys.includes('archive/data.pkl')) return 'archive';
   for (const k of keys) {
     if (k.endsWith('/data.pkl')) return k.slice(0, -'/data.pkl'.length);
   }
@@ -684,11 +684,14 @@ async function parsePytorchBin(file) {
 
   const prefix = detectPytorchZipPrefix(zipFiles);
   if (!prefix) {
-    throw new Error('No data.pkl in zip (expected archive/data.pkl or pytorch_model/data.pkl).');
+    const sample = Object.keys(zipFiles).slice(0, 8).join(', ');
+    throw new Error('No */data.pkl in zip. First keys: ' + sample + ' (reload page with cache disabled if this persists).');
   }
   const pklPath = prefix + '/data.pkl';
   const pkl = zipFiles[pklPath];
-  if (!pkl) throw new Error(pklPath + ' not found — is this a valid pytorch_model.bin?');
+  if (!pkl) {
+    throw new Error('Missing ' + pklPath + ' after prefix detection — invalid pytorch_model.bin?');
+  }
 
   console.log('[pytorch] using zip prefix:', prefix);
 
@@ -948,6 +951,7 @@ const $ = id => document.getElementById(id);
 // ── Boot ─────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
   console.log('[app] DOM ready — wiring events');
+  console.info('[esp32-llm-converter] loader id', 'pytorch-zip-v2', '(if Convert still mentions archive/data.pkl only, your browser is serving a cached old index.html)');
 
   // Drag and drop
   const dz = $('dropzone');
