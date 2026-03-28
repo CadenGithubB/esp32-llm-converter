@@ -417,6 +417,17 @@
         3. Upload the downloaded <code>model.bin</code><br>
         4. In the <strong>CLI</strong>: <code>llm load</code> → <code>llm generate Once upon a time</code>
       </div>
+      <div class="card" id="manifest-card" style="margin-top:14px;background:var(--surface-soft);border:1px solid var(--border);border-radius:8px;padding:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <strong style="color:var(--fg);font-size:13px;">Firmware manifest (JSON)</strong>
+          <span style="font-size:11px;color:var(--muted);">Exact tensor order &amp; sizes — paste for loader / AI debugging</span>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button type="button" class="btn btn-secondary" id="manifest-copy-btn" style="font-size:12px;padding:6px 12px;">Copy</button>
+            <button type="button" class="btn btn-secondary" id="manifest-dl-btn" style="font-size:12px;padding:6px 12px;">Download .json</button>
+          </div>
+        </div>
+        <textarea id="manifest-json" readonly rows="14" style="width:100%;font-family:var(--mono);font-size:11px;line-height:1.4;padding:10px;border-radius:6px;border:1px solid var(--border);background:var(--panel-bg);color:var(--fg);resize:vertical;box-sizing:border-box;"></textarea>
+      </div>
     </div>
   </div>
 </main>
@@ -628,12 +639,17 @@ function buildOutputBin({ config, tokBuf, embedData, posEmbedData, layers, final
 
   const total = parts.reduce((n, b) => n + b.byteLength, 0);
   console.log('[format] total output size:', total, 'bytes', `(${(total/1024/1024).toFixed(2)} MB)`);
+
+  const manifest = buildFirmwareManifest({
+    config, tokBuf, embedData, posEmbedData, layers, finalNorm, lmHead, quantType, groupSize, blobSize: total,
+  });
+  console.log('[format] FIRMWARE_MANIFEST_JSON\n' + JSON.stringify(manifest, null, 2));
   console.groupEnd();
 
   const out = new Uint8Array(total);
   let off   = 0;
   for (const b of parts) { out.set(new Uint8Array(b), off); off += b.byteLength; }
-  return new Blob([out], { type: 'application/octet-stream' });
+  return { blob: new Blob([out], { type: 'application/octet-stream' }), manifest };
 }
 
 function tensorBlock(nElements, w) {
@@ -641,6 +657,95 @@ function tensorBlock(nElements, w) {
   if (w.mode === 'int8') { parts.push(w.scales.buffer, w.quant.buffer); }
   else                   { parts.push(w.data.buffer); }
   return parts;
+}
+
+/** Bytes of payload after the uint32 element-count (matches tensorBlock) */
+function tensorBlockPayloadBytes(w) {
+  if (w.mode === 'int8') return w.scales.byteLength + w.quant.byteLength;
+  return w.data.byteLength;
+}
+
+/**
+ * Build a JSON-serializable manifest for firmware / AI debugging (exact tensor order & sizes in model.bin).
+ */
+function buildFirmwareManifest(meta) {
+  const {
+    config, tokBuf, embedData, posEmbedData, layers, finalNorm, lmHead, quantType, groupSize, blobSize,
+  } = meta;
+  const dim = config.dim, n_heads = config.n_heads, n_kv_heads = config.n_kv_heads;
+  const head_dim = Math.floor(dim / n_heads);
+  const kv_dim = (n_kv_heads * dim) / n_heads;
+
+  const sequence = [];
+  function record(path, w, extra) {
+    const n = w.mode === 'int8' ? w.quant.length : w.data.length;
+    const file_bytes = 4 + tensorBlockPayloadBytes(w);
+    const row = Object.assign({
+      path, n_elements: n, mode: w.mode, file_bytes,
+    }, extra || {});
+    if (path.endsWith('.gate') || path.includes('.gate')) {
+      row.firmware_hint = 'Packed as FP32 (dummy scalar for GPT-2); do not read as INT8 when global quant is INT8.';
+    }
+    sequence.push(row);
+  }
+
+  const out = {
+    _description: 'ESP32 LLM converter (LLM1) — tensor order and sizes as written to model.bin. Paste for firmware alignment.',
+    format_magic_hex: '0x' + MAGIC.toString(16).toUpperCase(),
+    spec_version: VERSION,
+    file_size_bytes: blobSize,
+    global_quant_type: quantType === QUANT.INT8 ? 'INT8' : 'FP32',
+    group_size: groupSize,
+    derived_geometry: {
+      head_dim,
+      kv_dim,
+      arch_type: config.arch_type ?? 0,
+      arch_label: (config.arch_type === 1) ? 'GPT-2 family (incl. GPT-Neo)' : 'Llama-style',
+    },
+    header_fields: {
+      dim: config.dim,
+      hidden_dim: config.hidden_dim,
+      n_layers: config.n_layers,
+      n_heads: config.n_heads,
+      n_kv_heads: config.n_kv_heads,
+      vocab_size: config.vocab_size,
+      seq_len: config.seq_len,
+    },
+    layout_order: [
+      '64-byte header',
+      'uint32 tokenizer_len + tokenizer blob',
+      'embedding tensor block',
+      posEmbedData ? 'positional embedding tensor block (wpe)' : null,
+      'per-layer: attn_norm, q, k, v, o, ffn_norm, gate, up, down',
+      'final_norm tensor block',
+      'uint8 lm_head_tied + optional lm_head tensor block',
+    ].filter(Boolean),
+    tensor_sequence: sequence,
+  };
+
+  record('embedding', embedData);
+  if (posEmbedData) {
+    record('positional_embedding', posEmbedData, { note: 'transformer.wpe.weight [seq_len, dim] row-major' });
+  }
+
+  const KEYS = ['attn_norm', 'q', 'k', 'v', 'o', 'ffn_norm', 'gate', 'up', 'down'];
+  for (let li = 0; li < layers.length; li++) {
+    for (const key of KEYS) {
+      const w = layers[li][key];
+      const isDummyGate = key === 'gate' && w.mode === 'f32' && w.data.length === 1 && w.data[0] === 0;
+      record(`layers[${li}].${key}`, w, isDummyGate ? { gpt2_dummy_gate: true } : undefined);
+    }
+  }
+  record('final_norm', { mode: 'f32', data: finalNorm });
+
+  if (lmHead.tied) {
+    sequence.push({ path: 'lm_head', tied_to_embedding: true, file_bytes: 1, note: 'single uint8 flag only' });
+  } else {
+    record('lm_head', lmHead.mode === 'int8' ? lmHead : { mode: 'f32', data: lmHead.data });
+  }
+
+  out.tokenizer = { block_bytes: tokBuf.byteLength };
+  return out;
 }
 
 function estimateSize({ config, tokBufSize, quantType, groupSize }) {
@@ -959,6 +1064,7 @@ const state = {
   stFiles:   [],
   ready:     false,
   blob:      null,
+  manifest:  null,
 };
 
 // ── DOM refs ─────────────────────────────────────────────────────────────
@@ -1561,15 +1667,17 @@ self.onmessage = function ({ data }) {
 
     // ── Build binary ──
     setProgress(97, 'Packing binary…');
-    const blob    = buildOutputBin({ config: state.config, tokBuf, embedData,
+    const { blob, manifest } = buildOutputBin({ config: state.config, tokBuf, embedData,
       posEmbedData, layers, finalNorm, lmHead, quantType, groupSize });
     const sizeMB  = (blob.size / 1024 / 1024).toFixed(2);
 
     uiLog('ok', `Done! ${sizeMB} MB (${blob.size.toLocaleString()} bytes)`);
+    uiLog('info', 'Firmware manifest JSON printed to console; copy from Ready to Flash below.');
     setProgress(100, 'Complete ✓');
     setDot('done');
     state.blob = blob;
-    showDownload(blob, sizeMB, quantType);
+    state.manifest = manifest;
+    showDownload(blob, sizeMB, quantType, manifest);
     console.groupEnd();
 
   } catch (err) {
@@ -1581,7 +1689,7 @@ self.onmessage = function ({ data }) {
   }
 }
 
-function showDownload(blob, sizeMB, quantType) {
+function showDownload(blob, sizeMB, quantType, manifest) {
   const url = URL.createObjectURL(blob);
   $('dl-filename').textContent = 'model.bin';
   $('dl-meta').textContent = `${sizeMB} MB · ${quantType===QUANT.INT8?'INT8':'F32'} · ESP32-S3 LLM format v1`;
@@ -1589,6 +1697,30 @@ function showDownload(blob, sizeMB, quantType) {
     const a = document.createElement('a');
     a.href = url; a.download = 'model.bin'; a.click();
   };
+
+  const json = JSON.stringify(manifest, null, 2);
+  const ta = $('manifest-json');
+  if (ta) ta.value = json;
+
+  const copyBtn = $('manifest-copy-btn');
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      ta.select();
+      document.execCommand('copy');
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+    };
+  }
+  const mj = $('manifest-dl-btn');
+  if (mj) {
+    mj.onclick = () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+      a.download = 'model.manifest.json';
+      a.click();
+    };
+  }
+
   show('card-download');
   $('card-download').scrollIntoView({ behavior: 'smooth' });
 }
