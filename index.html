@@ -1559,13 +1559,14 @@ self.onmessage = function ({ data }) {
         layer.gate      = { mode: 'f32', data: new Float32Array([0]) };
 
         // nn.Linear weights already [out, in] — no transpose needed
+        const forceF32 = quantType === QUANT.F32;
         const [qRes, kRes, vRes, oRes, upRes, downRes] = await Promise.all([
-          quantizeTensor(`${L}.q`,    qRaw,    false),
-          quantizeTensor(`${L}.k`,    kRaw,    false),
-          quantizeTensor(`${L}.v`,    vRaw,    false),
-          quantizeTensor(`${L}.o`,    oRaw,    false),
-          quantizeTensor(`${L}.up`,   fcRaw,   false),
-          quantizeTensor(`${L}.down`, projRaw, false),
+          quantizeTensor(`${L}.q`,    qRaw,    forceF32),
+          quantizeTensor(`${L}.k`,    kRaw,    forceF32),
+          quantizeTensor(`${L}.v`,    vRaw,    forceF32),
+          quantizeTensor(`${L}.o`,    oRaw,    forceF32),
+          quantizeTensor(`${L}.up`,   fcRaw,   forceF32),
+          quantizeTensor(`${L}.down`, projRaw, forceF32),
         ]);
         const toW = r => r.mode === 'int8' ? { mode:'int8', scales:r.scales, quant:r.quant } : { mode:'f32', data:r.data };
         layer.q = toW(qRes); layer.k = toW(kRes); layer.v = toW(vRes);
@@ -1602,13 +1603,14 @@ self.onmessage = function ({ data }) {
         const cFcT    = transposeF32(cFc,      dim,       hiddenDim);
         const cMlpT   = transposeF32(cMlpProj, hiddenDim, dim);
 
+        const forceF32 = quantType === QUANT.F32;
         const [qRes, kRes, vRes, oRes, upRes, downRes] = await Promise.all([
-          quantizeTensor(`${L}.q`,    qRaw,    false),
-          quantizeTensor(`${L}.k`,    kRaw,    false),
-          quantizeTensor(`${L}.v`,    vRaw,    false),
-          quantizeTensor(`${L}.o`,    cProjT,  false),
-          quantizeTensor(`${L}.up`,   cFcT,    false),
-          quantizeTensor(`${L}.down`, cMlpT,   false),
+          quantizeTensor(`${L}.q`,    qRaw,    forceF32),
+          quantizeTensor(`${L}.k`,    kRaw,    forceF32),
+          quantizeTensor(`${L}.v`,    vRaw,    forceF32),
+          quantizeTensor(`${L}.o`,    cProjT,  forceF32),
+          quantizeTensor(`${L}.up`,   cFcT,    forceF32),
+          quantizeTensor(`${L}.down`, cMlpT,   forceF32),
         ]);
         const toW = r => r.mode === 'int8' ? { mode:'int8', scales:r.scales, quant:r.quant } : { mode:'f32', data:r.data };
         layer.q = toW(qRes); layer.k = toW(kRes); layer.v = toW(vRes);
