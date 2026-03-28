@@ -559,7 +559,7 @@ const MAGIC   = 0x4C4C4D31;
 const VERSION = 1;
 const QUANT   = { F32: 0, INT8: 1 };
 
-function buildOutputBin({ config, tokBuf, embedData, layers, finalNorm, lmHead, quantType, groupSize }) {
+function buildOutputBin({ config, tokBuf, embedData, posEmbedData, layers, finalNorm, lmHead, quantType, groupSize }) {
   console.group('[format] buildOutputBin');
   console.log('config:', config, 'quantType:', quantType, 'groupSize:', groupSize);
   const parts = [];
@@ -592,6 +592,13 @@ function buildOutputBin({ config, tokBuf, embedData, layers, finalNorm, lmHead, 
   const embedN = embedData.mode === 'int8' ? embedData.quant.length : embedData.data.length;
   parts.push(...tensorBlock(embedN, embedData));
   console.log('[format] embedding table:', embedN, 'elements');
+
+  // Positional embedding (GPT-2 / GPT-Neo only)
+  if (posEmbedData) {
+    const posN = posEmbedData.data.length;
+    parts.push(...tensorBlock(posN, posEmbedData));
+    console.log('[format] positional embedding:', posN, 'elements (FP32)');
+  }
 
   // Layers
   const KEYS = ['attn_norm','q','k','v','o','ffn_norm','gate','up','down'];
@@ -1391,6 +1398,19 @@ self.onmessage = function ({ data }) {
       : { mode: 'f32',  data:   _embedRes.data };
     uiLog('ok', `Embedding quantized: ${_embedRes.mode}`);
 
+    // ── Positional embedding (GPT-2 / GPT-Neo only) ──
+    let posEmbedData = null;
+    if (isGPT2 || isGPTNeo) {
+      const wpeName = 'transformer.wpe.weight';
+      const wpeRaw = await getTensor(wpeName);
+      if (wpeRaw) {
+        posEmbedData = { mode: 'f32', data: wpeRaw };
+        uiLog('ok', `Positional embedding: ${wpeRaw.length.toLocaleString()} elements (FP32)`);
+      } else {
+        uiLog('warn', 'transformer.wpe.weight not found — positional embeddings will be missing');
+      }
+    }
+
     // ── Tokenizer ──
     const tokBuf = state.tokenizer ? encodeTokenizerBinary(state.tokenizer) : new ArrayBuffer(8);
 
@@ -1542,7 +1562,7 @@ self.onmessage = function ({ data }) {
     // ── Build binary ──
     setProgress(97, 'Packing binary…');
     const blob    = buildOutputBin({ config: state.config, tokBuf, embedData,
-      layers, finalNorm, lmHead, quantType, groupSize });
+      posEmbedData, layers, finalNorm, lmHead, quantType, groupSize });
     const sizeMB  = (blob.size / 1024 / 1024).toFixed(2);
 
     uiLog('ok', `Done! ${sizeMB} MB (${blob.size.toLocaleString()} bytes)`);
