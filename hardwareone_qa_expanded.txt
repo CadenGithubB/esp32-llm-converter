@@ -1,0 +1,431 @@
+Q: What is the on-device language model?
+A: Hardware One can run a small GPT-2 language model directly on the ESP32-S3. It uses PSRAM for weights and runs entirely offline. Type llm to open the LLM interface, or access it from the LLM tab in the web UI.
+
+Q: How do I load a language model?
+A: Place a model.bin file in the /system/llm/ folder on the internal filesystem or /sd/llm/ on the SD card. Hardware One detects it automatically on boot. The file is produced by the esp32-llm-converter tool.
+
+Q: How do I start the language model?
+A: Type llm to enter the LLM prompt interface from the CLI. You can also use the LLM tab in the web UI, which shows a chat interface with token-per-second stats.
+
+Q: What model format does Hardware One use?
+A: Hardware One uses the LLM1 binary format. It embeds the tokenizer, model weights, and configuration in a single file. INT8 quantised models are recommended to fit within the 8 MB PSRAM budget.
+
+Q: How fast does the language model run?
+A: Speed depends on the model and quantisation. An INT8 model with 18 layers typically runs at one to three tokens per second on the ESP32-S3. The web UI shows the current tokens per second.
+
+Q: How do I convert a model for Hardware One?
+A: Use the esp32-llm-converter web tool. Open index.html, drag your trained model folder in, select INT8 output, and download the resulting model.bin. Upload this file to /system/llm/ or /sd/llm/.
+
+Q: Can the language model run without WiFi?
+A: Yes. The LLM runs entirely on-device with no network connection required. It uses only local PSRAM and flash storage.
+
+Q: What language model architectures are supported?
+A: Hardware One supports GPT-2 compatible models and Llama-style models. GPT-2 uses absolute positional embeddings and LayerNorm. Llama uses RoPE and RMSNorm. Both can be INT8 quantised.
+
+Q: How do I stop language model generation?
+A: In the web UI, press the Stop button. From the CLI, press any key or send a stop signal. Generation halts at the next token boundary.
+
+Q: What sampling settings does the LLM support?
+A: You can set temperature, top-p, and Mirostat v2 sampling from the web UI or CLI settings. Temperature controls randomness. Top-p filters low-probability tokens. Mirostat targets a specific surprise level per token.
+
+Q: What is the SD card for?
+A: The SD card provides extra storage for files, maps, and language models. Mount it with sd mount. Files on the SD card are accessible under the /sd/ path.
+
+Q: How do I mount the SD card?
+A: Type sd mount to mount the SD card. Type sd status to check whether it is mounted and how much space is available.
+
+Q: How do I unmount the SD card?
+A: Type sd unmount to safely unmount the SD card before removing it.
+
+Q: How do I copy a file to the SD card?
+A: Type filecopy followed by the source path and destination path. For example, filecopy /system/llm/model.bin /sd/llm/model.bin.
+
+Q: What is the LittleFS filesystem?
+A: LittleFS is the internal flash filesystem on Hardware One. It stores settings, automations, logs, and small files. It is wear-levelled and power-safe. The SD card uses a separate FAT filesystem.
+
+Q: How do I see the filesystem layout?
+A: Type files / to list the root of the internal filesystem. The main folders are /system for configuration and /data for user files.
+
+Q: What is the I2C dashboard?
+A: The I2C dashboard in the web UI shows all detected I2C devices with their addresses and response times. It polls the bus periodically and highlights devices that stop responding. Useful for debugging sensor wiring.
+
+Q: How do I run the I2C dashboard?
+A: Open the web UI and go to the Sensors tab. The I2C section shows a live table of detected devices. You can also type i2c scan from the CLI for a one-time scan.
+
+Q: What happens if an I2C sensor stops responding?
+A: The I2C dashboard marks it in red. Type i2c reset to reset the bus without rebooting. If that fails, check wiring or power to the sensor.
+
+Q: How do I see sensor data in real time?
+A: Open the Sensors tab in the web UI. It shows live readings for all active sensors, updating automatically. You can also type SENSORread from the CLI for a single reading.
+
+Q: How does sensorlog work?
+A: Type sensorlog start followed by the sensor name to begin logging. Readings are written to a timestamped file. Type sensorlog stop to stop. Type sensorlog view to display recent entries. Type sensorlog list to see which sensors are currently logging.
+
+Q: Where are sensor logs stored?
+A: Sensor logs are stored in /data/logs/ on the internal filesystem. Each sensor gets its own file named after the sensor and the start timestamp.
+
+Q: How do I export sensor log data?
+A: Type fileview followed by the log file path to display it in the CLI. You can also download it from the Files tab in the web UI.
+
+Q: What is the offline map feature?
+A: Hardware One includes an offline tile map viewer in the web UI. It shows GPS tracks overlaid on cached map tiles. Map tiles are stored on the SD card and are fetched automatically when WiFi is available, then cached for offline use.
+
+Q: How do I use the GPS tracker?
+A: Type opengps to start the PA1010D GPS module. Type gpsread to get a single position fix. The web UI map page shows your current position and tracks your movement in real time.
+
+Q: How do I save a GPS track?
+A: GPS tracks are saved automatically to /sd/gps/ when the GPS is running. Each session creates a new GPX file. View tracks in the map tab of the web UI.
+
+Q: What is the web dashboard?
+A: The web dashboard is the main overview page of the web UI. It shows WiFi status, connected sensors, MQTT state, uptime, memory usage, and recent log entries. It refreshes automatically every few seconds.
+
+Q: How do I access the web dashboard?
+A: Connect the device to WiFi and open its IP address in a browser. The dashboard is the first page you see. Log in with your admin username and password.
+
+Q: What is the Files tab in the web UI?
+A: The Files tab shows the contents of the internal filesystem and SD card. You can browse folders, view text files, download files, upload new files, and delete files from the browser.
+
+Q: How do I upload a file to the device?
+A: Open the Files tab in the web UI. Click the upload button, select a file, and choose the destination folder. Files up to the available flash space can be uploaded.
+
+Q: How do I update the firmware over the web?
+A: Navigate to the Settings tab in the web UI and look for the OTA update section. Upload a new firmware binary to flash it wirelessly. The device reboots automatically after a successful update.
+
+Q: What is OTA?
+A: OTA stands for over-the-air update. Hardware One supports flashing new firmware from the web UI without a USB cable. The device validates the binary before writing it to flash.
+
+Q: How do I roll back firmware?
+A: Hardware One keeps the previous firmware image in a secondary OTA partition. If the new firmware fails to boot, it reverts automatically. You can also trigger a manual rollback from the web UI settings page.
+
+Q: What is the CLI?
+A: The CLI is the command-line interface for Hardware One. You can access it over USB serial at 115200 baud, through an SSH-like connection over WiFi, or in the browser via the CLI tab in the web UI. All features are accessible from the CLI.
+
+Q: How do I get a list of all CLI commands?
+A: Type help to enter the interactive help system. Type a module name like wifi or sensors to see that module's commands. Type help all to print every available command at once.
+
+Q: How do I use command history in the CLI?
+A: Use the up and down arrow keys to scroll through previously entered commands. Type clear to clear the screen.
+
+Q: What is the build configuration system?
+A: Hardware One uses a single header file called System_BuildConfig.h to enable or disable features at compile time. Set a flag to 1 to include a feature and rebuild. This keeps unused code out of the binary and saves flash space.
+
+Q: Which features can be enabled in the build?
+A: Features you can toggle include WiFi, MQTT, BLE Bluetooth, ESP-NOW, GPS, thermal camera, IMU, ToF sensor, presence sensor, FM radio, servo control, battery monitoring, OLED display, NeoPixel LED, and the on-device LLM.
+
+Q: What is the difference between Basic and Advanced setup?
+A: Basic setup asks only for a WiFi network name, password, and admin account. Advanced setup walks through every configurable option including MQTT, device name, timezone, and feature flags.
+
+Q: How do I redo the setup wizard?
+A: Type wizard to launch the setup wizard at any time. This lets you reconfigure WiFi, admin credentials, and other settings without resetting the device.
+
+Q: How do I change the device timezone?
+A: Type settings set timezone followed by a POSIX timezone string. For example, settings set timezone EST5EDT for US Eastern time. The timezone affects displayed time and automation schedules.
+
+Q: How do I see the current time?
+A: Type time to display the current date and time. If the device is connected to WiFi, the time is synchronised from NTP automatically.
+
+Q: What NTP servers does Hardware One use?
+A: By default it uses pool.ntp.org. You can change the server with settings set ntpServer followed by the server address.
+
+Q: How do I set a static IP address?
+A: Type settings set staticIP followed by the IP address. Also set settings set gateway and settings set subnet. Then reconnect WiFi for the change to take effect. Leave staticIP empty to use DHCP.
+
+Q: Does Hardware One support WPA2 enterprise WiFi?
+A: No. Hardware One supports standard WPA2 personal networks only. Use a personal hotspot or access point.
+
+Q: What is the maximum WiFi range?
+A: The device uses the built-in ESP32 antenna. Typical indoor range is twenty to thirty metres depending on obstacles. An external antenna can be added on boards that support it.
+
+Q: How do I check the WiFi signal strength?
+A: Type wifi to see the RSSI value. Higher negative numbers like minus ninety mean weaker signal. Minus sixty or better is generally reliable.
+
+Q: Can Hardware One connect to multiple WiFi networks?
+A: Hardware One stores one primary SSID and password. It connects to that network automatically on boot. You can change credentials with setssid and setpass at any time.
+
+Q: What MQTT QoS levels are supported?
+A: Hardware One publishes and subscribes at QoS level 0 by default. This means at-most-once delivery with no acknowledgement. For most sensor telemetry this is sufficient.
+
+Q: How do I publish a message to MQTT manually?
+A: Type mqtt publish followed by the topic and message to publish a single message. For example, mqtt publish devices/sensor1/test hello.
+
+Q: How do I subscribe to an MQTT topic?
+A: Type mqtt subscribe followed by the topic pattern. Incoming messages on that topic are printed to the CLI. Use a wildcard like devices/# to subscribe to all sub-topics.
+
+Q: Can Hardware One receive commands over MQTT?
+A: Yes. Subscribe to the command topic prefix followed by /cmd. Any CLI command sent as a message to that topic is executed on the device as if typed locally.
+
+Q: How do automations get triggered?
+A: Automations trigger in three ways. SCHEDULE with BOOT runs once on startup. SCHEDULE with TIME=HH:MM runs daily at that time. SCHEDULE with INTERVAL=Xm runs repeatedly. Conditional automations with IF run whenever the condition becomes true.
+
+Q: What conditions can I use in automations?
+A: Conditions include sensor thresholds like TEMP greater than 75, presence like MOTION=true, zone like ZONE=Upstairs, and time like TIME between 08:00 and 18:00. Combine conditions with AND.
+
+Q: Can automations call other automations?
+A: Yes. Use automation run followed by the name as a command inside an automation. This allows chaining and reusable sub-routines.
+
+Q: How do I create an automation from the web UI?
+A: Open the Automations tab. Click New, give it a name, write the schedule or condition line, then add the commands to execute. Save and enable it.
+
+Q: How do I see if an automation ran successfully?
+A: Type automation log followed by the name to see recent execution history. The log shows timestamps, whether the automation triggered, and whether each command succeeded.
+
+Q: What is the remote command feature in bonded mode?
+A: When two Hardware One devices are bonded, the controller device gains a Remote tab in its web UI. Commands typed there are sent to and executed on the bonded device. The response is shown in the controller's CLI.
+
+Q: How do I see what the bonded device is doing?
+A: In bonded mode, sensor readings and status from the bonded device are forwarded to the controller. The dashboard shows a summary panel for the bonded device including its sensors and connectivity.
+
+Q: How does encrypted ESP-NOW pairing work?
+A: During pairing, both devices exchange a hashed version of the shared passphrase. After verification, messages between them are encrypted. The passphrase is never transmitted directly.
+
+Q: How many devices can be paired with ESP-NOW?
+A: Hardware One supports up to six paired ESP-NOW peers. Each peer is identified by its MAC address and given a name and room assignment.
+
+Q: What is metadata sync?
+A: Metadata sync is an ESP-NOW feature that periodically broadcasts device name, zone, room, uptime, and sensor summary to all paired peers. This lets the network maintain a live picture of every device without a central server.
+
+Q: How do I see metadata from peers?
+A: Type espnow peers to list all known peers with their names and last-seen metadata. In the web UI, the ESP-NOW tab shows a card for each peer with its current status.
+
+Q: What is the NeoPixel LED used for?
+A: The onboard NeoPixel RGB LED can show device status, alert conditions, or decorative colours. Automations can set the LED colour based on sensor readings or events. For example, red when temperature is too high.
+
+Q: What colours can the LED be set to?
+A: Type ledcolor followed by any standard colour name like red, green, blue, white, orange, yellow, purple, or cyan. Use ledcolor off to turn it off. You can also set raw RGB values with ledrgb.
+
+Q: How do I set the LED to a specific RGB value?
+A: Type ledrgb followed by three numbers for red, green, and blue each from 0 to 255. For example, ledrgb 255 128 0 sets an orange colour.
+
+Q: How do I set LED brightness?
+A: Type ledbrightness followed by a value from 0 to 255. This scales all colour output without changing the hue.
+
+Q: What is the Seesaw gamepad?
+A: The Seesaw is an Adafruit I2C gamepad and joystick. On Standard Handheld builds it is used to navigate the OLED menu and control device functions without a phone or computer.
+
+Q: How do I navigate the OLED menu with the gamepad?
+A: Use the joystick to move the cursor. Press the A button to select. Press B to go back. Long-press A to enter edit mode for a setting.
+
+Q: What does the OLED display show when idle?
+A: The OLED shows a status screen with WiFi state, IP address, sensor count, and uptime when idle. Press any button on the gamepad or type oled menu to open the interactive menu.
+
+Q: How do I set a custom OLED screen message?
+A: Type oled text followed by the text you want to display. It shows on the OLED screen until the next status update or until you type oled clear.
+
+Q: What is the barebones headless configuration?
+A: Barebones headless runs on an ESP32 or ESP32-S3 without any display or gamepad. All interaction is through the CLI over serial or WiFi. This is the most memory-efficient configuration and suits sensor node deployments.
+
+Q: What is the sensor appliance configuration?
+A: The sensor appliance configuration enables multiple sensors and MQTT publishing but no OLED or gamepad. It is designed for fixed installations that report data to a home automation server.
+
+Q: How do I change the hostname?
+A: Type settings set hostname followed by the name you want. The hostname appears in the serial monitor on boot and is used for mDNS so you can reach the device at hostname.local on your network.
+
+Q: What is mDNS?
+A: mDNS lets you reach the device using a name like hardwareone.local instead of an IP address. It works on most home networks without any router configuration. The name is set with the hostname setting.
+
+Q: How do I see the device MAC address?
+A: Type wifi to see the WiFi MAC address. Type espnow status to see the ESP-NOW MAC address, which is different and used for peer pairing.
+
+Q: What is the difference between WiFi and ESP-NOW MAC addresses?
+A: WiFi uses the station MAC for connecting to access points. ESP-NOW uses a separate interface MAC. When pairing devices, use the ESP-NOW MAC address shown in espnow status.
+
+Q: How do I enable verbose logging for a sensor?
+A: Type debug followed by the sensor name and 1. For example, debugsensors 1 enables general sensor debug output. Individual sensor names can also be used. Add temp to enable only until the next reboot.
+
+Q: How do I see a list of all debug flags?
+A: Type debug list to see all available debug flags and their current state. Flags with a 1 are enabled and flags with a 0 are disabled.
+
+Q: Can I log debug output to a file?
+A: Type debugfile on to redirect debug output to a log file in /data/logs/debug.txt. Type debugfile off to stop. The file grows until you delete it, so monitor its size with fsusage.
+
+Q: What is the auth system?
+A: Hardware One uses a username and password system for the web UI and CLI over WiFi. The first account created during setup is the admin. Admin accounts can manage other users. Regular users have access to most commands but not user management.
+
+Q: What happens if I forget the admin password?
+A: If you have serial access, you can type settings reset to factory reset all settings including user accounts. Then run the setup wizard again. This erases all automations and settings so back up first with settings export.
+
+Q: How do I import settings?
+A: Type settings import followed by a JSON string to restore settings from a backup. The format matches the output of settings export. Reboot after importing for all settings to take effect.
+
+Q: What does the status command show?
+A: Type status to see a summary of the current device state. It includes WiFi connection and IP, active sensors, MQTT connection, ESP-NOW peer count, uptime, and memory usage.
+
+Q: How do I check if a feature is enabled?
+A: Type status to see active modules, or type help followed by the module name to see if its commands are available. Commands for disabled features are not registered and will show as unknown command.
+
+Q: What happens when memory is low?
+A: Hardware One monitors heap usage and logs a warning when free memory falls below a threshold. Type memory or memreport to see a full breakdown. If memory is critically low, consider disabling unused sensors or reducing the LLM context size.
+
+Q: How do I reduce memory usage?
+A: Disable sensors you are not using with the closeSENSOR command. Reduce the LLM context length in settings if using the language model. Type memreport to identify which components are using the most memory.
+
+Q: What is PSRAM?
+A: PSRAM is pseudo-static RAM, an external memory chip on the ESP32-S3. Hardware One uses PSRAM for large allocations like LLM weights, KV cache, and sensor buffers. The ESP32-S3 on supported boards has 8 MB of PSRAM.
+
+Q: What is the difference between heap and PSRAM?
+A: The internal heap is fast SRAM built into the ESP32 chip. It is used for time-critical data structures. PSRAM is larger but slower and accessed over SPI. Large allocations like LLM weights go to PSRAM automatically.
+
+Q: How do I reboot into safe mode?
+A: Hold the boot button during power-on to enter safe mode. In safe mode, automations do not run and only basic commands are available. This is useful for recovering from a bad automation that causes a boot loop.
+
+Q: What is the boot log?
+A: Hardware One prints a detailed boot sequence to serial at 115200 baud. It lists each module as it initialises, reports any failures, and shows the available memory after setup is complete.
+
+Q: How do I see previous boot logs?
+A: Boot logs are not stored by default. Connect serial before powering on to capture the boot sequence. If you need persistent boot logging, enable debugfile on before rebooting.
+
+Q: What happens during a firmware panic?
+A: If the firmware crashes with a panic, the ESP32 prints a stack trace to serial and reboots. Serial monitor at 115200 baud shows the crash address. Use idf.py monitor to decode the addresses into function names automatically.
+
+Q: How do I decode a crash stack trace?
+A: Run idf.py monitor while connected via USB. It automatically decodes addresses to source file and line numbers. Alternatively use xtensa-esp32s3-elf-addr2line with the ELF file from your build directory.
+
+Q: What is the difference between reboot and reset?
+A: Reboot restarts the firmware and reloads all settings. Settings and automations are preserved. Settings reset restores factory defaults and erases all user configuration. Use reboot for a normal restart and settings reset only to recover from a bad configuration.
+
+Q: How do I update only one setting without changing others?
+A: Type settings set followed by the key and value. Only that setting changes. Other settings are not affected. Use settings list to find the exact key name.
+
+Q: What format do settings use?
+A: Settings are stored as JSON in the internal filesystem. The settings export command outputs all current settings as a JSON object. You can edit this and import it back with settings import.
+
+Q: How does Hardware One handle power loss?
+A: LittleFS is power-safe and will not corrupt data during a power cut. Settings and automations are preserved. Sensor logs may have an incomplete final entry but previous entries are intact.
+
+Q: Can Hardware One run on battery power?
+A: Yes. Any board with a LiPo connector works. Type battery status to see voltage, charge percentage, and charging state. Battery monitoring must be enabled in System_BuildConfig.h with ENABLE_BATTERY=1.
+
+Q: What voltage does the battery connector expect?
+A: The battery connector expects a 3.7 volt single-cell LiPo battery. The board's built-in charger handles charging from USB. Do not exceed 4.2 volts.
+
+Q: How do I put the device to sleep to save power?
+A: Type sleep followed by the number of seconds to enter deep sleep. The device wakes after that time and resumes normal operation. Automations scheduled during the sleep window are skipped.
+
+Q: Does the RTC retain time during sleep?
+A: Yes. The DS3231 RTC has its own battery backup and keeps time independently of the ESP32. After waking from sleep, the firmware reads the current time from the RTC automatically.
+
+Q: What is the difference between opengps and gpsauto?
+A: opengps starts the GPS module manually for the current session. gpsautostart on makes it start automatically on every boot without needing to type opengps each time.
+
+Q: How do I calibrate the IMU?
+A: Type imucal to start the BNO055 calibration routine. Follow the on-screen instructions to rotate the device through different orientations. Calibration data is saved and loaded automatically on the next boot.
+
+Q: What is the presence sensor range?
+A: The STHS34PF80 IR presence sensor detects human presence and motion at up to four metres in a roughly ninety degree cone. It is passive infrared so it responds to body heat rather than reflected light.
+
+Q: What are the APDS9960 gesture directions?
+A: The APDS9960 in gesture mode detects swipes in four directions: up, down, left, and right. Use apdsgesture to start the gesture reader. Results are printed to the CLI and can trigger automations.
+
+Q: How accurate is the thermal camera?
+A: The MLX90640 has temperature accuracy of about one to two degrees Celsius across its 32 by 24 pixel array. It measures surface temperatures in the range of negative forty to three hundred degrees Celsius.
+
+Q: What is the ToF sensor maximum range?
+A: The VL53L4CX measures distances from one centimetre to six metres with millimetre precision. It supports up to four simultaneous ranging targets, useful for detecting objects at different distances.
+
+Q: How do I use the servo controller with more than one servo?
+A: The PCA9685 I2C PWM controller supports sixteen independent channels. Use servo followed by the channel number from 0 to 15 and an angle from 0 to 180. For example, servo 0 90 centres channel zero.
+
+Q: What I2C address does the PCA9685 use?
+A: The default I2C address is 0x40. If you have multiple PCA9685 boards, set their address pins to get different addresses and configure the address in System_BuildConfig.h.
+
+Q: What is the FM radio frequency range?
+A: The RDA5807 FM radio covers 76 to 108 MHz. Use fmradio tune followed by the frequency in MHz. For example, fmradio tune 98.1. Type fmradio volume followed by a value from 0 to 15 to set the volume.
+
+Q: Can I record audio with the FM radio?
+A: No. The RDA5807 is a receive-only FM radio. It plays audio through a connected speaker or headphones. Recording is not supported.
+
+Q: What is the web UI built with?
+A: The web UI is a single-page application served from flash. It uses plain HTML, CSS, and JavaScript with no external dependencies. It works in any modern browser without an internet connection.
+
+Q: How many simultaneous web UI connections are supported?
+A: The web server supports up to four simultaneous HTTP connections. Only one user at a time should use the CLI tab to avoid command conflicts. Sensor data and dashboard tabs can be viewed by multiple users simultaneously.
+
+Q: What port does the web server run on?
+A: The web server runs on port 80 by default. You can change this with settings set webPort followed by the port number. Ports below 1024 require no special configuration on the device.
+
+Q: Is the web UI accessible over HTTPS?
+A: No. The web UI is plain HTTP. For secure access, use a reverse proxy or VPN on your local network. The login system prevents unauthorised command execution but traffic is not encrypted.
+
+Q: What is the Pair tab?
+A: The Pair tab in the web UI lets you initiate or accept ESP-NOW pairing with another Hardware One device. Enter a shared passphrase on both devices, then click Pair on one and Accept on the other.
+
+Q: What is the MQTT tab in the web UI?
+A: The MQTT tab shows the current broker connection status, configured topic prefix, and a log of recent published and received messages. You can also publish test messages and change broker settings from here.
+
+Q: How do I see the ESP-NOW tab?
+A: Open the web UI and click the ESP-NOW tab. It shows a card for each paired peer with its name, room, last-seen time, and recent metadata. You can send messages and files from here.
+
+Q: What is the Remote tab?
+A: The Remote tab appears in the controller device when two Hardware One devices are in bonded mode. It gives a unified view of the bonded device including its sensors, status, and a CLI that routes commands to it.
+
+Q: What is the Settings tab in the web UI?
+A: The Settings tab shows all device settings with editable fields. Changes save immediately. It also has sections for user management, OTA firmware update, and factory reset.
+
+Q: What does the Sensors tab show?
+A: The Sensors tab shows live readings from all active sensors, the I2C device table, sensor log status, and controls to start or stop individual sensors. Data updates automatically every two seconds.
+
+Q: How do I write an automation that responds to temperature?
+A: Create an automation with IF TEMP>threshold THEN command. For example: IF TEMP>30 THEN ledcolor red will set the LED red when temperature exceeds 30 degrees. The temperature sensor must be open and autostarted.
+
+Q: Can automations send messages to MQTT?
+A: Yes. Include mqtt publish followed by the topic and message as a command in an automation. For example: IF TEMP>80 THEN mqtt publish alerts/temp too hot will publish a warning when temperature spikes.
+
+Q: How do I write a multi-command automation?
+A: Separate commands with a semicolon in the automation body. For example: ledcolor red; mqtt publish alerts/motion detected; broadcast intruder alert will execute all three commands in order when triggered.
+
+Q: What does help all output?
+A: Type help all to print a full list of every registered command across all modules. Each line shows the command name and a brief description. The output can be long on a fully configured device.
+
+Q: How do I use the interactive help system?
+A: Type help to enter help mode. Then type a module name to see its commands and descriptions. Type a command name for detailed usage including arguments. Type exit or press Enter with no input to leave help mode.
+
+Q: What happens if I type an unknown command?
+A: The CLI prints unknown command and shows the closest matching command name if one exists. Type help followed by the module name to see the correct syntax.
+
+Q: How do I comment out a line in an automation?
+A: Start the line with a hash symbol to mark it as a comment. Comment lines are ignored during execution. This is useful for documenting what an automation does or temporarily disabling a step.
+
+Q: Can Hardware One act as a WiFi access point?
+A: Yes. Type wifi ap on to start the device as a WiFi access point. Other devices can connect directly to it. The default SSID is the device hostname. Set a password with wifi appass followed by the password.
+
+Q: How do I disable the access point?
+A: Type wifi ap off to stop the access point and return to station-only mode.
+
+Q: Can Hardware One be both an access point and a station at the same time?
+A: Yes. This is called AP-STA mode. The device connects to your home network as a station while also broadcasting its own access point. Enable it with wifi ap on while WiFi is already connected.
+
+Q: What firmware framework does Hardware One use?
+A: Hardware One runs on ESP-IDF, the official Espressif IoT Development Framework. It does not use the Arduino IDE or Arduino libraries. This gives direct access to FreeRTOS, WiFi stack, and hardware peripherals.
+
+Q: Why does Hardware One use ESP-IDF instead of Arduino?
+A: ESP-IDF provides better control over memory, task scheduling, and peripherals. It allows true multitasking with FreeRTOS tasks for sensors, networking, and the CLI running concurrently without blocking each other.
+
+Q: What tasks run on Hardware One?
+A: The main tasks include the CLI handler, WiFi and MQTT managers, the web server, sensor polling loops, the ESP-NOW radio handler, the automation engine, and the LLM inference task when active.
+
+Q: Can I add custom commands to the CLI?
+A: Yes. Register a new command in the CLI module by adding an entry to the command table. Specify the name, description, argument format, and handler function. The command appears in help automatically after rebuilding.
+
+Q: What is the command registry?
+A: The command registry is a table of all registered CLI commands. In bonded mode, two devices merge their registries so the controller can see and route commands from both. Commands are registered at boot time.
+
+Q: How do I check the firmware version?
+A: Type version to print the current firmware version string, build date, and target board. This is useful when reporting issues or checking whether an OTA update applied successfully.
+
+Q: What does the version command show?
+A: The version command outputs the firmware version number, the git commit hash if available, the build timestamp, and the target hardware configuration such as ESP32-S3 with PSRAM.
+
+Q: Can I run Hardware One without PSRAM?
+A: Basic features work without PSRAM on the ESP32 or ESP32-S3. However, the LLM requires PSRAM for weight storage and the KV cache. Large sensor buffers and map tile caching also benefit from PSRAM.
+
+Q: How do I reduce flash usage?
+A: Disable unused features in System_BuildConfig.h before building. Each disabled feature removes its code from the binary. Use idf.py size to see the flash footprint of each component after building.
+
+Q: What is the typical flash usage?
+A: A fully featured build with all sensors, networking, web UI, and LLM support uses approximately one to one and a half megabytes of program flash. The remaining flash is used for LittleFS storage.
+
+Q: How big is the LittleFS partition?
+A: The default LittleFS partition is defined in the partition table. A typical configuration allocates two to three megabytes for internal storage. Check the partitions.csv file in the project root for your build's layout.
+
+Q: How do I check the partition layout?
+A: Run idf.py partition-table to print the current partition table. It shows the name, type, offset, and size of each partition including the app, OTA, and LittleFS partitions.

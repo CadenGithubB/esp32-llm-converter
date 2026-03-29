@@ -1,4 +1,7 @@
+.DS_Store
 .venv/
+.hf_cache/
+generated_presets/
 __pycache__/
 *.pyc
 tiny_smoke_out/

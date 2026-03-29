@@ -1,0 +1,89 @@
+Q: My WiFi keeps disconnecting. What should I do?
+A: Check your router is 2.4GHz, not 5GHz. Run `wifistatus` to see signal strength. If RSSI is below -80, move the device closer to the router. Run `debugwifi 1` for detailed connection logs.
+
+Q: WiFi says connected but I cannot reach the web interface.
+A: Run `ipinfo` to check the assigned IP address. Make sure your phone or laptop is on the same network. Try accessing the IP directly in your browser. If bonded mode is on, the access point is disabled.
+
+Q: WiFi will not connect to my network.
+A: Hardware One only supports 2.4GHz WiFi. Check your SSID and password with `settings`. Special characters in the password may need to be entered carefully. Run `wifiscan` to verify your network is visible.
+
+Q: How do I reset WiFi settings?
+A: Run `wificlear` to erase stored credentials. The device will restart in setup mode with the access point enabled. You can also run `factoryreset` to clear all settings.
+
+Q: A sensor is not detected on I2C.
+A: Run `i2cscan` to see which addresses respond on the bus. Check wiring: SDA and SCL must be connected correctly. Pull-up resistors are required. If the bus shows no devices, check power to the sensor board.
+
+Q: The BME280 shows incorrect temperature readings.
+A: The BME280 can self-heat when read frequently. Make sure it has airflow. Temperature offset can be adjusted in settings. Run `bme` to see raw readings.
+
+Q: The IMU sensor shows all zeros.
+A: Run `i2cscan` to check if the ICM-42670-P responds at its address. If present but reading zeros, run `imucal` to recalibrate. The IMU must be stationary during calibration.
+
+Q: The VL53L1X distance sensor gives inconsistent readings.
+A: Make sure the sensor has a clear line of sight. Transparent or very dark surfaces may not reflect the laser properly. Run `tof` to see raw distance values. The sensor works best between 4cm and 200cm.
+
+Q: The LLM model will not load.
+A: Check free PSRAM with `meminfo`. The model needs at least 7MB free. Run `llmstatus` for the specific error. Common causes: file not found, file corrupted, or not enough PSRAM. Try loading with a lower context: `llmload model.bin 64`.
+
+Q: The LLM model loads but produces garbage output.
+A: The model file may be corrupted or incompatible. Re-convert it using the converter with INT8 format. Check that the model was trained with the correct tokenizer. Run `debugllmgenerate 1` for detailed sampling logs.
+
+Q: The LLM is very slow.
+A: Run `llmstatus` to check tokens per second. Normal speed is 2-8 tok/s depending on model size. Lower context length reduces KV cache and speeds up inference. Larger models are slower but more accurate.
+
+Q: MQTT will not connect to my broker.
+A: Run `mqttstatus` to see the connection state and error. Verify the broker address, port, username, and password with `settings`. The default MQTT port is 1883. Make sure WiFi is connected first.
+
+Q: MQTT connects but no data appears on my broker.
+A: Check the publish topic with `settings`. Data is published on the configured topic prefix. Use a tool like MQTT Explorer to subscribe to the wildcard topic. Run `debugmqtt 1` for publish logs.
+
+Q: How do I use Hardware One with Home Assistant?
+A: Connect Hardware One to your WiFi network and configure MQTT with your Home Assistant MQTT broker address. Sensor data is published as MQTT topics. Add MQTT sensors in Home Assistant configuration matching the Hardware One topic prefix.
+
+Q: ESP-NOW is not receiving messages from other devices.
+A: Both devices must be on the same WiFi channel. Run `espnowstatus` to check. Add the peer MAC address with `espnowadd`. Run `debugespnow 1` to see incoming packets. Range is typically 10-30 meters indoors.
+
+Q: How many sensors can I connect?
+A: Hardware One supports multiple I2C sensors simultaneously. The practical limit is around 8-12 I2C devices before bus capacitance becomes an issue. Each sensor uses a unique I2C address. Run `i2cscan` to see all detected devices.
+
+Q: What is the range of ESP-NOW?
+A: ESP-NOW range is typically 10-30 meters indoors through walls, and up to 100 meters outdoors with line of sight. Range depends on obstacles, interference, and antenna orientation. It is shorter than WiFi because there is no access point amplification.
+
+Q: How long does the battery last?
+A: Battery life depends on which features are active. With WiFi and sensors running, expect 4-8 hours on a typical LiPo battery. Disabling WiFi and reducing sensor polling extends battery life significantly. Run `battery` to check current voltage and percentage.
+
+Q: How do I factory reset the device?
+A: Run `factoryreset` from the CLI. This clears all settings, WiFi credentials, and user accounts. The device will restart in first-time setup mode. Files on the SD card are not affected.
+
+Q: The OLED display is blank or frozen.
+A: Run `oledtest` to verify the display works. Check I2C connection with `i2cscan`. If the display shows on the scan but is blank, run `oledclear` then `oledrefresh`. A frozen display may indicate a bus lockup — restart the device.
+
+Q: The device keeps restarting in a loop.
+A: This is usually caused by a crash or watchdog timeout. Connect via USB serial to see the crash log. Common causes: I2C bus lockup, out of memory, or corrupted settings. Hold the boot button during startup to enter safe mode if available.
+
+Q: How do I check memory usage?
+A: Run `meminfo` to see free heap, PSRAM, and stack usage. Run `taskinfo` to see per-task stack usage. If free heap is below 30KB the device may become unstable. The LLM uses the most PSRAM.
+
+Q: OTA firmware update fails.
+A: Make sure WiFi is connected and stable during the update. The firmware binary must fit in the OTA partition. Run `otastatus` to check the update state. If an update fails mid-write, the device will roll back to the previous firmware automatically.
+
+Q: How do I enable debug logging?
+A: Use the debug commands: `debugwifi 1`, `debugmqtt 1`, `debughttp 1`, `debugllm 1`, `debugespnow 1`, `debugsensor 1`. Add `temp` to make it temporary (resets on reboot): `debugwifi 1 temp`. Run `debugstatus` to see which categories are active.
+
+Q: How do I access the CLI?
+A: Connect via USB serial at 115200 baud. Use a terminal program like PuTTY, screen, or the Arduino Serial Monitor. Type `help` to see all available commands. The web terminal at /terminal also provides CLI access over WiFi.
+
+Q: The web interface is very slow.
+A: Check WiFi signal strength with `wifistatus`. A weak signal causes slow page loads. The web server runs on a single thread so concurrent requests queue up. Reduce polling intervals in the dashboard if multiple browsers are connected.
+
+Q: Can I use Hardware One outdoors?
+A: The ESP32-S3 module is not waterproof. For outdoor use, put it in a weatherproof enclosure. The GPS and BME280 work well outdoors. Operating temperature range is -10C to 60C. Direct sunlight may affect temperature readings from the BME280.
+
+Q: How do I update the firmware?
+A: Upload the firmware binary through the web interface OTA page, or use the CLI command `otaupdate`. The device will verify the binary, write it, and reboot. If the update fails, it automatically rolls back to the previous version.
+
+Q: What board variants does Hardware One support?
+A: Hardware One runs on ESP32-S3 boards with PSRAM. The primary target is the ESP32-S3-DevKitC-1 with 8MB PSRAM. Other S3 boards with PSRAM may work but are not officially tested.
+
+Q: Can multiple Hardware One devices talk to each other?
+A: Yes. Use ESP-NOW for direct peer-to-peer communication without a router. Use bonded mode to pair two devices. Both devices must be added as peers with their MAC addresses. MQTT can also be used for multi-device coordination through a broker.

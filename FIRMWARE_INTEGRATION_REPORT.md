@@ -154,7 +154,7 @@ Other architectures (T5, encoder-only, etc.) are **not** exported unless you ext
 
 ## 7. Typical workflow for users
 
-1. Obtain a compatible HF model (or train with `train_tiny_model.py` in this repo — **GPT-2–compatible** checkpoint).
+1. Obtain a compatible HF model (or train with `train_tiny_model.py` — presets `micro` … `xlarge`, plus `--estimate-only` for parameter counts; **GPT-2–compatible** checkpoint).
 2. Open `index.html` locally (file or HTTP; see project README for mixed-content rules if fetching from HF).
 3. Drop folder or **Fetch** from Hugging Face.
 4. Choose **INT8** (or F32) and group size; set **LittleFS KB** estimate if shown.
@@ -201,7 +201,7 @@ A **valid** `model.bin` for a tiny model is usually **hundreds of KB to a few MB
 
 - **Converter UI + packer:** `index.html`  
 - **Format documentation (comments):** `format.js`  
-- **Optional Python trainer (GPT-2–compatible export):** `train_tiny_model.py`  
+- **Optional Python trainer (GPT-2–compatible export):** `train_tiny_model.py` (`--preset`, `--estimate-only`, `--grad-accum`, `--gradient-checkpointing`)  
 - **Worker (INT8 quant):** `worker.js`
 
 ---

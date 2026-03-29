@@ -1,0 +1,2603 @@
+Q: How do I make a sensor start automatically?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I list users?
+A: Type users list to see all user accounts and their roles.
+
+Q: What is the WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: Is MQTT connected?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: How do I delete a user?
+A: Type users delete followed by the username to remove their account.
+
+Q: How do I auto-start a sensor on boot?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I leave the current network?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I broadcast a message to all users?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I disable debug output?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I check memory usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I use the hardware clock?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I get to the main menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: How do I sync NTP?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I connect to an MQTT broker?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I get thermal images?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: What configurations can Hardware One run in?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I change the screen brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: How do I use the time-of-flight sensor?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: What are your capabilities?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I update a user password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I make an automation with a condition?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I pair with Bluetooth?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I send a file over ESP-NOW?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: How do conditional automations work?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I see my paired devices?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I pair with another device?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I change the target board?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I send a message to everyone?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: Tell me about yourself.
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I turn on debug logging?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: What happens when I first boot Hardware One?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I disable WiFi?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: What is Hardware One?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I restart?
+A: Type reboot to restart the device.
+
+Q: How do I use the presence sensor?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I sync the clock?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I turn on BLE?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I turn off the NeoPixel?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I control servos?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I send text to a peer?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I turn the screen on?
+A: Type oled on to turn the OLED display on.
+
+Q: What is the automation feature?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I detect if someone is in the room?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How much storage is available?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: Which ESP32 boards are supported?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I change a password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: What boards do you run on?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: What deployment types are there?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I see nearby WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: How do I check MQTT connection status?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: How do I enable the web UI?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: How do I change I2C bus speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I back up settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I add a user?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I build and flash the firmware?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How does the BNO055 work?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I scan I2C devices?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How do I see what files are on the device?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: What is the reboot command?
+A: Type reboot to restart the device.
+
+Q: How do I disconnect from MQTT?
+A: Type mqtt disconnect to disconnect from the current MQTT broker.
+
+Q: What is the MQTT feature?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I list files?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: How do I turn the OLED off?
+A: Type oled off to turn the OLED display off.
+
+Q: What are you?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I switch between ESP32 and ESP32-S3?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I use the thermal camera?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I promote a user?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: How do I scan for WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: What is the battery status?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I set the MQTT topic?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I assign a room?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I use the RTC?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I see all settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I reset settings to defaults?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I enable a feature in the build?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I get online?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I create a directory?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I remove an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: What is the ESP-NOW feature?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I access the web UI?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: The I2C sensor is not responding, what do I do?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I set the room for this device?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: What is the pattern for sensor commands?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I set up MQTT?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I create an automation that runs at a specific time?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I see what I2C devices are connected?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How do I check uptime?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: What is MQTT?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I do first-time setup?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I set a repeating interval?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: How do I connect two Hardware One devices?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I open the OLED menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: What is bonded mode?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How much battery is left?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I update the time?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I set a zone?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How does the FM radio work?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I turn off the web UI?
+A: Type webstop to stop the web server.
+
+Q: What can I debug?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: How do I transfer a file to another device?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: How do I record sensor readings?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: What are automations?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I enable or disable an automation?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How does the APDS9960 work?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I view a file?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I make something happen at boot?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I join a network?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I read a file on the device?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How does device bonding work?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How does the ToF sensor work?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I set up the device for the first time?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I set OLED brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: What baud rate do I use for the serial monitor?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I name this device?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do I assign a zone to the device?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How do I create a new user account?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I check ESP-NOW status?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I turn off the LED?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I trigger an automation manually?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I clear the CLI?
+A: Type clear to clear the CLI history.
+
+Q: How do I check Bluetooth status?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I check WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I start the web server?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: How do I update a device setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I use the servo controller?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: What can you do?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I log sensor data?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: How do I connect to a BLE device?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I reboot the device?
+A: Type reboot to restart the device.
+
+Q: How do I measure distance?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I enable debug output?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: How do I change the LED color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I turn an automation on or off?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How do I set my device name?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do I see all automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I flash Hardware One?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How do I disconnect from WiFi?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I see the system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: What sections does the OLED menu have?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: How do I stop the web server?
+A: Type webstop to stop the web server.
+
+Q: How do I use the GPS?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I detect gestures?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I turn WiFi off?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I use the gesture sensor?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I list paired devices?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: How do I remove a user account?
+A: Type users delete followed by the username to remove their account.
+
+Q: How do I see all user accounts?
+A: Type users list to see all user accounts and their roles.
+
+Q: How do I get help?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I access the device from a browser for the first time?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: How do I check storage space?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I use a sensor?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: What tabs are in the web interface?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I remove a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: How do I check system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I open the web interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I delete an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How does GPS work on this device?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do sensors work?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I list my automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How long has the device been running?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I use the FM radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I connect to WiFi?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I change the MQTT topic prefix?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I see all my peers?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: What hardware can run this firmware?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: What is on the OLED main menu?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: What is the default baud rate for serial?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I get orientation data?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I get location data?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I see all available commands?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I tune the radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I enable Bluetooth?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I set I2C speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How does the MLX90640 work?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I find the device IP address?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: How do I set my WiFi password?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I factory reset the settings?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I use the IMU?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: Is Bluetooth enabled?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I list device settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I save WiFi credentials?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: What is this device?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I change the RGB LED?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I schedule a daily task?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I send a message to another device?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I auto-start the web server?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: What is ESP-NOW?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I reset the I2C bus?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I change a setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I make a folder?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I export my settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I use the browser interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I run an automation immediately?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I check battery level?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I run a command when the device starts?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How does MQTT work on this device?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I turn the OLED on?
+A: Type oled on to turn the OLED display on.
+
+Q: How do I make the web server start on boot?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How much memory is being used?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: Who made you?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: Who built Hardware One?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: How does the mesh network work?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I create an automation that runs every few minutes?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: How do I see RAM usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do automations work?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I turn on a sensor in the firmware?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I make someone an admin?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: What commands are available?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I turn off debug logging?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: Is the device connected to WiFi?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: What can I do in the web UI?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I turn the screen off?
+A: Type oled off to turn the OLED display off.
+
+Q: How do I set the NeoPixel color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: What debug modules are available?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: What features do you have?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I clear command history?
+A: Type clear to clear the CLI history.
+
+Q: How do I delete a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: What is the automation feature?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I schedule a daily task?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I list device settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I set a repeating interval?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: What baud rate do I use for the serial monitor?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I open the OLED menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: What can you do?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: Is MQTT connected?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: What tabs are in the web interface?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How much memory is being used?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: What configurations can Hardware One run in?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I turn the OLED on?
+A: Type oled on to turn the OLED display on.
+
+Q: How does the ToF sensor work?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How does the BNO055 work?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I change the screen brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: What boards do you run on?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I connect to an MQTT broker?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I connect two Hardware One devices?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I enable a feature in the build?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I auto-start the web server?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: Who built Hardware One?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: Tell me about yourself.
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I check storage space?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I send text to a peer?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I change the MQTT topic prefix?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: What features do you have?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I use the IMU?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I reset the I2C bus?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I turn the screen off?
+A: Type oled off to turn the OLED display off.
+
+Q: What is this device?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I delete a user?
+A: Type users delete followed by the username to remove their account.
+
+Q: How do I turn an automation on or off?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How do I auto-start a sensor on boot?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: What commands are available?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I check uptime?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I use the FM radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I change I2C bus speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I find the device IP address?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: How do I record sensor readings?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: How do I see RAM usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I pair with another device?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I create an automation that runs every few minutes?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: What is the reboot command?
+A: Type reboot to restart the device.
+
+Q: How do I disconnect from WiFi?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I list my automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I create a new user account?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I run an automation immediately?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I start the web server?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: What are automations?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I get thermal images?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I control servos?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I turn off the LED?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: What hardware can run this firmware?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: What deployment types are there?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I do first-time setup?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I change the RGB LED?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: What is the battery status?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I set OLED brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: How do I see my paired devices?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I use the thermal camera?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I check system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I send a file over ESP-NOW?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: How do I make something happen at boot?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: What debug modules are available?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: How do I list files?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: How do I see nearby WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: What is the WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: Is the device connected to WiFi?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I see all user accounts?
+A: Type users list to see all user accounts and their roles.
+
+Q: How do I change the target board?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I broadcast a message to all users?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I check Bluetooth status?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I use the servo controller?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I update a device setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: What is MQTT?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I back up settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I set I2C speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I disable debug output?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I flash Hardware One?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How do I get location data?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I turn WiFi off?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I turn on debug logging?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: How do I update a user password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I factory reset the settings?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I use the hardware clock?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I set the MQTT topic?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: What is the default baud rate for serial?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I detect if someone is in the room?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I use the presence sensor?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I update the time?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I turn on BLE?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I check memory usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I connect to a BLE device?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I transfer a file to another device?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: What happens when I first boot Hardware One?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How does the mesh network work?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: What sections does the OLED menu have?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: How do I promote a user?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: What can I do in the web UI?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I sync the clock?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I set the room for this device?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I reboot the device?
+A: Type reboot to restart the device.
+
+Q: How do I save WiFi credentials?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I restart?
+A: Type reboot to restart the device.
+
+Q: How do I see all automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I open the web interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I set a zone?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How do I make an automation with a condition?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I remove a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: How do I assign a room?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I use the gesture sensor?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I see all my peers?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: How do I switch between ESP32 and ESP32-S3?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: What is bonded mode?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How do I check battery level?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: What is the ESP-NOW feature?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I delete a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: How do I assign a zone to the device?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How does the FM radio work?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I turn the screen on?
+A: Type oled on to turn the OLED display on.
+
+Q: How do I make the web server start on boot?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How do I use the RTC?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I scan for WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: How does GPS work on this device?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I disconnect from MQTT?
+A: Type mqtt disconnect to disconnect from the current MQTT broker.
+
+Q: How do I stop the web server?
+A: Type webstop to stop the web server.
+
+Q: How do I turn on a sensor in the firmware?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I list paired devices?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: Who made you?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: What are you?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I sync NTP?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I trigger an automation manually?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I change a password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I scan I2C devices?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How does device bonding work?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How do I send a message to everyone?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I list users?
+A: Type users list to see all user accounts and their roles.
+
+Q: How do I use a sensor?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I get help?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I enable or disable an automation?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How do I log sensor data?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: What can I debug?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: What is ESP-NOW?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I join a network?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I check ESP-NOW status?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: What are your capabilities?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I connect to WiFi?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I turn the OLED off?
+A: Type oled off to turn the OLED display off.
+
+Q: How do I get to the main menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: How do I leave the current network?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I turn off the NeoPixel?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I turn off debug logging?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I see what files are on the device?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: How does MQTT work on this device?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: What is the MQTT feature?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do conditional automations work?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I see what I2C devices are connected?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How do I change the LED color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I see all settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I pair with Bluetooth?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How much storage is available?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I check WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I enable debug output?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: How do I build and flash the firmware?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: What is on the OLED main menu?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: How do I name this device?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do I clear the CLI?
+A: Type clear to clear the CLI history.
+
+Q: What is the pattern for sensor commands?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I get orientation data?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I delete an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I access the device from a browser for the first time?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: How do I clear command history?
+A: Type clear to clear the CLI history.
+
+Q: How do I add a user?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I reset settings to defaults?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I export my settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I make a sensor start automatically?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I use the GPS?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I use the browser interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I remove an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I remove a user account?
+A: Type users delete followed by the username to remove their account.
+
+Q: How do sensors work?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: Which ESP32 boards are supported?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How does the MLX90640 work?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I turn off the web UI?
+A: Type webstop to stop the web server.
+
+Q: How do I run a command when the device starts?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I read a file on the device?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I check MQTT connection status?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: What is Hardware One?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I detect gestures?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I get online?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: Is Bluetooth enabled?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How does the APDS9960 work?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I set up MQTT?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I view a file?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do automations work?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I access the web UI?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I measure distance?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I create a directory?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I set the NeoPixel color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I disable WiFi?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I see all available commands?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: The I2C sensor is not responding, what do I do?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How long has the device been running?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I create an automation that runs at a specific time?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I tune the radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I use the time-of-flight sensor?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I set up the device for the first time?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How much battery is left?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I enable the web UI?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: How do I enable Bluetooth?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I change a setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I make a folder?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I send a message to another device?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I set my WiFi password?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I see the system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I make someone an admin?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: How do I set my device name?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: What is ESP-NOW?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How does device bonding work?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How do I do first-time setup?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: What deployment types are there?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I use the FM radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I turn off the NeoPixel?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: What is the WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: Which ESP32 boards are supported?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I set up the device for the first time?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: What are your capabilities?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I add a user?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I enable Bluetooth?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: What sections does the OLED menu have?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: Who made you?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: How do I access the web UI?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I start the web server?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: How do I connect to WiFi?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I run an automation immediately?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I see what I2C devices are connected?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How much battery is left?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I turn the OLED off?
+A: Type oled off to turn the OLED display off.
+
+Q: What features do you have?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I auto-start a sensor on boot?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I turn on debug logging?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: How do I send a message to everyone?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: Tell me about yourself.
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I make someone an admin?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: What happens when I first boot Hardware One?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I check Bluetooth status?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I turn off the LED?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I scan I2C devices?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How do I change the screen brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: How do I use the thermal camera?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I reset settings to defaults?
+A: Type settings reset to reset all settings to their default values.
+
+Q: What is the pattern for sensor commands?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I read a file on the device?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I make a sensor start automatically?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I change the LED color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I check memory usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I see nearby WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: How do I assign a zone to the device?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How do I see the system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I see all available commands?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: What boards do you run on?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I set the NeoPixel color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I reset the I2C bus?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I enable debug output?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: The I2C sensor is not responding, what do I do?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: What is the default baud rate for serial?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I name this device?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do I flash Hardware One?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: Who built Hardware One?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: How do I list device settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I set up MQTT?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I reboot the device?
+A: Type reboot to restart the device.
+
+Q: How do I list my automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I disable debug output?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I turn the screen off?
+A: Type oled off to turn the OLED display off.
+
+Q: What can you do?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I make an automation with a condition?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I create a new user account?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: What is the ESP-NOW feature?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I access the device from a browser for the first time?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: Is Bluetooth enabled?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I change the RGB LED?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I turn the OLED on?
+A: Type oled on to turn the OLED display on.
+
+Q: How does the MLX90640 work?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I change I2C bus speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I get to the main menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: What tabs are in the web interface?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: What is Hardware One?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I export my settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I leave the current network?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I remove a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: How do I build and flash the firmware?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How do I list users?
+A: Type users list to see all user accounts and their roles.
+
+Q: How do I transfer a file to another device?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: What configurations can Hardware One run in?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I control servos?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I disconnect from WiFi?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I change a setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I enable or disable an automation?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How do I create an automation that runs at a specific time?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I use the RTC?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I set the room for this device?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I use the gesture sensor?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I enable a feature in the build?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I schedule a daily task?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I scan for WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: Is the device connected to WiFi?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I check MQTT connection status?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: What is the battery status?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How does the ToF sensor work?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: What is the reboot command?
+A: Type reboot to restart the device.
+
+Q: How do I back up settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I disable WiFi?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I connect to an MQTT broker?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: What baud rate do I use for the serial monitor?
+A: Connect the serial monitor at 115200 baud.
+
+Q: What debug modules are available?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: How do I auto-start the web server?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How do I factory reset the settings?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I send a message to another device?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I join a network?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I use a sensor?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I measure distance?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I turn on BLE?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I check system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How does the mesh network work?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I view a file?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I open the OLED menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: How do sensors work?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I sync the clock?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I assign a room?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I turn off the web UI?
+A: Type webstop to stop the web server.
+
+Q: How do I get thermal images?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I use the GPS?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I see all settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I update the time?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I change the MQTT topic prefix?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I see all my peers?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: How do I set my WiFi password?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I turn the screen on?
+A: Type oled on to turn the OLED display on.
+
+Q: How do I see my paired devices?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I check ESP-NOW status?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How does MQTT work on this device?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I promote a user?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: How do I remove an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I set the MQTT topic?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I use the presence sensor?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I turn off debug logging?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I check battery level?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I record sensor readings?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: How do I stop the web server?
+A: Type webstop to stop the web server.
+
+Q: How do I set I2C speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I use the servo controller?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I use the time-of-flight sensor?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I remove a user account?
+A: Type users delete followed by the username to remove their account.
+
+Q: What are you?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I detect if someone is in the room?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I see what files are on the device?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: How do I broadcast a message to all users?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I connect two Hardware One devices?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I check uptime?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: What is the MQTT feature?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I detect gestures?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: What can I do in the web UI?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I find the device IP address?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: What is on the OLED main menu?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: How long has the device been running?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I make something happen at boot?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I make the web server start on boot?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How does GPS work on this device?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I set a zone?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How do I change the target board?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I sync NTP?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: What is MQTT?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I run a command when the device starts?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I see RAM usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I delete a user?
+A: Type users delete followed by the username to remove their account.
+
+Q: How does the APDS9960 work?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I create a directory?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I set OLED brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: How do I send text to a peer?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I see all automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I clear the CLI?
+A: Type clear to clear the CLI history.
+
+Q: How do I set a repeating interval?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: What can I debug?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: How do I get location data?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I pair with another device?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I send a file over ESP-NOW?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: How do conditional automations work?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: How do I check WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: Is MQTT connected?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: How do I turn an automation on or off?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How do I disconnect from MQTT?
+A: Type mqtt disconnect to disconnect from the current MQTT broker.
+
+Q: How do I switch between ESP32 and ESP32-S3?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I enable the web UI?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: What commands are available?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I tune the radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I see all user accounts?
+A: Type users list to see all user accounts and their roles.
+
+Q: What hardware can run this firmware?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I get online?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: What is bonded mode?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How much storage is available?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I list paired devices?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: How do I pair with Bluetooth?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I connect to a BLE device?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I change a password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: What are automations?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How does the BNO055 work?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I make a folder?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How does the FM radio work?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I get help?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I get orientation data?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: What is the automation feature?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I trigger an automation manually?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I restart?
+A: Type reboot to restart the device.
+
+Q: What is this device?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I set my device name?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do I list files?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: How do I turn WiFi off?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I check storage space?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I delete a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: How much memory is being used?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I log sensor data?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: How do automations work?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I save WiFi credentials?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I delete an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I update a device setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I turn on a sensor in the firmware?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I use the browser interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I open the web interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I use the hardware clock?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I create an automation that runs every few minutes?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: How do I use the IMU?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I clear command history?
+A: Type clear to clear the CLI history.
+
+Q: How do I update a user password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I open the OLED menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: How do I disconnect from MQTT?
+A: Type mqtt disconnect to disconnect from the current MQTT broker.
+
+Q: How do I see what files are on the device?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: What is ESP-NOW?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I remove an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I turn on BLE?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I make someone an admin?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: What is the WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I create an automation that runs at a specific time?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How does the ToF sensor work?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I set OLED brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: The I2C sensor is not responding, what do I do?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I see my paired devices?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I start the web server?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: How do I change the RGB LED?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: What is the battery status?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: What happens when I first boot Hardware One?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I check storage space?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: What is the pattern for sensor commands?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I list files?
+A: Type files to list files in the root directory, or files followed by a path to list a specific folder.
+
+Q: What is the ESP-NOW feature?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I check battery level?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I log sensor data?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: How do I stop the web server?
+A: Type webstop to stop the web server.
+
+Q: How do I detect if someone is in the room?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: How do I transfer a file to another device?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: What is the default baud rate for serial?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I get orientation data?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: What is the MQTT feature?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I reset the I2C bus?
+A: Type i2c reset to reset the I2C bus. This can help if a sensor becomes unresponsive without needing to reboot.
+
+Q: How do I connect to WiFi?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I change a setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I tune the radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: What hardware can run this firmware?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: What is Hardware One?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I name this device?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How long has the device been running?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I switch between ESP32 and ESP32-S3?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I auto-start the web server?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How do I set the room for this device?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I check ESP-NOW status?
+A: Type espnow status to see the ESP-NOW connection status and the list of paired peers.
+
+Q: How do I check memory usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I disable WiFi?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I turn off the NeoPixel?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I get to the main menu?
+A: Type oled menu to open the main menu on the OLED display.
+
+Q: How do I change the MQTT topic prefix?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I get online?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I turn WiFi off?
+A: Type wifi off to disable WiFi. Use wifi on to re-enable it.
+
+Q: How do I use the gesture sensor?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I get thermal images?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I access the device from a browser for the first time?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: What can I debug?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: How do I export my settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I turn off debug logging?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I make the web server start on boot?
+A: Type webauto on to enable auto-start. The web server will start automatically after every reboot.
+
+Q: How do I delete a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: What deployment types are there?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I set my device name?
+A: Type espnow setname followed by the name you want to give this device. The name is shared with peers during metadata sync.
+
+Q: How do automations work?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I restart?
+A: Type reboot to restart the device.
+
+Q: How does the MLX90640 work?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I create an automation that runs every few minutes?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: What is the reboot command?
+A: Type reboot to restart the device.
+
+Q: How do I create a new user account?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I set up the device for the first time?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I run a command when the device starts?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I find the device IP address?
+A: After connecting to WiFi, the device prints its IP address in the serial monitor. You can also type webstatus at any time to see the IP address and web server status.
+
+Q: How do I promote a user?
+A: Type users promote followed by the username to grant them admin privileges.
+
+Q: How do I check WiFi status?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I turn the screen off?
+A: Type oled off to turn the OLED display off.
+
+Q: How do I make an automation with a condition?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: Is Bluetooth enabled?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do I factory reset the settings?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I set my WiFi password?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I check uptime?
+A: Type uptime to see how long the device has been running since the last reboot.
+
+Q: How do I auto-start a sensor on boot?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: Tell me about yourself.
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I use the thermal camera?
+A: Type openthermal to start the MLX90640 32 by 24 thermal camera. The web UI shows a live heatmap. Type closethermal to stop it.
+
+Q: How do I clear command history?
+A: Type clear to clear the CLI history.
+
+Q: How do I use a sensor?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I update a device setting?
+A: Type settings set followed by the key and value to change a setting. For example, settings set deviceName MyDevice.
+
+Q: How do I set I2C speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I change a password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I broadcast a message to all users?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I send a message to everyone?
+A: Type broadcast followed by your message to send it to all connected users. This requires admin privileges.
+
+Q: How do I use the hardware clock?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: What debug modules are available?
+A: Debug modules include debughttp, debugwifi, debugespnow, debugmqtt, debugautomations, debugsensors, debugstorage, debugcli, debugauth, and more. Type debug list to see all available flags.
+
+Q: What is the automation feature?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I see all my peers?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: What is on the OLED main menu?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: What are your capabilities?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I assign a room?
+A: Type espnow setroom followed by the room name. Room information is used in automation conditions and metadata sync.
+
+Q: How do I see all available commands?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I see all automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: What boards do you run on?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How much storage is available?
+A: Type fsusage to see the total and available space on the filesystem.
+
+Q: How do I flash Hardware One?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How do I get location data?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I change I2C bus speed?
+A: Type i2c speed followed by the speed in Hz to set the I2C bus speed.
+
+Q: How do I use the GPS?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I list users?
+A: Type users list to see all user accounts and their roles.
+
+Q: How do I measure distance?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How do I change the screen brightness?
+A: Type oled brightness followed by a value from 0 to 255 to set the brightness.
+
+Q: How much memory is being used?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I delete an automation?
+A: Type automation delete followed by the automation name to remove it.
+
+Q: How do I see RAM usage?
+A: Type memory to see heap and PSRAM usage. Use memsum for a one-line summary or memreport for a full breakdown.
+
+Q: How do I use the browser interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I set a repeating interval?
+A: Use SCHEDULE: INTERVAL=Xm in your automation where X is the number of minutes. You can also use Xs for seconds or Xh for hours.
+
+Q: How do conditional automations work?
+A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>75 THEN ledcolor red will turn the LED red when temperature exceeds 75.
+
+Q: What are you?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: How do I make a folder?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I save WiFi credentials?
+A: Type setssid followed by your network name to save the SSID, then setpass followed by your password to save it. Then type wifi connect to connect.
+
+Q: How do I pair with Bluetooth?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I see the system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I do first-time setup?
+A: On first boot the device launches a setup wizard automatically on serial and OLED. Open serial monitor at 115200 baud. Choose Basic for quick setup or Advanced to configure everything. You will create an admin account with a username and password.
+
+Q: How do I turn the screen on?
+A: Type oled on to turn the OLED display on.
+
+Q: How do I sync NTP?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I change the LED color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I set up MQTT?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I enable or disable an automation?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How does the APDS9960 work?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: Who built Hardware One?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: How do I create a directory?
+A: Type mkdir followed by the path to create a new directory.
+
+Q: How do I make something happen at boot?
+A: Add an automation with SCHEDULE: BOOT to run it once every time the device boots.
+
+Q: How do I remove a file?
+A: Type filedelete followed by the file path to delete it.
+
+Q: What is bonded mode?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: How do I connect two Hardware One devices?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How much battery is left?
+A: Type battery status to see the current voltage, charge level, and charging status. Battery monitoring must be enabled in the build configuration.
+
+Q: How do I update the time?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I use the FM radio?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I sync the clock?
+A: Type synctime to synchronise the device clock from an NTP server. You must be connected to WiFi first. Type time to see the current time.
+
+Q: How do I add a user?
+A: Type users add followed by the username and password to create a new user account. This requires admin privileges.
+
+Q: How do I update a user password?
+A: Type users passwd followed by the username and new password to change it.
+
+Q: How do I see what I2C devices are connected?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: How do I check MQTT connection status?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: How do I use the presence sensor?
+A: Type openpresence to start the STHS34PF80 IR presence sensor, then presenceread to check for presence or motion in the area.
+
+Q: What can you do?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I remove a user account?
+A: Type users delete followed by the username to remove their account.
+
+Q: What baud rate do I use for the serial monitor?
+A: Connect the serial monitor at 115200 baud.
+
+Q: How do I reset settings to defaults?
+A: Type settings reset to reset all settings to their default values.
+
+Q: How do I set the NeoPixel color?
+A: Type ledcolor followed by a color name to set the onboard NeoPixel LED. For example, ledcolor red or ledcolor blue.
+
+Q: How do I clear the CLI?
+A: Type clear to clear the CLI history.
+
+Q: How do I set the MQTT topic?
+A: Type mqtt topic followed by your desired prefix to set the MQTT topic prefix. All published messages will use this prefix.
+
+Q: How do I connect to a BLE device?
+A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+
+Q: How do I scan I2C devices?
+A: Type i2c scan to scan the I2C bus and list all detected devices with their addresses.
+
+Q: What are automations?
+A: Automations are scheduled or conditional command sequences that run locally on the device. They require no internet connection and can trigger at specific times, intervals, or on boot.
+
+Q: How do I build and flash the firmware?
+A: Run idf.py build to build, then idf.py -p PORT flash to flash. Replace PORT with your device's serial port. You can combine them with idf.py -p PORT flash monitor to also open the serial monitor.
+
+Q: How do I turn the OLED on?
+A: Type oled on to turn the OLED display on.
+
+Q: How do I read a file on the device?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I reboot the device?
+A: Type reboot to restart the device.
+
+Q: What configurations can Hardware One run in?
+A: There are four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers where two devices share command registries.
+
+Q: How do I list device settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How do I open the web interface?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I access the web UI?
+A: Connect the device to WiFi, then navigate to its IP address in a browser. Type webstatus to see the IP address. Log in with your admin credentials.
+
+Q: How do I change the target board?
+A: Run idf.py fullclean first, then idf.py set-target esp32s3 or idf.py set-target esp32. Using the wrong target for your board can cause boot failures due to different PSRAM modes.
+
+Q: How do I send a message to another device?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How do I disable debug output?
+A: Type debug followed by the module name and 0 to disable it. For example, debugwifi 0 turns off WiFi debug logging.
+
+Q: How do I enable Bluetooth?
+A: Type bluetooth on to enable BLE. Note that Bluetooth must be enabled in the build configuration with ENABLE_BLUETOOTH=1.
+
+Q: How do I control servos?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I use the servo controller?
+A: Use servo followed by the channel number and angle to move a servo. The PCA9685 controller supports up to 16 servo channels.
+
+Q: How do I turn an automation on or off?
+A: Type automation enable followed by the name to enable it, or automation disable followed by the name to disable it.
+
+Q: How does GPS work on this device?
+A: Type opengps to start the PA1010D GPS module, then gpsread to get the current position. The web UI includes an offline map viewer for viewing GPS tracks.
+
+Q: How do I leave the current network?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I check Bluetooth status?
+A: Type bluetooth status to see whether BLE is enabled and any current connection status.
+
+Q: How do sensors work?
+A: All sensors follow the same pattern: openSENSOR to start it, closeSENSOR to stop it, and SENSORread to take a single reading. For example, opentof, closetof, and tofread for the time-of-flight sensor.
+
+Q: How do I scan for WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: How do I turn off the LED?
+A: Type ledcolor off to turn off the onboard NeoPixel LED.
+
+Q: How do I record sensor readings?
+A: Type sensorlog start followed by the sensor name to begin logging to a file. Use sensorlog stop to stop, sensorlog view to see recent entries, and sensorlog list to see active logs.
+
+Q: What is this device?
+A: I am Hardware One, an ESP32-based device. I can connect to sensors, display data, talk to other devices over ESP-NOW, and be controlled from a web browser or the command line.
+
+Q: What commands are available?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I check system status?
+A: Type status to see the current system status including WiFi, sensors, and uptime.
+
+Q: How do I enable the web UI?
+A: Type webstart to start the web server. Type webauto on to make it start automatically on every boot.
+
+Q: What is MQTT?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How does MQTT work on this device?
+A: MQTT lets the device publish sensor data and receive commands via a message broker like Home Assistant Mosquitto. Configure the broker address in the web UI or with the mqtt commands.
+
+Q: How do I view a file?
+A: Type fileview followed by the file path to display its contents.
+
+Q: How do I send a file over ESP-NOW?
+A: Type espnow sendfile followed by the peer MAC address and the file path to transfer a file to another device.
+
+Q: How do I turn off the web UI?
+A: Type webstop to stop the web server.
+
+Q: What tabs are in the web interface?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I turn the OLED off?
+A: Type oled off to turn the OLED display off.
+
+Q: Is MQTT connected?
+A: Type mqtt status to see whether the device is connected to the MQTT broker and what topic prefix is being used.
+
+Q: What sections does the OLED menu have?
+A: The OLED main menu has sections for Network, Sensors, System, Settings, Logging, and Power. Navigate it with the Seesaw gamepad joystick and buttons.
+
+Q: How do I delete a user?
+A: Type users delete followed by the username to remove their account.
+
+Q: How do I get help?
+A: Type help to enter the interactive help system. Type a module name to see its commands, or help all to list everything.
+
+Q: How do I see nearby WiFi networks?
+A: Type wifi scan to scan for nearby access points and list them with their signal strength.
+
+Q: Who made you?
+A: Hardware One is an open-source ESP32 firmware project. It runs on ESP-IDF, not the Arduino IDE.
+
+Q: What features do you have?
+A: I can connect to WiFi, run a web UI, talk to sensors, send data over MQTT, run automations, and pair with other Hardware One devices over ESP-NOW. Type help to see all available commands.
+
+Q: How do I set a zone?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: What can I do in the web UI?
+A: The web UI has tabs for Sensors, ESP-NOW, Pair, MQTT, Settings, and a full CLI. You can view live sensor data, manage peers, configure MQTT, and run any command from the browser.
+
+Q: How do I use the RTC?
+A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the current time from the hardware clock.
+
+Q: How do I list paired devices?
+A: Type espnow peers to list all known paired devices with their MAC addresses and names.
+
+Q: How do I use the IMU?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I back up settings?
+A: Type settings export to export all current settings as JSON. You can save this output and use it to restore settings later.
+
+Q: How do I assign a zone to the device?
+A: Type espnow setzone followed by the zone name. Zones can be used in automation conditions, for example IF ZONE=Upstairs.
+
+Q: How do I schedule a daily task?
+A: Add an automation with SCHEDULE: TIME=HH:MM to run it daily at that time. For example, TIME=08:00 runs the automation every day at 8 in the morning.
+
+Q: How do I see all settings?
+A: Type settings list to see all current device settings and their values.
+
+Q: How does the mesh network work?
+A: ESP-NOW is Hardware One's wireless peer-to-peer protocol. Devices pair with a shared passphrase and form an encrypted mesh network. They can send messages, transfer files, and share metadata with each other.
+
+Q: How do I connect to an MQTT broker?
+A: Set the broker with mqtt broker followed by the host address, then mqtt connect to connect. Use mqtt user and mqtt pass if authentication is required.
+
+Q: How do I list my automations?
+A: Type automation list to see all configured automations and their current status.
+
+Q: How do I use the time-of-flight sensor?
+A: Type opentof to start the VL53L4CX time-of-flight sensor, then tofread to take a reading. It measures distance up to 6 metres and supports up to 4 simultaneous measurements.
+
+Q: How does the FM radio work?
+A: Type openfmradio to start the RDA5807 FM radio, then fmradio tune followed by the frequency in MHz to tune to a station. For example, fmradio tune 101.5.
+
+Q: How do I turn on debug logging?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: Which ESP32 boards are supported?
+A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
+
+Q: How do I send text to a peer?
+A: Type espnow send followed by the peer's MAC address and your message. You can find peer MAC addresses with espnow peers.
+
+Q: How does the BNO055 work?
+A: Type openimu to start the BNO055 9-DoF orientation sensor, then imuread to take a reading. It provides accelerometer, gyroscope, and magnetometer data fused into orientation angles.
+
+Q: How do I turn on a sensor in the firmware?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I run an automation immediately?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I join a network?
+A: First save your credentials with setssid and setpass, then type wifi connect to connect to the saved network.
+
+Q: How do I pair with another device?
+A: Go to the Pair tab in the web UI on both devices, set the same passphrase on both, then have one device initiate pairing while the other accepts.
+
+Q: How do I detect gestures?
+A: The APDS9960 has three modes: apdscolor for RGB light readings, apdsproximity for proximity detection, and apdsgesture for up, down, left, and right gesture detection.
+
+Q: How do I make a sensor start automatically?
+A: Type SENSORautostart on to enable auto-start for that sensor. For example, imuautostart on to start the IMU automatically on every boot.
+
+Q: How do I enable debug output?
+A: Type debug followed by the module name and 1 to enable it. For example, debugwifi 1 enables WiFi debug logging. Add temp at the end to enable it only until the next reboot.
+
+Q: How does device bonding work?
+A: In bonded mode, two devices share their command registries. The controller device gains a Remote tab in its web UI showing the paired device's features. Commands are routed automatically to whichever device can execute them.
+
+Q: Is the device connected to WiFi?
+A: Type wifi to show the current WiFi connection status, IP address, and signal strength.
+
+Q: How do I enable a feature in the build?
+A: Edit System_BuildConfig.h in the components/hardwareone folder. Set the flag for the feature you want to 1, then rebuild and reflash.
+
+Q: How do I disconnect from WiFi?
+A: Type wifi disconnect to disconnect from the current network.
+
+Q: How do I trigger an automation manually?
+A: Type automation run followed by the automation name to execute it immediately.
+
+Q: How do I see all user accounts?
+A: Type users list to see all user accounts and their roles.

@@ -1,0 +1,482 @@
+Q: What is Hardware One?
+A: Hardware One is a self-contained IoT device built on the ESP32-S3 with 8MB PSRAM. It runs sensors, networking, automation, and an on-device language model entirely locally.
+
+Q: What processor does Hardware One use?
+A: The ESP32-S3 dual-core Xtensa LX7 at 240MHz with 8MB PSRAM and integrated WiFi and Bluetooth.
+
+Q: What makes Hardware One different from other IoT devices?
+A: It runs completely standalone with no cloud dependency. All processing, storage, and inference happen on the device itself.
+
+Q: Does Hardware One need internet to work?
+A: No. All features run locally. Internet is optional for MQTT, NTP time sync, and OTA updates.
+
+Q: What operating system does it run?
+A: Hardware One runs on FreeRTOS through the ESP-IDF framework with Arduino compatibility. There is no Linux or traditional OS.
+
+Q: How much RAM does Hardware One have?
+A: 512KB internal SRAM plus 8MB PSRAM. The PSRAM holds the LLM model weights and KV cache during inference.
+
+Q: What is PSRAM used for?
+A: PSRAM stores the LLM model weights, KV cache, and large runtime buffers. It provides 8MB of additional memory beyond the 512KB internal SRAM.
+
+Q: How do I check available memory?
+A: Run the `meminfo` command. It shows free heap, free PSRAM, minimum free heap since boot, and stack usage per task.
+
+Q: What filesystem does Hardware One use?
+A: LittleFS on internal flash for settings, web assets, and small files. An optional SD card provides external storage for maps, logs, and model files.
+
+Q: Where are settings stored?
+A: Settings are stored in LittleFS on internal flash at /system/settings.json. They persist across reboots and firmware updates.
+
+Q: How do I export my settings?
+A: Run `settingsexport` from the CLI or use the Settings page in the web interface to download settings as a JSON file.
+
+Q: How do I import settings?
+A: Run `settingsimport` from the CLI or upload a settings JSON file through the web Settings page.
+
+Q: What WiFi modes does Hardware One support?
+A: Station mode connects to an existing router. Access point mode creates its own network. Both can run simultaneously during setup.
+
+Q: What is bonded mode?
+A: Bonded mode disables the access point so the device only connects as a station to a trusted network. WiFi remains active but the AP broadcast stops.
+
+Q: How do I connect to WiFi?
+A: Use the first-time setup wizard, or run `wificonnect SSID PASSWORD` from the CLI, or configure through the web Settings page.
+
+Q: Why does WiFi only work on 2.4GHz?
+A: The ESP32-S3 radio hardware only supports 2.4GHz 802.11 b/g/n. The 5GHz band is not supported by the chip.
+
+Q: How do I check WiFi signal strength?
+A: Run `wifistatus` to see RSSI in dBm. Values above -60 are strong, -60 to -75 are moderate, below -80 is weak and may cause disconnections.
+
+Q: What happens if WiFi disconnects?
+A: The device automatically attempts to reconnect. Sensor polling, automations, and the CLI continue to work without WiFi. MQTT messages are queued until reconnection.
+
+Q: How do I scan for nearby networks?
+A: Run `wifiscan` to list all visible 2.4GHz networks with their SSID, channel, RSSI, and encryption type.
+
+Q: What is the WiFi access point password?
+A: The default AP password is set during first-time setup. You can change it in the Settings page or with the `appassword` CLI command.
+
+Q: Can I hide the access point SSID?
+A: The access point broadcasts its SSID by default. Disabling SSID broadcast is not currently supported.
+
+Q: What is ESP-NOW?
+A: ESP-NOW is a peer-to-peer wireless protocol for direct communication between ESP32 devices. It does not use WiFi infrastructure or require a router.
+
+Q: How does ESP-NOW differ from WiFi?
+A: WiFi connects to a router for network access. ESP-NOW sends packets directly between ESP32 devices without any router. ESP-NOW has lower latency but shorter range.
+
+Q: How do I pair ESP-NOW devices?
+A: Add the peer device MAC address with `espnowadd MAC_ADDRESS`. Both devices must be on the same WiFi channel. Run `espnowstatus` to verify the connection.
+
+Q: What is the range of ESP-NOW?
+A: Typically 10-30 meters indoors through walls and up to 100 meters outdoors with clear line of sight. Range depends on obstacles and interference.
+
+Q: Does ESP-NOW use TCP/IP?
+A: No. ESP-NOW uses its own lightweight frame protocol directly over the 802.11 radio. It operates below the TCP/IP stack with lower overhead and latency.
+
+Q: Can I send data to multiple ESP-NOW peers?
+A: Yes. Add multiple peer MAC addresses and broadcast to all of them. Each peer must be registered with `espnowadd`.
+
+Q: What is BLE?
+A: BLE is Bluetooth Low Energy, a short-range wireless protocol for communicating with nearby devices like phones and other Bluetooth peripherals.
+
+Q: How do I enable Bluetooth?
+A: Run `bleenable` from the CLI or toggle Bluetooth in the web Settings page. BLE advertising starts automatically once enabled.
+
+Q: What is the BLE range?
+A: BLE typically works within 5-15 meters indoors. Range depends on obstacles and the receiving device antenna quality.
+
+Q: Can I use BLE and WiFi at the same time?
+A: Yes. The ESP32-S3 supports concurrent WiFi and BLE operation. Both share the 2.4GHz radio but the firmware manages time-division between them.
+
+Q: What is MQTT?
+A: MQTT is a lightweight publish-subscribe messaging protocol. Hardware One publishes sensor data to an MQTT broker and subscribes to control topics.
+
+Q: How do I configure MQTT?
+A: Set the broker address, port, username, and password in the web Settings page or use the `mqttconfig` CLI command. Default port is 1883.
+
+Q: What data does MQTT publish?
+A: Sensor readings from BME280, IMU, distance, GPS coordinates, battery voltage, and device status. Each sensor publishes on its own subtopic.
+
+Q: What MQTT topic format does Hardware One use?
+A: Topics follow the pattern `{prefix}/{sensor_type}`. The prefix is configurable in settings. Example: `hardwareone/bme280/temperature`.
+
+Q: Does MQTT support TLS?
+A: MQTT connects over plain TCP on port 1883 by default. TLS support depends on the firmware build configuration.
+
+Q: What happens if the MQTT broker is unreachable?
+A: The device retries connection automatically. Sensor polling and local features continue without interruption. Messages are not queued indefinitely to prevent memory exhaustion.
+
+Q: What is the BME280?
+A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure over I2C.
+
+Q: What temperature range does the BME280 measure?
+A: The BME280 measures -40C to 85C with an accuracy of plus or minus 1C. Self-heating may cause slightly elevated readings if polled frequently.
+
+Q: How accurate is the BME280 humidity reading?
+A: BME280 humidity accuracy is plus or minus 3% relative humidity in the 20-80% range. Accuracy decreases at extremes.
+
+Q: Can the BME280 measure altitude?
+A: The BME280 measures barometric pressure which can be converted to approximate altitude. Accuracy depends on weather conditions and calibration.
+
+Q: How do I read BME280 data?
+A: Run `bme` from the CLI to see current temperature, humidity, and pressure. The web dashboard also shows live BME280 readings.
+
+Q: What is the ICM-42670-P?
+A: The ICM-42670-P is a 6-axis inertial measurement unit that provides acceleration and angular velocity readings over I2C.
+
+Q: What does the IMU measure?
+A: The IMU measures linear acceleration on X, Y, Z axes and rotational velocity on X, Y, Z axes. It detects motion, tilt, orientation, and vibration.
+
+Q: How do I calibrate the IMU?
+A: Run `imucal` with the device on a flat, stable surface. The calibration process takes a few seconds and stores offsets for zero-bias correction.
+
+Q: What is the VL53L1X?
+A: The VL53L1X is a time-of-flight laser distance sensor. It measures distance to an object by timing a 940nm laser pulse reflection.
+
+Q: What is the range of the VL53L1X?
+A: The VL53L1X measures from 4cm to approximately 400cm. Best accuracy is within 200cm. Performance varies with target surface reflectivity.
+
+Q: Does ambient light affect the VL53L1X?
+A: The VL53L1X is relatively immune to ambient light because it uses a narrow 940nm laser and measures pulse return time rather than reflected intensity.
+
+Q: What is the MLX90614?
+A: The MLX90614 is a non-contact infrared thermometer that measures surface temperature of objects without touching them.
+
+Q: What is the range of the MLX90614?
+A: The MLX90614 measures surface temperatures from -70C to 380C. The sensor itself operates between -40C and 125C. Accuracy is plus or minus 0.5C around room temperature.
+
+Q: Does the MLX90614 measure distance?
+A: No. The MLX90614 only measures infrared thermal radiation. It reports the temperature of the object in its field of view but not the distance to it.
+
+Q: What is the APDS9960?
+A: The APDS9960 is a multifunctional sensor that detects ambient light, color (RGB), proximity, and hand gestures over I2C.
+
+Q: What gestures can the APDS9960 detect?
+A: The APDS9960 detects up, down, left, and right hand swipe gestures within approximately 10cm of the sensor.
+
+Q: What does the APDS9960 proximity reading mean?
+A: The proximity value ranges from 0 to 255 where higher values indicate a closer object. It detects objects within roughly 10cm.
+
+Q: Does Hardware One have GPS?
+A: Yes. An optional GPS module provides latitude, longitude, altitude, speed, and satellite count. Data is parsed from NMEA sentences over serial.
+
+Q: How long does GPS take to get a fix?
+A: Cold start takes 30-60 seconds outdoors with clear sky view. Warm start with cached almanac data takes 5-15 seconds. GPS does not work indoors.
+
+Q: What is the GPS accuracy?
+A: Typical GPS accuracy is 2-5 meters outdoors with good satellite visibility. Accuracy degrades near buildings, trees, and other obstructions.
+
+Q: How do I read GPS data?
+A: Run `gps` from the CLI to see current coordinates, altitude, speed, heading, and satellite count. The web dashboard shows GPS on the map tab.
+
+Q: What is the PCA9685?
+A: The PCA9685 is a 16-channel PWM driver that controls servo motors and other PWM devices over I2C. It generates precise PWM signals independently from the main processor.
+
+Q: How many servos can the PCA9685 control?
+A: Up to 16 servos simultaneously. Each channel can be set to a different angle or duty cycle independently.
+
+Q: How do I control a servo?
+A: Run `servo CHANNEL ANGLE` where channel is 0-15 and angle is 0-180. The PCA9685 must be detected on the I2C bus first.
+
+Q: What are NeoPixels?
+A: NeoPixels are addressable RGB LEDs that can be individually set to any color. Hardware One controls them through a data pin with precise timing.
+
+Q: How many NeoPixels can Hardware One drive?
+A: Up to 256 NeoPixels on a single data line. Longer strips need adequate power supply. The firmware supports color, brightness, and animation patterns.
+
+Q: How do I set NeoPixel colors?
+A: Run `led COLOR` to set all LEDs or `led INDEX COLOR` to set a specific LED. Colors can be hex values like FF0000 for red or named colors.
+
+Q: What is the OLED display?
+A: A 128x64 pixel monochrome OLED display connected over I2C. It shows status information, sensor readings, menus, and the LLM chat interface.
+
+Q: How do I navigate the OLED menu?
+A: Use the physical buttons to scroll through menu items and select options. The display shows the current mode, sensor readings, and network status.
+
+Q: What is the automation system?
+A: The automation system runs user-defined rules that trigger actions based on sensor readings, time schedules, or device events. Rules are configured through the web interface or CLI.
+
+Q: How do I create an automation rule?
+A: Use the Automations page in the web interface to define a trigger condition, optional time constraint, and an action. Example: if temperature exceeds 30C then send an MQTT alert.
+
+Q: What triggers can automations use?
+A: Sensor thresholds (temperature above X), time schedules (every N minutes), device events (WiFi connected, button pressed), and MQTT messages received on subscribed topics.
+
+Q: What actions can automations perform?
+A: Send MQTT messages, control servos, set NeoPixel colors, trigger alerts, toggle outputs, run CLI commands, and chain to other automation rules.
+
+Q: How many automation rules can I create?
+A: The practical limit depends on available memory. Typically 20-30 rules run without issues. Each rule uses a small amount of heap memory for its condition and action.
+
+Q: What is OTA?
+A: OTA is Over-The-Air firmware update. It replaces the running firmware with a new version uploaded over WiFi without needing a USB cable.
+
+Q: How do I perform an OTA update?
+A: Upload the firmware binary through the web interface OTA page or use the `otaupdate` CLI command. The device verifies the binary, writes it to the OTA partition, and reboots.
+
+Q: What happens if an OTA update fails?
+A: The device automatically rolls back to the previous firmware. OTA uses dual partitions so a failed write never bricks the device.
+
+Q: What is the CLI?
+A: The CLI is a command-line interface accessible over USB serial at 115200 baud or through the web terminal at /terminal. It provides direct control of all device features.
+
+Q: How do I get help on CLI commands?
+A: Run `help` to see all available commands grouped by category. Run `help COMMAND` for detailed usage of a specific command.
+
+Q: What is the web dashboard?
+A: The web dashboard is served over WiFi and provides real-time sensor readings, maps, file management, settings, automation configuration, and the LLM chat interface.
+
+Q: How do I access the web dashboard?
+A: Connect to the same WiFi network and open the device IP address in a browser. In AP mode, connect to the device network and browse to 192.168.4.1.
+
+Q: What tabs does the web dashboard have?
+A: Dashboard for live sensor data, Map for GPS tracking, Files for file management, Settings for configuration, Automations for rules, Terminal for CLI access, and LLM for the language model chat.
+
+Q: How do I upload files?
+A: Use the Files page in the web dashboard to upload files to internal storage or the SD card. Files can also be transferred via the CLI with file transfer commands.
+
+Q: How do I download files from the device?
+A: Use the Files page in the web dashboard to browse and download files. Click on a file to download it through the browser.
+
+Q: What file formats does the SD card support?
+A: The SD card uses FAT32 filesystem. It stores map tiles, log files, LLM model files, and any other user data. Maximum tested card size is 32GB.
+
+Q: What is the on-device LLM?
+A: A tiny transformer language model that runs entirely on the ESP32-S3 using PSRAM. It answers questions about Hardware One without any internet connection.
+
+Q: How big is the LLM model?
+A: The narrow2 model uses approximately 4.7MB for INT8 weights plus 1.3MB for the KV cache at context length 64. Total PSRAM usage is about 6.9MB.
+
+Q: How fast is LLM inference?
+A: Typically 2-8 tokens per second depending on model size and context length. Smaller models with shorter context are faster.
+
+Q: How do I load an LLM model?
+A: Use the LLM page in the web dashboard to select and load a model. Or run `llmload MODEL_PATH` from the CLI. Models are stored in /system/llm/ or /sd/llm/.
+
+Q: What is the LLM context length?
+A: Context length determines how many tokens the model can process at once. Default is 64 tokens. Longer context uses more PSRAM for the KV cache.
+
+Q: What format are LLM model files?
+A: LLM1 binary format with magic 0x4C4C4D31. Models are converted from PyTorch using the esp32-llm-converter tool with INT8 quantization.
+
+Q: How do I train a custom LLM model?
+A: Use the train_tiny_model_gpu.py script with your training data. Then convert the output with the esp32-llm-converter to LLM1 INT8 format.
+
+Q: What is INT8 quantization?
+A: INT8 reduces each model weight from 32-bit float to 8-bit integer with a per-group scale factor. This cuts model size by 4x with minimal quality loss.
+
+Q: What is the KV cache?
+A: The KV cache stores key and value tensors from previous tokens so the model does not recompute them. Larger cache allows longer context but uses more PSRAM.
+
+Q: Can the LLM answer questions about other topics?
+A: No. The on-device model is trained specifically on Hardware One documentation. It only knows about this device and its features.
+
+Q: What authentication does Hardware One use?
+A: Username and password authentication protects the web interface. Credentials are set during first-time setup and stored locally.
+
+Q: How do I change my password?
+A: Run `passwd` from the CLI or change it in the web Settings page under User Management.
+
+Q: How do I add another user?
+A: Run `useradd USERNAME PASSWORD` from the CLI or add users through the web Settings page.
+
+Q: What is NTP?
+A: NTP is Network Time Protocol. Hardware One syncs its clock with an NTP server over WiFi to maintain accurate time for logs and automations.
+
+Q: How do I set the timezone?
+A: Configure the timezone offset in the Settings page or with the `timezone` CLI command. The device uses UTC internally and applies the offset for display.
+
+Q: What is I2C?
+A: I2C is a two-wire serial bus used to communicate with sensors, the OLED display, and the PCA9685 PWM driver. Multiple devices share the same SDA and SCL lines.
+
+Q: How do I scan for I2C devices?
+A: Run `i2cscan` to probe all addresses on the I2C bus. Detected devices show their hexadecimal address. Common addresses: BME280 at 0x76, OLED at 0x3C.
+
+Q: What pull-up resistors does I2C need?
+A: I2C requires pull-up resistors on SDA and SCL lines, typically 4.7K ohm. Many breakout boards include these already. Without pull-ups the bus will not communicate.
+
+Q: What is the I2C bus speed?
+A: Hardware One uses standard 100KHz I2C speed by default. Some sensors support 400KHz fast mode but 100KHz ensures maximum compatibility.
+
+Q: What happens if two I2C devices have the same address?
+A: Both devices will respond simultaneously causing data corruption. Each device on the bus must have a unique address. Some sensors have configurable address pins.
+
+Q: How do I check debug logs?
+A: Run `debugstatus` to see which debug categories are active. Enable a category with `debugCATEGORY 1`. View output on the serial console.
+
+Q: What debug categories are available?
+A: WiFi, HTTP, MQTT, ESP-NOW, sensors, LLM load, LLM tokenizer, LLM forward, LLM generate, LLM memory, I2C, automation, Bluetooth, and more.
+
+Q: How do I see task stack usage?
+A: Run `taskinfo` to see all FreeRTOS tasks with their priority, state, and remaining stack space. Low stack remaining indicates potential overflow.
+
+Q: What baud rate does the serial console use?
+A: 115200 baud, 8N1. Use any serial terminal program. The ESP32-S3 USB CDC provides a virtual serial port without needing an external UART adapter.
+
+Q: Can I use Hardware One as a datalogger?
+A: Yes. Configure sensor polling intervals and enable logging to the SD card. Logs are stored as timestamped CSV or JSON files that can be downloaded later.
+
+Q: How often can sensors be polled?
+A: Most sensors can be polled every 1-10 seconds. The BME280 needs about 30ms per reading. The VL53L1X takes 20-50ms per measurement. Faster polling increases power consumption.
+
+Q: What is the maximum SD card size?
+A: FAT32 supports up to 32GB. Larger cards may work if formatted as FAT32 but are not officially tested.
+
+Q: How do I format the SD card?
+A: Format the SD card as FAT32 on a computer before inserting it. The device can also format it with the `sdformat` CLI command but this erases all data.
+
+Q: What is deep sleep?
+A: Deep sleep is a low-power mode where the ESP32-S3 shuts down most circuits. It can wake on timer, GPIO pin change, or touchpad input. WiFi and processing stop during deep sleep.
+
+Q: How do I restart the device?
+A: Run `reboot` from the CLI or press the physical reset button. The device saves settings before restarting.
+
+Q: What is a factory reset?
+A: Factory reset clears all settings, WiFi credentials, user accounts, and returns the device to first-time setup mode. Run `factoryreset` from the CLI. SD card files are not affected.
+
+Q: How do I check the firmware version?
+A: Run `version` from the CLI or check the bottom of the web dashboard. The version number follows semantic versioning.
+
+Q: What is the build configuration?
+A: Build configuration controls which features are compiled into the firmware. Features like LLM, GPS, and advanced sensors can be enabled or disabled at compile time to save flash space.
+
+Q: How do I build the firmware?
+A: Use the ESP-IDF build system. Run `idf.py build` from the project directory. Flash with `idf.py flash`. Requires ESP-IDF v5.x installed.
+
+Q: What is the partition table?
+A: The partition table defines how flash memory is divided between the application, OTA, LittleFS, NVS, and other partitions. It is configured at build time.
+
+Q: How much flash does the firmware use?
+A: The firmware binary is typically 1.5-2.5MB depending on enabled features. The remaining flash is used for OTA, LittleFS, and NVS storage.
+
+Q: What is NVS?
+A: NVS is Non-Volatile Storage, a key-value store in flash used by ESP-IDF for WiFi credentials, calibration data, and small persistent values.
+
+Q: Can I use Hardware One without sensors?
+A: Yes. Sensors are optional. The device still provides WiFi, web interface, CLI, file management, MQTT, ESP-NOW, and LLM features without any sensors attached.
+
+Q: What voltage does Hardware One run on?
+A: The ESP32-S3 operates on 3.3V. Development boards include a voltage regulator for USB 5V input. Battery input through a LiPo charger provides 3.7V nominal.
+
+Q: How do I check battery level?
+A: Run `battery` from the CLI to see voltage and estimated percentage. The web dashboard also shows battery status when a battery monitor is connected.
+
+Q: What is the operating temperature range?
+A: The ESP32-S3 operates from -40C to 85C. Practical outdoor range with standard components is -10C to 60C. The BME280 temperature sensor works across the full range.
+
+Q: Is Hardware One waterproof?
+A: No. The ESP32-S3 module and sensors are not waterproof. For outdoor deployment use a weatherproof IP65 or better enclosure.
+
+Q: How do I connect sensors to Hardware One?
+A: Most sensors connect via I2C using SDA and SCL pins plus 3.3V power and ground. The GPS connects via serial UART. Check pin assignments in the build configuration.
+
+Q: What happens during first-time setup?
+A: The device creates a WiFi access point, launches the setup wizard in the web interface, and walks you through setting a username, password, WiFi credentials, and basic configuration.
+
+Q: Can I skip the setup wizard?
+A: Yes. Connect via USB serial and configure settings manually with CLI commands. Run `setupcomplete` to mark first-time setup as done.
+
+Q: What map tiles does Hardware One support?
+A: The Map tab displays offline map tiles stored on the SD card. Tiles follow the standard z/x/y directory structure. Download tiles from OpenStreetMap for your area.
+
+Q: How do I download map tiles?
+A: Use a tile downloader tool on your computer to save tiles for your geographic area. Copy the tile directory to the SD card. The web Map tab loads tiles from /sd/maps/.
+
+Q: What is the map tile cache?
+A: The device caches recently accessed map tiles in memory for faster rendering. Cache size is limited by available RAM. Tiles are loaded from SD card on cache miss.
+
+Q: Can Hardware One record GPS tracks?
+A: Yes. Enable GPS logging to record tracks as timestamped coordinate files on the SD card. Tracks can be downloaded and viewed in mapping software.
+
+Q: What is the web terminal?
+A: The web terminal at /terminal provides CLI access through the browser over WiFi. It works like a serial console but does not require a USB cable.
+
+Q: How do I see real-time sensor data?
+A: The web Dashboard tab shows live sensor readings that update automatically. The CLI commands `bme`, `imu`, `tof`, `gps` show current values on demand.
+
+Q: What refresh rate does the dashboard use?
+A: The web dashboard polls sensor data every 2-5 seconds by default. Faster polling increases network traffic and CPU usage.
+
+Q: Can I control Hardware One from my phone?
+A: Yes. Open the device IP address in your phone browser. The web interface is responsive and works on mobile screens. No app installation required.
+
+Q: Does Hardware One support multiple simultaneous users?
+A: The web server handles requests sequentially on a single thread. Multiple users can connect but requests are processed one at a time. The LLM can only generate for one user at a time.
+
+Q: What is the maximum number of web connections?
+A: The ESP HTTP server supports up to 7 concurrent connections by default. Additional connections are queued until a slot opens.
+
+Q: How do I see what files are on the device?
+A: Run `ls /system/` for internal storage or `ls /sd/` for SD card from the CLI. The web Files page provides a graphical file browser.
+
+Q: Can I delete files from the web interface?
+A: Yes. The Files page allows file deletion, upload, download, and directory browsing for both internal storage and the SD card.
+
+Q: What log files does Hardware One create?
+A: Sensor data logs, GPS track files, and system event logs. Log files are stored on the SD card in timestamped directories. Internal flash has limited space for logs.
+
+Q: How do I clear old log files?
+A: Delete log files through the web Files page or run `rm /sd/logs/FILENAME` from the CLI. There is no automatic log rotation by default.
+
+Q: What is the watchdog timer?
+A: The watchdog monitors task execution and resets the device if a task stops responding. This prevents permanent hangs. The default timeout is several seconds.
+
+Q: Why does the device restart unexpectedly?
+A: Common causes are watchdog timeout from a stuck task, stack overflow, out of memory, or a firmware crash. Check the serial console for the reset reason and crash dump.
+
+Q: How do I interpret a crash dump?
+A: The crash dump shows the PC register, call stack, and exception cause. Use the `idf.py monitor` tool with ELF file to decode addresses into function names and line numbers.
+
+Q: What is the boot sequence?
+A: Power on, bootloader runs, application starts, initializes hardware (I2C, SPI, UART), mounts filesystems, starts WiFi, loads settings, starts web server and CLI, runs automations.
+
+Q: How long does boot take?
+A: Typical boot time is 2-5 seconds from power on to full operation. WiFi connection adds 1-3 seconds. First boot after a factory reset takes slightly longer for the setup wizard.
+
+Q: What is safe mode?
+A: Safe mode starts the device with minimal features to allow recovery from bad settings or configuration. Hold the boot button during startup to enter safe mode.
+
+Q: Can I use both internal storage and SD card?
+A: Yes. Internal LittleFS at /system/ and SD card at /sd/ are both available simultaneously. Settings and firmware data use internal storage. Large files like models and maps use the SD card.
+
+Q: What SD card speed does Hardware One support?
+A: The SD card interface uses SPI mode which is slower than native SDIO. Typical read speeds are 1-4 MB/s depending on the card class.
+
+Q: How do I check if the SD card is mounted?
+A: Run `sdstatus` from the CLI. The web Files page also shows SD card presence and available space.
+
+Q: What is the LLM sentence limit?
+A: The sentence limit stops generation after a set number of sentences. Default is 2 sentences for Q&A. This prevents the model from rambling beyond a useful answer.
+
+Q: What is the hard token cap?
+A: The hard cap stops generation after a fixed number of tokens regardless of sentence boundaries. Default is 80 tokens. This is a safety limit to prevent runaway generation.
+
+Q: What is temperature in LLM generation?
+A: Temperature controls randomness of token sampling. Lower values like 0.3 produce more predictable focused answers. Higher values like 1.0 produce more varied creative output.
+
+Q: What is top-p sampling?
+A: Top-p or nucleus sampling considers only the most likely tokens whose cumulative probability exceeds the threshold. Default is 0.9 meaning the top 90% probability mass is sampled from.
+
+Q: What is repetition penalty?
+A: Repetition penalty reduces the probability of tokens that appeared recently. Default is 1.3. Higher values more strongly discourage repeated words and phrases.
+
+Q: What is Mirostat sampling?
+A: Mirostat 2 is an adaptive sampling method that targets a specific surprise level in bits. It automatically adjusts the sampling distribution to maintain consistent output quality.
+
+Q: What is dynamic temperature?
+A: Dynamic temperature adjusts the sampling temperature based on the model confidence at each step. When the model is uncertain it increases temperature. Off by default for Q&A models.
+
+Q: Why should I leave dynamic temperature off?
+A: For Q&A models trained on specific domain data, flat temperature produces more consistent factual answers. Dynamic temperature adds randomness when the model is uncertain which can produce wrong answers.
+
+Q: How do I unload the LLM model?
+A: Click Unload in the web LLM page or run `llmunload` from the CLI. This frees all PSRAM used by the model weights and KV cache.
+
+Q: Can I switch between different LLM models?
+A: Yes. Unload the current model then load a different one from the model list. Only one model can be loaded at a time due to PSRAM constraints.
+
+Q: Where do I put LLM model files?
+A: Copy model.bin files to /sd/llm/ on the SD card or /system/llm/ on internal storage. The LLM page model dropdown lists all available files from both locations.

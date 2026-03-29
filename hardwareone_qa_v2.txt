@@ -1,0 +1,237 @@
+Q: How do I connect to WiFi?
+A: WiFi connection is configured through Settings. Open the web dashboard, go to Settings, enter your WiFi SSID and password, then save. The device will reconnect automatically on reboot.
+
+Q: How do I set up WiFi on Hardware One?
+A: WiFi credentials are stored in Settings. Navigate to the Settings page on the dashboard, fill in the WiFi SSID and password fields, and tap Save. Hardware One will join the network on next boot.
+
+Q: Where do I enter my WiFi password?
+A: WiFi password is entered in the Settings page of the web dashboard. Go to Settings, find the WiFi section, type your network name and password, and save the configuration.
+
+Q: Can Hardware One connect to a wireless network?
+A: WiFi is supported natively. Use the Settings page to enter your network SSID and password. After saving, the device connects to your local WiFi network and its IP address appears on the OLED display.
+
+Q: My device won't connect to my network. What should I check?
+A: WiFi connection issues are usually caused by a wrong SSID or password. Open the Settings page, verify the WiFi credentials, and save again. Also confirm the network is 2.4 GHz — the ESP32-S3 does not support 5 GHz.
+
+Q: What is ESP-NOW and how is it different from WiFi?
+A: ESP-NOW is a peer-to-peer radio protocol that works without a WiFi router or access point. WiFi connects the device to your local network and the internet, while ESP-NOW connects two or more Hardware One units directly to each other without any infrastructure.
+
+Q: How do I send a message to another Hardware One over ESP-NOW?
+A: ESP-NOW messaging is done through the espnow command in the CLI. First pair the two devices using the dashboard's ESP-NOW peer panel, then use the espnow send command followed by the peer name and message text.
+
+Q: How do I pair two Hardware One devices over ESP-NOW?
+A: ESP-NOW pairing is done from the web dashboard. Open the ESP-NOW section, click Add Peer, and enter the MAC address of the other device. Both units must add each other as peers before they can exchange messages.
+
+Q: Can Hardware One communicate without a router?
+A: ESP-NOW allows direct device-to-device communication with no router required. Two Hardware One units can exchange messages and sensor data peer-to-peer using ESP-NOW. This is different from WiFi, which requires a network infrastructure.
+
+Q: What range does ESP-NOW have?
+A: ESP-NOW range is similar to standard WiFi at approximately 50 to 100 meters in open air. It uses the same 2.4 GHz radio as WiFi but establishes a direct encrypted link between paired device MAC addresses.
+
+Q: How does bonded device mode work?
+A: Bonded mode creates a trusted relationship between two Hardware One units. Once bonded, the CLI on one device can transparently run commands on the other. Commands are routed over ESP-NOW without any extra syntax — you just type the command and it executes on the bonded peer.
+
+Q: Can I run a command on a remote Hardware One?
+A: Bonded device mode lets you run commands on a paired unit. After bonding two devices via the dashboard, any CLI command you type on one device can be forwarded to and executed on the bonded partner automatically over ESP-NOW.
+
+Q: How do I enable Bluetooth on Hardware One?
+A: BLE is enabled through the feature flags in Settings. Go to Settings, find the BLE toggle, enable it, and save. The device will begin advertising over Bluetooth Low Energy and can be detected by nearby phones or other BLE scanners.
+
+Q: What does BLE do on this device?
+A: BLE enables proximity interactions and short-range communication. Hardware One uses Bluetooth Low Energy to broadcast a beacon, detect nearby devices, and optionally exchange small data payloads. It is separate from WiFi and ESP-NOW.
+
+Q: How do I connect to an MQTT broker?
+A: MQTT is configured in Settings. Enter your broker hostname or IP address, port number (typically 1883), and optionally a username and password. After saving, Hardware One will connect to the broker and subscribe to its configured topics.
+
+Q: What MQTT topics does Hardware One publish to?
+A: MQTT topic names are set in Settings. By default the device publishes sensor readings and status updates to topics under the device name prefix. You can also publish custom messages from the CLI using the mqtt publish command.
+
+Q: How do I trigger an MQTT message from automation?
+A: MQTT publish is one of the available automation actions. In the Automation page, create a rule, add a Publish MQTT action, and fill in the topic and payload. The message will be sent whenever the rule condition is met.
+
+Q: How do I perform an OTA firmware update?
+A: OTA update is done from the web dashboard. Go to the OTA section, select a firmware binary (.bin file), and click Upload. The device flashes the new image into the alternate partition, verifies it, and reboots into the new firmware.
+
+Q: Can I update the firmware without a USB cable?
+A: OTA over-the-air updates are supported. Open the web dashboard, navigate to the OTA page, upload the new firmware binary, and Hardware One will flash and reboot automatically. No serial connection or USB cable needed.
+
+Q: What happens if an OTA update fails?
+A: OTA rollback is automatic. Hardware One uses a dual-partition scheme, so if the new firmware fails to boot, the device falls back to the previous working image. Your settings and files stored on LittleFS are preserved across updates.
+
+Q: How do I read temperature and humidity?
+A: Temperature and humidity come from the BME280 sensor. If a BME280 is connected on the I2C bus, the device detects it automatically at startup and shows readings on the dashboard and OLED. Use the sensor command in the CLI to read values directly.
+
+Q: What does the BME280 measure?
+A: BME280 measures temperature, humidity, and barometric pressure. It connects via I2C and is auto-detected at startup. Readings appear on the web dashboard and are available through the sensor CLI command and MQTT telemetry.
+
+Q: How do I read motion data?
+A: Motion and orientation data come from the ICM-42688-P IMU. This sensor is auto-detected on the I2C bus and provides accelerometer and gyroscope readings. Access it through the sensor command or view it on the dashboard's sensor panel.
+
+Q: What is the IMU used for?
+A: The ICM-42688-P inertial measurement unit provides accelerometer and gyroscope data for motion and orientation sensing. It is distinct from the BME280 environmental sensor. Use it to detect tilt, vibration, or movement.
+
+Q: How do I measure distance with the device?
+A: Distance measurement uses the VL53L1X time-of-flight sensor. Connect it to the I2C bus and it will be detected automatically. The sensor outputs distance in millimeters and is accessible through the sensor CLI command.
+
+Q: What sensor is used for distance?
+A: VL53L1X is the time-of-flight distance sensor. It measures distances up to 4 meters using infrared light. It connects over I2C, is auto-discovered at startup, and its readings appear in the dashboard sensor panel.
+
+Q: How do I measure surface temperature without touching it?
+A: Non-contact temperature measurement uses the MLX90614 infrared thermometer. Connect it to the I2C bus and the device will detect it automatically. It measures the temperature of objects at a distance and is read via the sensor command.
+
+Q: Can I detect gestures with Hardware One?
+A: Gesture detection uses the APDS9960 sensor. This device detects up, down, left, and right swipes, along with proximity and ambient light level. It connects via I2C and is auto-detected at startup.
+
+Q: What does the APDS9960 detect?
+A: APDS9960 detects gestures, proximity, and ambient light. It recognizes directional swipes (up, down, left, right) and can trigger automation rules or CLI callbacks based on gesture events. It is separate from the distance sensor.
+
+Q: How do I get GPS coordinates?
+A: GPS coordinates come from the GPS module connected over UART. The device parses NMEA sentences from the GPS receiver and tracks position fix status. Coordinates are displayed on the dashboard map tab using locally cached map tiles.
+
+Q: How do I view my position on a map?
+A: GPS position is shown on the Map tab of the web dashboard. The map renders using tiles cached locally on the SD card, so it works offline in the field. A fix indicator shows whether the GPS module has acquired a valid position.
+
+Q: Does GPS work without internet?
+A: GPS works fully offline. Map tiles are pre-cached on the SD card, and the GPS module uses satellite signals, not internet connectivity. You can view your position on the map even with no WiFi or cellular connection.
+
+Q: How do I control servos?
+A: Servo control uses the PCA9685 PWM driver. Connect the PCA9685 to the I2C bus and it will be auto-detected. Use the servo command in the CLI to set channel and position in degrees, or drive it from an automation action.
+
+Q: How do I control PWM outputs?
+A: PWM output is managed through the PCA9685 board. The PCA9685 provides 16 PWM channels controllable from the CLI using the servo or pwm commands. It is I2C-based and detected automatically at startup.
+
+Q: How do I control NeoPixel LEDs?
+A: NeoPixel control uses the neopixel command in the CLI. Specify the number of LEDs, the GPIO data pin, a color as RGB hex, and optional brightness. For example: neopixel set 8 gpio48 ff0000 128 sets 8 LEDs to red at half brightness.
+
+Q: How do I change the LED strip color?
+A: NeoPixel LED color is set with the neopixel command. Use neopixel set followed by the LED count, GPIO pin, color in hex, and brightness level. The color change takes effect immediately.
+
+Q: How do I browse files on the device?
+A: File browsing is done through the Files tab on the web dashboard. You can see files on both the internal LittleFS filesystem and the SD card, download files to your computer, upload new files, and delete files from either storage.
+
+Q: How do I upload a file to Hardware One?
+A: File upload is available on the Files tab of the web dashboard. Click the upload button, select a file from your computer, and it will be transferred to the device. Files can be stored on LittleFS or the SD card.
+
+Q: What is LittleFS?
+A: LittleFS is the internal persistent filesystem on Hardware One. It stores settings, configuration files, and small data files in flash memory. It survives power cycles and OTA updates, and is accessible through the Files tab on the dashboard.
+
+Q: What is the SD card used for?
+A: The SD card stores large files that do not fit in flash. LLM model files, map tiles for GPS, and log files are stored on the SD card. The internal LittleFS holds settings and small files, while the SD card handles large data.
+
+Q: How do I set up an automation rule?
+A: Automation rules are created on the Automation page of the dashboard. Click Add Rule, choose a condition type (sensor threshold, time trigger, or MQTT message), then add one or more actions such as MQTT publish, GPIO output, display update, or CLI command execution.
+
+Q: Can Hardware One react to sensor readings automatically?
+A: Automation rules respond to sensor values without any manual input. Create a rule on the Automation page, set a condition like BME280 temperature above 30, and add an action. The rule engine evaluates conditions continuously and triggers actions when met.
+
+Q: How do I combine multiple conditions in an automation rule?
+A: Automation conditions support AND and OR operators. When adding conditions to a rule, select the logical operator between them. The rule only fires when the combined condition evaluates as true.
+
+Q: How do I use the LLM on this device?
+A: The LLM is accessed through the LLM tab on the web dashboard. Type your prompt in the text box and submit it. The model generates a response token by token, streamed live to the browser. You can also use the llm generate command from the CLI.
+
+Q: How do I load a language model?
+A: LLM loading is done by placing a model.bin file in LLM1 format on the SD card. Use the llm load command in the CLI specifying the file path, or select it from the LLM tab on the dashboard. The weights load into PSRAM automatically.
+
+Q: What model format does Hardware One use?
+A: The LLM1 binary format is used for model files. It stores transformer weights in either FP32 or INT8 quantized form. The browser-based converter tool on the Mac generates LLM1 files from standard HuggingFace checkpoints.
+
+Q: How do I convert a model for the device?
+A: Model conversion uses the browser-based converter tool at index.html. Drag in the model output folder from training, select INT8 quantization, and download the model.bin file. Copy it to the SD card and load it with the llm load command.
+
+Q: How do I run the LLM from the command line?
+A: LLM generation from the CLI uses llm generate followed by your prompt in quotes. For example: llm generate "What sensors are supported?" The model generates a streamed response directly in the terminal.
+
+Q: How do I see what I2C devices are connected?
+A: I2C scanning is done with the i2c scan command in the CLI. It returns a list of all detected device addresses on the bus. Hardware One also performs this scan automatically at startup to discover and initialize drivers for connected hardware.
+
+Q: Does Hardware One auto-detect connected sensors?
+A: Sensor auto-detection runs at startup. Hardware One scans the I2C bus and automatically loads drivers for any recognized devices. Supported sensors including BME280, ICM-42688-P, VL53L1X, MLX90614, APDS9960, and PCA9685 are initialized without manual configuration.
+
+Q: How do I see sensor readings in real time?
+A: Real-time sensor data is shown on the Sensors tab of the web dashboard. Values update automatically as the sensor polling task runs. You can also read any sensor from the CLI using the sensor command followed by the sensor name.
+
+Q: How do I use the OLED display?
+A: The OLED display shows status information automatically. Hardware One drives the SSD1306 OLED to display WiFi IP address, GPS status, and sensor summaries. You can also write custom text to the display using the display command in the CLI or an automation action.
+
+Q: What does the OLED show by default?
+A: The SSD1306 OLED shows the device IP address, connection status, GPS fix state, and a rotating summary of sensor readings. It updates automatically. You can override the content with the display command in the CLI.
+
+Q: How do I use the gamepad?
+A: The Adafruit Seesaw gamepad connects over I2C and is auto-detected at startup. Button presses and joystick position are read by the input subsystem and can trigger automation rules or be queried through the CLI with the gamepad command.
+
+Q: How do I back up my settings?
+A: Settings export is available from the Settings page of the dashboard. Click Export to download a JSON file containing all your configuration including WiFi credentials, MQTT settings, sensor calibration, and feature flags. Import it on another device to replicate the configuration.
+
+Q: How do I restore settings to another device?
+A: Settings import is done from the Settings page. Click Import, select the previously exported JSON file, and the configuration is applied immediately. This makes it easy to provision multiple Hardware One units identically.
+
+Q: How do I view the serial logs?
+A: Serial output is available from the web terminal on the dashboard as well as over the physical UART port. The CLI and log subsystem write tagged output that can also be saved to a file on the SD card using the log file command.
+
+Q: Can I save log output to a file?
+A: Debug log file output is enabled with the log file command in the CLI. Specify a filename on the SD card and tagged log output will be written there. This allows post-mortem analysis without requiring a serial connection.
+
+Q: How do I reset the device to factory defaults?
+A: Factory reset is done through the Settings page. Click the Reset to Defaults button to wipe all stored settings. WiFi credentials, MQTT config, and all saved settings are cleared. The device reboots into unconfigured state.
+
+Q: What is the web terminal?
+A: The web terminal is a CLI accessible from the Terminal tab on the dashboard. It accepts the same commands as the physical serial port. You can run sensor queries, LLM prompts, file operations, and network commands from any browser without a USB cable.
+
+Q: How do I register a custom CLI command?
+A: Custom commands are registered at runtime using the cli register API in firmware. Provide a command name, a handler function, and a help string. The command then appears in the CLI help list and executes your handler when called.
+
+Q: What communication protocols does Hardware One support?
+A: Hardware One supports WiFi for local network access, ESP-NOW for peer-to-peer device communication, BLE for Bluetooth proximity, and MQTT for broker-based IoT messaging. These are independent protocols that can run simultaneously.
+
+Q: What is the difference between ESP-NOW and MQTT?
+A: ESP-NOW is a direct peer-to-peer radio link between two Hardware One units with no infrastructure needed. MQTT is a publish-subscribe protocol that routes messages through a central broker server. Use ESP-NOW for local device-to-device links, MQTT for cloud or network-based messaging.
+
+Q: What is the difference between MQTT and WiFi?
+A: WiFi is the wireless network connection that gives Hardware One an IP address on your LAN. MQTT is an application-layer messaging protocol that runs on top of the WiFi connection to exchange messages with a broker. WiFi is the transport, MQTT is the messaging layer.
+
+Q: What processors does Hardware One use?
+A: Hardware One uses the ESP32-S3 microcontroller, which has a dual-core Xtensa LX7 processor running at up to 240 MHz. It includes built-in WiFi and Bluetooth radios, 8 MB of PSRAM, and uses 16 MB of external flash storage.
+
+Q: How much memory does Hardware One have?
+A: Hardware One has 8 MB of PSRAM for large runtime allocations like LLM weights and audio buffers, plus 16 MB of flash storage. The internal RAM also includes the standard ESP32-S3 SRAM used by the RTOS and driver stack.
+
+Q: What is PSRAM used for?
+A: PSRAM stores large data that does not fit in the chip's internal RAM. LLM model weights, large string buffers, and sensor history tables are allocated in PSRAM. Keeping these in PSRAM leaves internal SRAM free for the FreeRTOS kernel and network stack.
+
+Q: How does the authentication work?
+A: Web dashboard authentication uses a password-based login. You set a password in Settings and the device issues a session token on successful login. All dashboard pages and API endpoints require a valid session. There is no cloud dependency — auth is fully on-device.
+
+Q: Is there a cloud service required?
+A: No cloud service is required. Hardware One operates entirely standalone. The web dashboard is served from the device itself, LLM inference runs locally, map tiles are cached on the SD card, and all communication uses local network or direct radio links.
+
+Q: How do I access the web dashboard?
+A: The web dashboard is accessed by opening a browser and navigating to the device's IP address. The IP address is shown on the OLED display after WiFi connects. Login with the password set in Settings.
+
+Q: What tabs does the web dashboard have?
+A: The web dashboard includes tabs for Sensors, Map, Files, Terminal, Automation, LLM, ESP-NOW, OTA, and Settings. Each section provides a different management function for the device.
+
+Q: How are FreeRTOS tasks organized?
+A: Each major subsystem runs in its own FreeRTOS task. The web server, sensor polling loop, automation engine, LLM inference, and communication layers each have dedicated tasks with configured stack sizes and priorities. This prevents any one subsystem from blocking others.
+
+Q: How does the build system work?
+A: Hardware One uses ESP-IDF as its build system. Run idf.py build to compile the firmware, idf.py flash to write it over USB, and idf.py monitor to see serial output. The project is organized into components under the components directory.
+
+Q: What is the partition table layout?
+A: The flash partition table includes two application partitions for OTA, a LittleFS data partition, and a NVS partition for ESP-IDF settings. Having two app partitions allows the device to hold both the current and previous firmware and roll back if needed.
+
+Q: How do I train a new LLM for this device?
+A: LLM training uses the Python training scripts included in the toolchain. Run train_tiny_model_gpu.py with your text files, select a preset like narrow, and specify output and epochs. After training, use the converter to package the output into LLM1 format for the device.
+
+Q: What model size fits on Hardware One?
+A: LLM model size is limited by the 8 MB PSRAM. The narrow preset produces a model around 1 to 2 MB. The stretch2 preset approaches 8 MB. Models must be INT8 quantized to fit the larger presets. FP32 models only work for the smallest configurations.
+
+Q: What is INT8 quantization?
+A: INT8 quantization reduces model weight precision from 32-bit floats to 8-bit integers with grouped scaling factors. This shrinks the model file to roughly one quarter of the FP32 size, allowing larger architectures to fit in the 8 MB PSRAM budget.
+
+Q: How do I know if my model loaded correctly?
+A: A successfully loaded model shows a READY status in the LLM tab of the dashboard and prints model metadata including architecture type, layer count, embedding dimension, and vocabulary size to the serial log. Use llm info in the CLI to display these details.
+
+Q: How do I see what model is currently loaded?
+A: The llm info command in the CLI displays all metadata for the currently loaded model including file path, architecture, number of layers, embedding dimension, vocabulary size, and quantization format.
+

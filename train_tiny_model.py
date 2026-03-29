@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Train a tiny GPT-2–compatible LM for the esp32-llm-converter (browser INT8 → model.bin).
+Train a GPT-2–compatible LM for the esp32-llm-converter (browser INT8/FP32 → model.bin).
 
 Install (once):
   pip install torch transformers datasets tokenizers accelerate
@@ -12,33 +12,129 @@ Example:
   # 2) Or stream a slice of TinyStories (downloads ~data~ on first run)
   python train_tiny_model.py --dataset tiny_stories --max_samples 50000 --out ./my_tiny_gpt2
 
-  # 3) Open index.html → drop the output folder or zip contents → Convert
+  # 3) Presets: micro … xlarge, plus ESP32-S3 8 MB targets: baseline / leaner / stretch
+  python train_tiny_model.py --preset small --dataset tiny_stories --max_samples 100000 --out ./out_small
+  python train_tiny_model.py --preset leaner --dataset tiny_stories --max_samples 200000 --out ./out_leaner
 
-Defaults target a few million parameters and a small vocab so model.bin can fit ESP32 flash.
+  # 4) Parameter count only (compare to device PSRAM before training)
+  python train_tiny_model.py --preset small --estimate-only
+
+  # 5) Large preset on one GPU: small batch + accumulation + checkpointing
+  python train_tiny_model.py --preset large --dataset tiny_stories --max_samples 200000 --out ./out_l \\
+      --batch-size 1 --grad-accum 8 --gradient-checkpointing
+
+  # 6) Open index.html → drop the output folder → Convert
+
+Without --preset, defaults match the original script (64 dim, 4 layers). ESP32 devices need a
+*much* smaller architecture than “medium/large” presets — use --estimate-only and firmware docs.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import random
 import sys
 from pathlib import Path
 
+# Prevent HuggingFace libraries from making network calls when using local text files.
+# Must be set before any transformers/datasets import.
+os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
+# Named architectures: vocab_size, n_embd, n_layer, n_head, seq_len (n_inner = 4 * n_embd unless --n-inner)
+PRESETS: dict[str, dict[str, int]] = {
+    "micro": {"vocab_size": 512, "n_embd": 32, "n_layer": 2, "n_head": 4, "seq_len": 64},
+    "tiny": {"vocab_size": 2048, "n_embd": 64, "n_layer": 4, "n_head": 8, "seq_len": 128},
+    "small": {"vocab_size": 4096, "n_embd": 128, "n_layer": 6, "n_head": 8, "seq_len": 256},
+    "medium": {"vocab_size": 8192, "n_embd": 256, "n_layer": 8, "n_head": 8, "seq_len": 512},
+    "large": {"vocab_size": 12288, "n_embd": 384, "n_layer": 12, "n_head": 12, "seq_len": 512},
+    "xlarge": {"vocab_size": 16384, "n_embd": 512, "n_layer": 16, "n_head": 16, "seq_len": 1024},
+    # ── ESP32-S3 8 MB PSRAM targets (INT8, dim=128) ────────────────────────────
+    # All three fit comfortably in 8 MB PSRAM when converted with INT8 + group_size=128.
+    # Use ctx=64 on device. Train on TinyStories or similar simple English text.
+    # "baseline": 16K vocab / 12 layers — most expressive vocabulary, moderate depth (~6.4 MB)
+    "baseline": {"vocab_size": 16384, "n_embd": 128, "n_layer": 12, "n_head": 8, "seq_len": 128},
+    # "leaner":   8K vocab / 15 layers — freed embedding RAM reinvested in depth (~6.4 MB)
+    "leaner":   {"vocab_size": 8192,  "n_embd": 128, "n_layer": 15, "n_head": 8, "seq_len": 128},
+    # "stretch":  8K vocab / 18 layers — maximum depth that fits in 8 MB PSRAM (~7.4 MB)
+    "stretch":  {"vocab_size": 8192,  "n_embd": 128, "n_layer": 18, "n_head": 8, "seq_len": 128},
+    # "stretch2": 8K vocab / 20 layers / hidden=640 — deeper + wider FFN than stretch (~8.1 MB)
+    "stretch2": {"vocab_size": 8192,  "n_embd": 128, "n_layer": 20, "n_head": 8, "seq_len": 128, "n_inner": 640},
+    # "narrow":   4K vocab / dim=256 / 8 layers — optimized for specialized domain Q&A (~7.3 MB)
+    # head_size=32 (vs 16 in dim=128 models) gives much richer attention. Train on domain-specific
+    # text only. Faster inference than stretch (fewer layers, same ops/token).
+    "narrow":   {"vocab_size": 4096,  "n_embd": 256, "n_layer": 8,  "n_head": 8, "seq_len": 128, "n_inner": 512},
+    # "narrow2":  4K vocab / dim=128 / 20 layers / n_head=4 — deep domain Q&A model.
+    # dim=128 frees PSRAM for 20 layers (2.5× more than narrow's 8). n_head=4 gives head_size=32,
+    # the same rich per-head attention as narrow. n_inner=640 (5×dim) widens the FFN.
+    # PSRAM budget at ctx=64: ~4.7 MB weights + ~1.3 MB KV cache = ~6.9 MB total (~1 MB headroom).
+    # Use this when narrow fails to associate answers with the right topic.
+    "narrow2":  {"vocab_size": 4096,  "n_embd": 128, "n_layer": 20, "n_head": 4, "seq_len": 128, "n_inner": 640},
+}
+
+# argparse dest → CLI flag (for “only override if user did not pass this flag”)
+_ARG_TO_FLAG = {
+    "vocab_size": "--vocab-size",
+    "n_embd": "--n-embd",
+    "n_layer": "--n-layer",
+    "n_head": "--n-head",
+    "n_inner": "--n-inner",
+    "seq_len": "--seq-len",
+}
+
+
+def _argv_provides_flag(flag: str) -> bool:
+    for a in sys.argv[1:]:
+        if a == flag or a.startswith(flag + "="):
+            return True
+    return False
+
+
+def apply_preset(ns: argparse.Namespace) -> None:
+    if not ns.preset:
+        return
+    if ns.preset not in PRESETS:
+        sys.exit(f"Unknown preset: {ns.preset}")
+    for key, val in PRESETS[ns.preset].items():
+        flag = _ARG_TO_FLAG[key]
+        if not _argv_provides_flag(flag):
+            setattr(ns, key, val)
+
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Train tiny GPT-2 for esp32-llm-converter")
-    src = p.add_mutually_exclusive_group(required=True)
+    p = argparse.ArgumentParser(description="Train GPT-2 for esp32-llm-converter (tiny → xlarge presets)")
+    p.add_argument(
+        "--preset",
+        choices=sorted(PRESETS.keys()),
+        default=None,
+        help="Architecture bundle (optional). CLI flags like --n-embd still override.",
+    )
+    p.add_argument(
+        "--estimate-only",
+        action="store_true",
+        help="Print parameter count for the chosen architecture and exit (no data / no training).",
+    )
+    src = p.add_mutually_exclusive_group(required=False)
     src.add_argument(
         "--text",
         type=Path,
-        help="Plain-text file to train tokenizer + model on (UTF-8)",
+        nargs="+",
+        metavar="FILE",
+        help="One or more plain-text files (UTF-8). All files are concatenated for training.",
     )
     src.add_argument(
         "--dataset",
         choices=("tiny_stories",),
         help="Built-in dataset name (downloads via Hugging Face datasets)",
     )
-    p.add_argument("--out", type=Path, required=True, help="Output directory for checkpoint")
+    p.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="Output directory for checkpoint (required unless --estimate-only)",
+    )
     p.add_argument("--vocab-size", type=int, default=2048, help="BPE vocab size (smaller → smaller model.bin)")
     p.add_argument("--n-embd", type=int, default=64, help="Hidden size (dim)")
     p.add_argument("--n-layer", type=int, default=4, help="Transformer blocks")
@@ -46,10 +142,35 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--n-inner", type=int, default=None, help="FFN hidden (default: 4 * n-embd)")
     p.add_argument("--seq-len", type=int, default=128, help="Context length (blocks for LM)")
     p.add_argument("--epochs", type=float, default=1.0)
+    p.add_argument(
+        "--max-steps",
+        type=int,
+        default=None,
+        help="Stop after N optimizer steps (overrides --epochs). Use for smoke runs, e.g. --max-steps 15",
+    )
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--lr", type=float, default=5e-4)
     p.add_argument("--max-samples", type=int, default=None, help="Cap training rows (TinyStories)")
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument(
+        "--grad-accum",
+        type=int,
+        default=1,
+        metavar="N",
+        help="Gradient accumulation steps (useful for large presets + small GPU memory)",
+    )
+    p.add_argument(
+        "--gradient-checkpointing",
+        action="store_true",
+        help="Trade compute for VRAM (recommended for medium+ on one GPU)",
+    )
+    p.add_argument("--negatives",     type=Path, default=None, metavar="FILE",
+                   help="Negative reinforcement text file. Two-phase training: "
+                        "(1) train on --text only with test output, (2) add negatives and continue.")
+    p.add_argument("--neg-epochs",    type=float, default=None,
+                   help="Epochs for phase 2 (negatives). Defaults to same as --epochs.")
+    p.add_argument("--neg-lr",        type=float, default=None,
+                   help="Learning rate for phase 2 (negatives). Defaults to --lr * 0.5.")
     return p.parse_args()
 
 
@@ -62,7 +183,7 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
     trainer = trainers.BpeTrainer(
         vocab_size=vocab_size,
         min_frequency=2,
-        special_tokens=["<|endoftext|>", "<pad>", "<unk>"],
+        special_tokens=["<|endoftext|>", "<pad>", "<unk>", "Q:", "A:"],
     )
     tokenizer_core.train([str(p) for p in text_paths], trainer)
     tok_path = out_dir / "tokenizer.json"
@@ -75,16 +196,102 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
     return hf_tok
 
 
+def run_qa_test(model, tokenizer, label: str) -> None:
+    """Run generation test with Q&A prompts and print results.
+
+    Stops when the model emits the atomic ``Q:`` token (same heuristic as ESP32 firmware).
+    """
+    import torch
+    from transformers import StoppingCriteria, StoppingCriteriaList
+
+    class StopOnQTokenAfterPrompt(StoppingCriteria):
+        def __init__(self, prompt_len: int, q_token_id: int) -> None:
+            self.prompt_len = prompt_len
+            self.q_token_id = q_token_id
+
+        def __call__(self, input_ids, scores, **kwargs) -> bool:
+            if input_ids.shape[1] <= self.prompt_len:
+                return False
+            return int(input_ids[0, -1].item()) == self.q_token_id
+
+    prompts = [
+        "Q: What is WiFi?\nA:",
+        "Q: What is ESP-NOW?\nA:",
+        "Q: What sensors does Hardware One have?\nA:",
+        "Q: What is MQTT?\nA:",
+        "Q: Is ESP-NOW the same as WiFi?\nA:",
+        "Q: How do I update the firmware?\nA:",
+        "Once upon a time",
+    ]
+
+    q_enc = tokenizer.encode("Q:", add_special_tokens=False)
+    q_token_id = q_enc[0] if q_enc else None
+
+    print()
+    print(f"  === {label} ===")
+    if q_token_id is not None:
+        print(f"  (generation stops if model emits Q: token id={q_token_id}, same as device firmware)")
+    model.eval()
+    for prompt_text in prompts:
+        try:
+            device = next(model.parameters()).device
+            input_ids = tokenizer.encode(prompt_text, return_tensors="pt").to(device)
+            prompt_len = int(input_ids.shape[1])
+            attn = torch.ones_like(input_ids, dtype=torch.long)
+            gen_kw: dict = dict(
+                input_ids=input_ids,
+                attention_mask=attn,
+                max_new_tokens=128,
+                do_sample=True,
+                temperature=0.5,
+                top_p=0.8,
+                repetition_penalty=1.3,
+                pad_token_id=tokenizer.eos_token_id,
+            )
+            if q_token_id is not None:
+                gen_kw["stopping_criteria"] = StoppingCriteriaList(
+                    [StopOnQTokenAfterPrompt(prompt_len, q_token_id)]
+                )
+            with torch.no_grad():
+                output = model.generate(**gen_kw)
+            new_ids = output[0, prompt_len:]
+            ended_on_q = (
+                q_token_id is not None
+                and new_ids.numel() > 0
+                and int(new_ids[-1].item()) == q_token_id
+            )
+            to_dec = new_ids[:-1] if ended_on_q else new_ids
+            answer = tokenizer.decode(to_dec, skip_special_tokens=False)
+            if len(answer) > 280:
+                answer = answer[:280] + "..."
+            tail = "  [stopped: Q:]" if ended_on_q else ""
+            print(f"    {prompt_text}")
+            print(f"      -> {answer}{tail}")
+            print()
+        except Exception as e:
+            print(f"    {prompt_text}")
+            print(f"      -> ERROR: {e}")
+            print()
+
+
 def load_text_dataset(args: argparse.Namespace) -> tuple[list[Path], "Dataset"]:
     """Returns (temp_files_to_cleanup_or_empty, hf_dataset)."""
-    from datasets import Dataset, load_dataset
+    from datasets import Dataset
 
     if args.text:
-        if not args.text.is_file():
-            sys.exit(f"Not a file: {args.text}")
-        return [], Dataset.from_dict({"text": [args.text.read_text(encoding="utf-8", errors="replace")]})
+        rows: list[str] = []
+        for p in args.text:
+            if not p.is_file():
+                sys.exit(f"Not a file: {p}")
+            raw = p.read_text(encoding="utf-8", errors="replace")
+            paragraphs = [blk.strip() for blk in raw.split("\n\n") if blk.strip()]
+            rows.extend(paragraphs)
+        print(f"Loaded {len(rows)} text paragraphs from {len(args.text)} file(s).")
+        return [], Dataset.from_dict({"text": rows})
 
+    from datasets import load_dataset
     assert args.dataset == "tiny_stories"
+    os.environ["HF_DATASETS_OFFLINE"] = "0"
     ds = load_dataset("roneneldan/TinyStories", split="train")
     if args.max_samples:
         n = min(len(ds), args.max_samples)
@@ -92,9 +299,53 @@ def load_text_dataset(args: argparse.Namespace) -> tuple[list[Path], "Dataset"]:
     return [], ds
 
 
+def run_estimate_only(args: argparse.Namespace) -> None:
+    """Print architecture size without tokenizer data or training."""
+    try:
+        from transformers import GPT2Config, GPT2LMHeadModel
+    except ImportError as e:
+        sys.exit(f"Missing dependency: {e}\nInstall: pip install torch transformers")
+
+    if args.n_embd % args.n_head != 0:
+        sys.exit(f"n-embd ({args.n_embd}) must be divisible by n-head ({args.n_head})")
+
+    n_inner = args.n_inner if args.n_inner is not None else 4 * args.n_embd
+    config = GPT2Config(
+        vocab_size=args.vocab_size,
+        n_positions=args.seq_len,
+        n_ctx=args.seq_len,
+        n_embd=args.n_embd,
+        n_layer=args.n_layer,
+        n_head=args.n_head,
+        n_inner=n_inner,
+        bos_token_id=0,
+        eos_token_id=0,
+    )
+    model = GPT2LMHeadModel(config)
+    n_params = sum(p.numel() for p in model.parameters())
+    preset_note = f"preset={args.preset}" if args.preset else "custom (no --preset)"
+    print("Architecture estimate (vocab_size from CLI; real training uses len(tokenizer) ≈ vocab_size)")
+    print(f"  {preset_note}")
+    print(f"  n_embd={args.n_embd}  n_layer={args.n_layer}  n_head={args.n_head}  n_inner={n_inner}")
+    print(f"  seq_len={args.seq_len}  vocab_size={args.vocab_size}")
+    print(f"  Parameters: {n_params:,}  (~{n_params / 1e6:.2f}M)")
+    print(f"  Rough FP32 weight bytes (if fully loaded in RAM): ~{n_params * 4 / 1024 / 1024:.0f} MiB")
+    print("  On-device budgets are often a few MiB PSRAM — use a smaller preset or INT8 + smaller dim.")
+
+
 def main() -> None:
     args = parse_args()
+    apply_preset(args)
     random.seed(args.seed)
+
+    if args.estimate_only:
+        run_estimate_only(args)
+        return
+
+    if args.out is None:
+        sys.exit("--out is required unless you pass --estimate-only")
+    if not args.text and not args.dataset:
+        sys.exit("Provide --text PATH or --dataset tiny_stories")
 
     if args.n_embd % args.n_head != 0:
         sys.exit(f"n-embd ({args.n_embd}) must be divisible by n-head ({args.n_head})")
@@ -118,9 +369,9 @@ def main() -> None:
     text_paths: list[Path] = []
 
     if args.text:
-        text_paths = [args.text.resolve()]
+        text_paths = [p.resolve() for p in args.text]
         _, ds_raw = load_text_dataset(args)
-    else:
+    elif args.dataset:
         _, hf_train = load_text_dataset(args)
         chunk_path = out_dir / "_train_corpus.txt"
         with chunk_path.open("w", encoding="utf-8") as f:
@@ -132,6 +383,21 @@ def main() -> None:
 
     print("Training BPE tokenizer…")
     tokenizer = train_bpe_tokenizer(text_paths, args.vocab_size, out_dir)
+
+    # ── Tokenizer debug info ─────────────────────────────────────────────
+    print(f"Tokenizer vocab size: {len(tokenizer)}")
+    for special in ["Q:", "A:", "<|endoftext|>", "<pad>", "<unk>"]:
+        tok_ids = tokenizer.encode(special, add_special_tokens=False)
+        print(f"  '{special}' -> token IDs: {tok_ids}  (atomic={len(tok_ids)==1})")
+    sample_qa = "Q: What is WiFi?\nA: WiFi connects to a router."
+    sample_ids = tokenizer.encode(sample_qa, add_special_tokens=False)
+    print(f"  Sample Q&A tokenization ({len(sample_ids)} tokens):")
+    for i, tid in enumerate(sample_ids[:30]):
+        piece = tokenizer.decode([tid])
+        print(f"    [{i}] {tid} = {repr(piece)}")
+    if len(sample_ids) > 30:
+        print(f"    ... ({len(sample_ids) - 30} more)")
+    print("─" * 60)
 
     n_inner = args.n_inner if args.n_inner is not None else 4 * args.n_embd
     eos_id = tokenizer.eos_token_id
@@ -149,6 +415,8 @@ def main() -> None:
         eos_token_id=eos_id,
     )
     model = GPT2LMHeadModel(config)
+    if args.gradient_checkpointing:
+        model.gradient_checkpointing_enable()
 
     def tokenize(examples):
         return tokenizer(
@@ -159,7 +427,45 @@ def main() -> None:
         )
 
     if args.text:
-        tok_ds = ds_raw.map(tokenize, batched=False, remove_columns=["text"])
+        # Q&A boundary-aware mode: each paragraph (one Q: ... A: ... block) is
+        # tokenized independently and truncated to seq_len. group_texts() is NOT
+        # used, so Q→A pairs are never split across training block boundaries.
+        print(f"Mode: Q&A boundary-aware (each paragraph = one training block, truncated to {args.seq_len})")
+        tok_ds = ds_raw.map(tokenize, batched=True, remove_columns=["text"])
+        lm_ds = tok_ds.filter(lambda ex: len(ex["input_ids"]) > 0)
+
+        # ── Q&A boundary debug ────────────────────────────────────────────────
+        q_id = tokenizer.convert_tokens_to_ids("Q:")
+        a_id = tokenizer.convert_tokens_to_ids("A:")
+        print(f"\n[BLOCK DEBUG] Q: token id={q_id}  A: token id={a_id}")
+        print(f"[BLOCK DEBUG] Total training blocks: {len(lm_ds)}")
+
+        lengths = [len(ex["input_ids"]) for ex in lm_ds]
+        if lengths:
+            print(f"[BLOCK DEBUG] Block lengths — min={min(lengths)}  max={max(lengths)}  "
+                  f"avg={sum(lengths)/len(lengths):.1f}  "
+                  f"truncated_to_{args.seq_len}={sum(1 for l in lengths if l == args.seq_len)}")
+
+        n_has_q  = sum(1 for ex in lm_ds if q_id in ex["input_ids"])
+        n_has_a  = sum(1 for ex in lm_ds if a_id in ex["input_ids"])
+        n_has_both = sum(1 for ex in lm_ds if q_id in ex["input_ids"] and a_id in ex["input_ids"])
+        n_missing_a = sum(1 for ex in lm_ds if q_id in ex["input_ids"] and a_id not in ex["input_ids"])
+        print(f"[BLOCK DEBUG] Blocks with Q: token : {n_has_q}/{len(lm_ds)}")
+        print(f"[BLOCK DEBUG] Blocks with A: token : {n_has_a}/{len(lm_ds)}")
+        print(f"[BLOCK DEBUG] Blocks with both Q:+A: : {n_has_both}/{len(lm_ds)}")
+        if n_missing_a:
+            print(f"[BLOCK DEBUG] WARNING: {n_missing_a} blocks have Q: but no A: "
+                  f"(pair was truncated — increase --seq-len or shorten QA pairs)")
+
+        print(f"\n[BLOCK DEBUG] Sample decoded blocks (first 5):")
+        for i, ex in enumerate(lm_ds.select(range(min(5, len(lm_ds))))):
+            decoded = tokenizer.decode(ex["input_ids"], skip_special_tokens=False)
+            decoded_short = decoded[:200].replace("\n", "\\n")
+            ids_preview = ex["input_ids"][:12]
+            print(f"  [{i}] len={len(ex['input_ids'])}  ids={ids_preview}...")
+            print(f"       text: {repr(decoded_short)}")
+        print()
+        # ─────────────────────────────────────────────────────────────────────
     else:
         nproc = max(1, min(8, (args.max_samples or 50000) // 1000 + 1))
         tok_ds = ds_raw.map(
@@ -169,28 +475,29 @@ def main() -> None:
             num_proc=nproc,
         )
 
-    block_size = args.seq_len
+        block_size = args.seq_len
 
-    def group_texts(examples):
-        # Concatenate only token ids (ignore attention_mask boundaries for simplicity)
-        all_ids: list[int] = []
-        for ids in examples["input_ids"]:
-            all_ids.extend(ids)
-        total_length = len(all_ids)
-        if total_length < block_size:
-            return {"input_ids": [], "labels": []}
-        total_length = (total_length // block_size) * block_size
-        chunks = [all_ids[i : i + block_size] for i in range(0, total_length, block_size)]
-        return {"input_ids": chunks, "labels": [c[:] for c in chunks]}
+        def group_texts(examples):
+            # Dataset mode: concatenate all tokens and slice into fixed blocks.
+            # Only used for --dataset (non-Q&A data). Never used with --text.
+            all_ids: list[int] = []
+            for ids in examples["input_ids"]:
+                all_ids.extend(ids)
+            total_length = len(all_ids)
+            if total_length < block_size:
+                return {"input_ids": [], "labels": []}
+            total_length = (total_length // block_size) * block_size
+            chunks = [all_ids[i : i + block_size] for i in range(0, total_length, block_size)]
+            return {"input_ids": chunks, "labels": [c[:] for c in chunks]}
 
-    rm_cols = [c for c in tok_ds.column_names if c != "input_ids"]
-    lm_ds = tok_ds.map(
-        group_texts,
-        batched=True,
-        batch_size=10_000,
-        remove_columns=rm_cols,
-    )
-    lm_ds = lm_ds.filter(lambda ex: len(ex["input_ids"]) > 0)
+        rm_cols = [c for c in tok_ds.column_names if c != "input_ids"]
+        lm_ds = tok_ds.map(
+            group_texts,
+            batched=True,
+            batch_size=10_000,
+            remove_columns=rm_cols,
+        )
+        lm_ds = lm_ds.filter(lambda ex: len(ex["input_ids"]) > 0)
     if len(lm_ds) == 0:
         sys.exit(
             "No training blocks after grouping — use longer text, more TinyStories samples, or lower --seq-len."
@@ -199,17 +506,29 @@ def main() -> None:
     collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
     use_cuda = torch.cuda.is_available()
-    training_args = TrainingArguments(
+    ta_kw: dict = dict(
         output_dir=str(out_dir / "trainer_ckpt"),
         num_train_epochs=args.epochs,
         per_device_train_batch_size=args.batch_size,
+        gradient_accumulation_steps=args.grad_accum,
         learning_rate=args.lr,
         logging_steps=20,
         save_steps=10_000,
         save_total_limit=1,
         prediction_loss_only=True,
         fp16=use_cuda,
+        gradient_checkpointing=args.gradient_checkpointing,
     )
+    if args.max_steps is not None and args.max_steps > 0:
+        ta_kw["max_steps"] = args.max_steps
+    training_args = TrainingArguments(**ta_kw)
+
+    n_params = sum(p.numel() for p in model.parameters())
+    print(f"Model: {n_params:,} parameters  |  batch={args.batch_size}  |  epochs={args.epochs}")
+    print(f"Dataset: {len(lm_ds):,} blocks of {args.seq_len} tokens")
+    print(f"Params-to-blocks ratio: {n_params / max(1, len(lm_ds)):.0f}:1")
+    if args.negatives:
+        print(f"Two-phase training: Phase 1 (positive only) -> test -> Phase 2 (+ negatives)")
 
     trainer = Trainer(
         model=model,
@@ -218,8 +537,110 @@ def main() -> None:
         data_collator=collator,
     )
 
-    print("Training…")
+    phase_label = "Phase 1 (positive only)" if args.negatives else "Training"
+    print(f"{phase_label}…")
     trainer.train()
+
+    # ── Post-training diagnostics ─────────────────────────────────────────────
+    print("─" * 60)
+    print("POST-TRAINING DIAGNOSTICS")
+    print("─" * 60)
+
+    log_history = trainer.state.log_history
+    losses = [(entry["step"], entry["loss"]) for entry in log_history if "loss" in entry]
+    if losses:
+        first_loss = losses[0][1]
+        last_loss = losses[-1][1]
+        min_loss = min(l for _, l in losses)
+        print(f"  Loss: first={first_loss:.4f}  last={last_loss:.4f}  min={min_loss:.4f}  steps={losses[-1][0]}")
+        if last_loss > first_loss * 0.95:
+            print("  WARNING: Loss barely decreased — model may not have learned.")
+
+    model.eval()
+    print("  Key weight stats:")
+    for name, param in model.named_parameters():
+        if any(k in name for k in ["wte.weight", "wpe.weight", "ln_f.weight", "ln_f.bias",
+                                     "h.0.ln_1", "h.0.attn.c_attn", "h.0.mlp.c_fc"]):
+            data = param.detach().float().cpu()
+            nan_count = int(data.isnan().sum())
+            nan_warn = " NAN!" if nan_count > 0 else ""
+            print(f"    {name:45s} [{float(data.min()):+.6f}, {float(data.max()):+.6f}] "
+                  f"mean={float(data.mean()):+.6f} std={float(data.std()):.6f}{nan_warn}")
+
+    # Domain Q&A generation test
+    phase1_label = "Phase 1 (positive only)" if args.negatives else "Post-training"
+    run_qa_test(model, tokenizer, f"{phase1_label} Q&A Test")
+    print("─" * 60)
+
+    # ══════════════════════════════════════════════════════════════════════
+    # Phase 2: Negative reinforcement (optional)
+    # ══════════════════════════════════════════════════════════════════════
+    if args.negatives:
+        neg_path = args.negatives.resolve()
+        if not neg_path.is_file():
+            print(f"WARNING: Negatives file not found: {neg_path} — skipping phase 2")
+        else:
+            print("═" * 60)
+            print("PHASE 2: ADDING NEGATIVE REINFORCEMENT DATA")
+            print("═" * 60)
+
+            neg_raw = neg_path.read_text(encoding="utf-8", errors="replace")
+            neg_paragraphs = [blk.strip() for blk in neg_raw.split("\n\n") if blk.strip()]
+            print(f"  Negative data: {len(neg_paragraphs)} paragraphs from {neg_path.name}")
+
+            from datasets import Dataset as _Dataset
+            combined_rows: list[str] = []
+            for p_path in text_paths:
+                if p_path.is_file():
+                    raw = p_path.read_text(encoding="utf-8", errors="replace")
+                    combined_rows.extend([blk.strip() for blk in raw.split("\n\n") if blk.strip()])
+            combined_rows.extend(neg_paragraphs)
+            print(f"  Combined dataset: {len(combined_rows)} paragraphs (original + negatives)")
+
+            ds_combined = _Dataset.from_dict({"text": combined_rows})
+            tok_combined = ds_combined.map(
+                lambda ex: tokenizer(ex["text"], truncation=True,
+                                     max_length=args.seq_len, padding=False),
+                batched=True, remove_columns=["text"],
+            )
+            if args.text:
+                # Q&A boundary-aware: keep each paragraph as its own block
+                lm_combined = tok_combined.filter(lambda ex: len(ex["input_ids"]) > 0)
+            else:
+                rm_cols2 = [c for c in tok_combined.column_names if c != "input_ids"]
+                lm_combined = tok_combined.map(group_texts, batched=True, batch_size=10_000, remove_columns=rm_cols2)
+                lm_combined = lm_combined.filter(lambda ex: len(ex["input_ids"]) > 0)
+            print(f"  Combined blocks: {len(lm_combined):,} of {args.seq_len} tokens")
+
+            neg_epochs = args.neg_epochs if args.neg_epochs is not None else args.epochs
+            neg_lr = args.neg_lr if args.neg_lr is not None else args.lr * 0.5
+            print(f"  Phase 2 config: epochs={neg_epochs} lr={neg_lr:.1e}")
+
+            ta_kw2 = dict(ta_kw)
+            ta_kw2["output_dir"] = str(out_dir / "trainer_ckpt_phase2")
+            ta_kw2["num_train_epochs"] = neg_epochs
+            ta_kw2["learning_rate"] = neg_lr
+            ta_kw2.pop("max_steps", None)
+
+            training_args2 = TrainingArguments(**ta_kw2)
+            trainer2 = Trainer(
+                model=model,
+                args=training_args2,
+                train_dataset=lm_combined,
+                data_collator=collator,
+            )
+
+            print("Phase 2 training…")
+            trainer2.train()
+
+            log2 = trainer2.state.log_history
+            losses2 = [(e["step"], e["loss"]) for e in log2 if "loss" in e]
+            if losses2:
+                print(f"  Phase 2 loss: first={losses2[0][1]:.4f}  last={losses2[-1][1]:.4f}  "
+                      f"min={min(l for _, l in losses2):.4f}  steps={losses2[-1][0]}")
+
+            run_qa_test(model, tokenizer, "Phase 2 (+ negatives) Q&A Test")
+            print("─" * 60)
 
     print(f"Saving to {out_dir} …")
     model.save_pretrained(out_dir, safe_serialization=True)
