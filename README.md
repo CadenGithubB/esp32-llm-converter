@@ -83,12 +83,12 @@ Copy `model.bin` to `/sd/llm/` on the SD card or upload via the web Files page. 
 - `index.html` — Browser-based INT8 quantization converter
 - `tokenizer.js` — Tokenizer used by the converter
 
-### Reference Docs (`docs/`)
+### Technical Docs (`technical_docs/`)
 - `architecture_comparison.html` — Visual comparison of model architectures
 - `transformer_deep_dive.html` — Detailed transformer internals reference
 
 ### Download
-- `hardwareone_training_package.zip` — Everything in `training/` bundled for easy download
+- `training/hardwareone_training_package.zip` — Everything in `training/` bundled for easy download
 
 ---
 
