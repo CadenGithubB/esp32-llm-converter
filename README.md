@@ -96,7 +96,7 @@ Copy `model.bin` to `/sd/llm/` on the SD card or upload via the web Files page. 
 
 | Preset | Vocab | Layers | Dim | FFN | PSRAM (INT8) | Notes |
 |--------|-------|--------|-----|-----|--------------|-------|
-| **HW1HelpAgent192_deep** | 4K | 18 | 192 | 320 | ~7.3 MB | **Recommended** — best depth/width balance, 733KB headroom |
+| **HW1HelpAgent192_deep** | 4K | 16 | 192 | 512 | ~7.7 MB | **Recommended** — 2.67× FFN ratio, ~504KB headroom |
 | HW1HelpAgent | 4K | 22 | 128 | 768 | ~7.5 MB | Proven fallback, wide FFN |
 | HW1HelpAgent192 | 4K | 12 | 192 | 768 | ~7.5 MB | Wider per-layer but shallower |
 | narrow3 | 4K | 18 | 128 | 768 | ~6.9 MB | Previous default |

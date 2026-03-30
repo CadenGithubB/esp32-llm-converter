@@ -110,10 +110,10 @@ PRESETS: dict[str, dict[str, int]] = {
     # 2.25× representational capacity vs dim=128 while keeping 12 layers of depth.
     # Fits 8 MB PSRAM with ctx=64: ~6142KB weights + 325KB fp + 1152KB kv + 35KB act ≈ 7654KB.
     "HW1HelpAgent192": {"vocab_size": 4096, "n_embd": 192, "n_layer": 12, "n_head": 6, "seq_len": 128, "n_inner": 768},
-    # "HW1HelpAgent192_deep": dim=192 / 18 layers / 6 heads / FFN=320 — recommended for Hardware One.
-    # FFN=320 (1.67×dim) trades width for 18 layers of depth: +6 layers vs HW1HelpAgent192.
-    # Verified PSRAM fit at ctx=64: ~7459 KB total with ~733 KB headroom on 8 MB ESP32-S3.
-    "HW1HelpAgent192_deep": {"vocab_size": 4096, "n_embd": 192, "n_layer": 18, "n_head": 6, "seq_len": 128, "n_inner": 320},
+    # "HW1HelpAgent192_deep": dim=192 / 16 layers / 6 heads / FFN=512 — recommended for Hardware One.
+    # FFN=512 (2.67×dim) balances factual storage width with 16 layers of routing depth.
+    # Est. PSRAM at ctx=64: ~7688 KB with ~504 KB headroom on 8 MB ESP32-S3.
+    "HW1HelpAgent192_deep": {"vocab_size": 4096, "n_embd": 192, "n_layer": 16, "n_head": 6, "seq_len": 128, "n_inner": 512},
     # "HW1HelpAgent256": dim=256 / 8 layers / 8 heads / FFN=768 — wider representation for better topic separation.
     # 4× representational capacity vs dim=128 at the cost of depth (8 vs 22 layers).
     # Fits 8 MB PSRAM with ctx=64: ~6336KB weights + 234KB fp + 1024KB kv + 46KB act ≈ 7640KB.

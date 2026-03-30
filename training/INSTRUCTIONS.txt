@@ -18,7 +18,7 @@ Verify GPU (optional):  python -c "import torch; print(torch.cuda.is_available()
 STEP 2 — Train the model
 --------------------------
 
-Use HW1HelpAgent192_deep for best quality: 18 layers, dim=192, 6 heads, FFN=320, seq=128.
+Use HW1HelpAgent192_deep for best quality: 16 layers, dim=192, 6 heads, FFN=512, seq=128.
 Or use HW1HelpAgent for the proven narrow model: 22 layers, dim=128, 4 heads, FFN=768.
 
 GPU training (recommended):
@@ -108,7 +108,7 @@ PRESET REFERENCE
 
 Name                Vocab  Layers  dim  FFN   seq   Est. INT8 PSRAM
 ------------------  -----  ------  ---  ----  ----  ---------------
-HW1HelpAgent192_deep 4K    18      192  320   128   ~7.3 MB  <- recommended
+HW1HelpAgent192_deep 4K    16      192  512   128   ~7.7 MB  <- recommended
 HW1HelpAgent        4K     22      128  768   128   ~7.5 MB
 HW1HelpAgent192     4K     12      192  768   128   ~7.6 MB
 HW1HelpAgent256     4K      8      256  768   128   ~7.8 MB
