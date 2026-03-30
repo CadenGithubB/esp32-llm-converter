@@ -164,4 +164,16 @@ MIT License — See LICENSE file for details.
 
 ---
 
+## Links
+
+| | |
+|---|---|
+| 🔧 **[INT8 Converter](https://cadengithubb.github.io/HardwareOne_LLM_Tool/)** | Browser-based tool — convert a trained model to `model.bin` |
+| 📐 **[Architecture Comparison](https://cadengithubb.github.io/HardwareOne_LLM_Tool/technical_docs/architecture_comparison.html)** | Visual breakdown of model size and shape tradeoffs |
+| 🧠 **[Transformer Deep Dive](https://cadengithubb.github.io/HardwareOne_LLM_Tool/technical_docs/transformer_deep_dive.html)** | How prompts move through the model — heads, attention, FFN, KV cache |
+| 💾 **[Hardware One Firmware](https://github.com/CadenGithubB/HardwareOne)** | The ESP32-S3 platform this model runs on |
+| 📦 **[This Repo](https://github.com/CadenGithubB/HardwareOne_LLM_Tool)** | Training scripts, converter, and reference docs |
+
+---
+
 **Built for Hardware One — Local AI, No Cloud Required**
