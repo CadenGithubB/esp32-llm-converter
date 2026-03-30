@@ -84,8 +84,8 @@ Copy `model.bin` to `/sd/llm/` on the SD card or upload via the web Files page. 
 - `tokenizer.js` — Tokenizer used by the converter
 
 ### Technical Docs (`technical_docs/`)
-- `architecture_comparison.html` — Visual comparison of model architectures
-- `transformer_deep_dive.html` — Detailed transformer internals reference
+- [`architecture_comparison.html`](https://cadengithubb.github.io/HardwareOne_LLM_Tool/technical_docs/architecture_comparison.html) — Visual comparison of model architectures
+- [`transformer_deep_dive.html`](https://cadengithubb.github.io/HardwareOne_LLM_Tool/technical_docs/transformer_deep_dive.html) — Detailed transformer internals reference
 
 ### Download
 - `training/hardwareone_training_package.zip` — Everything in `training/` bundled for easy download
