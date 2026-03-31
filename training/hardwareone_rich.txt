@@ -284,7 +284,7 @@ A: Type opengps to start the GPS module, then gps to see latitude, longitude, al
 Q: Command to use gps?
 A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
 
-Maria wanted to control the LED color from her phone. She connected to the device access point and opened the web dashboard in her browser. From the Settings tab she changed the LED to green. Then she set up an automation so the LED turned blue whenever the humidity went above 70 percent.
+A user wanted to control the LED color from a phone. They connected to the device access point and opened the web dashboard in a browser. From the Settings tab they changed the LED to green. Then they set up an automation so the LED turned blue whenever the humidity went above 70 percent.
 
 Q: How do I add a user?
 A: Type users add followed by the username, password, and role.
@@ -412,7 +412,7 @@ A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 Q: Command to turn off the led?
 A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 
-Sam needed to monitor a greenhouse overnight. She set up an automation rule: IF TEMP>35 THEN ledcolor red. She also configured MQTT so the device published temperature every minute. In the morning she checked Home Assistant and saw the temperature had stayed below 30 all night.
+A user needed to monitor a greenhouse overnight. They set up an automation rule: IF TEMP>35 THEN ledcolor red. They also configured MQTT so the device published temperature every minute. In the morning they checked Home Assistant and saw the temperature had stayed below 30 all night.
 
 Q: How do I publish to MQTT?
 A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
@@ -604,7 +604,7 @@ A: Type automationlist to see all configured automation rules and their status.
 Q: Command to list automations?
 A: Type automationlist to see all configured automation rules and their status.
 
-Alex took the device out of the box and plugged in the USB cable. The OLED screen lit up and showed a welcome message. After a few seconds the device scanned the I2C bus and found a BME280 sensor. Alex typed bme and saw the room temperature was 23 degrees.
+A user took the device out of the box and plugged in the USB cable. The OLED screen lit up and showed a welcome message. After a few seconds the device scanned the I2C bus and found a BME280 sensor. They typed bme and saw the room temperature was 23 degrees.
 
 Q: How do I change screen brightness?
 A: Type oled brightness followed by a value from 0 to 255.
@@ -796,7 +796,7 @@ A: Type openthermal to start the MLX90640 thermal camera. The web UI shows a liv
 Q: Command to get thermal images?
 A: Type openthermal to start the MLX90640 thermal camera. The web UI shows a live 32 by 24 heatmap. Type closethermal to stop it.
 
-A new user logged in to the web dashboard for the first time. She explored the tabs: Sensors showed live data, Files showed the SD card contents, and the LLM tab let her type questions about the device. She asked how to connect to WiFi and the model answered with the right command.
+A new user logged in to the web dashboard for the first time. They explored the tabs: Sensors showed live data, Files showed the SD card contents, and the LLM tab let them type questions about the device. They asked how to connect to WiFi and the model answered with the right command.
 
 Q: How do I use the hardware clock?
 A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the time. The RTC keeps time even when the device is powered off.
@@ -828,7 +828,7 @@ A: Type bme to read the temperature from the BME280 sensor. The reading includes
 Q: Explain the current temperature
 A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
 
-Jordan could not figure out why the sensor readings were wrong. He typed debugbme 1 to turn on BME280 debug logging. The serial console showed that the I2C bus was returning errors. After checking the wiring he found a loose connection on the SDA line. Once he fixed it, the sensor readings were normal again.
+A user could not figure out why the sensor readings were wrong. They typed debugbme 1 to turn on BME280 debug logging. The serial console showed that the I2C bus was returning errors. After checking the wiring they found a loose connection on the SDA line. Once they fixed it, the sensor readings were normal again.
 
 Q: How do I use the time-of-flight sensor?
 A: Type opentof to start the VL53L4CX sensor. It measures distance up to 6 metres.
