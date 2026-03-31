@@ -1,5 +1,5 @@
 Q: Command to see my paired devices?
-A: Type espnow status to see the connection status and the list of paired peers.
+A: Type espnowstats to see the connection status and the list of paired peers.
 
 Q: Command to log in to the web ui?
 A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
@@ -22,7 +22,7 @@ A: Four configurations: Barebones headless node, Sensor Appliance, Standard Hand
 Q: Command to do a firmware update?
 A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
 
-The SSD1306 OLED display shows status information on the device itself. It supports a menu system navigated with the Seesaw gamepad. The display shows sensor readings, WiFi status, battery level, and system messages. Type oled menu to open the main menu, or oled brightness to adjust the screen.
+The SSD1306 OLED display shows status information on the device itself. It supports a menu system navigated with the Seesaw gamepad. The display shows sensor readings, WiFi status, battery level, and system messages. Type oledmode menu to open the main menu, or oledbrightness to adjust the screen.
 
 Q: Make me laugh
 A: I can only help with Hardware One features. Try asking about WiFi, sensors, or commands.
@@ -53,13 +53,13 @@ Q: start the real time clock
 Do: openrtc
 
 Q: What command do I use to receive mqtt messages?
-A: Type mqtt subscribe followed by the topic pattern. Incoming messages appear in the serial log and can trigger automations.
+A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
 Q: How to transfer files to the device?
 A: Drag and drop files in the Files tab of the web UI, or use the upload button.
 
 Q: How to stop a sensor?
-A: Type close followed by the sensor name. For example, closebme stops the BME280.
+A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
 
 Q: How do I create an automation rule?
 A: Type IF followed by a condition and THEN followed by a command. For example, IF TEMP>30 THEN ledcolor red.
@@ -71,18 +71,18 @@ A: Type automationlist to see the list, then delete the rule by its number.
 Q: Does it need the internet?
 A: No. Hardware One works without internet. It serves its own web dashboard, runs sensors, and runs the LLM entirely on the device.
 
-Q: Read the temp sensor
-A: Type openbme to start the BME280 sensor, then type bme to read it.
+Q: Read the motion sensor
+A: Type openimu to start the BNO055 IMU, then imuread to see orientation and acceleration data.
 Q: Can I see it on the web UI?
-A: Yes, the Sensors tab shows live temperature, humidity, and pressure readings.
+A: Yes, the Sensors tab shows live IMU orientation, acceleration, and gyroscope readings.
 Q: Can I send the data to my server?
-A: Yes, set up MQTT with mqtt broker and mqtt connect. Sensor data is published to MQTT topics automatically.
+A: Yes, set up MQTT with mqttHost and openmqtt. Sensor data is published to MQTT topics automatically.
 
 Q: Command to check memory usage?
 A: Type memsample for a memory snapshot or memreport for a full report.
 
 Q: How much battery is left?
-A: Type battery status to see voltage, charge level, and charging status.
+A: Type batterystatus to see voltage, charge level, and charging status.
 
 Q: turn on the motion sensor
 Do: openimu
@@ -105,27 +105,27 @@ A: Type reboot to restart the device.
 Q: I need to access the web ui
 A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
 
-Q: Describe the BME280 sensor
-A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure. Type openbme to start it and bme to read it.
+Q: Describe the presence sensor
+A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
 
 Q: What is WiFi?
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifi connect followed by the network name and password to join.
+A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: How to create a hotspot?
-A: Type wifi ap to start the built-in access point. Connect from your phone or laptop to access the web dashboard without a router.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
 
 Q: Tell me about chatgpt
 A: I am a small language model running on this ESP32-S3 device. I answer questions about Hardware One.
 
 Q: Command to set up the access point?
-A: Type wifi ap to start the built-in access point. Connect from your phone or laptop to access the web dashboard without a router.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
 
 Q: How do I connect to WiFi?
-A: Type wifi connect followed by the network name and password.
+A: Type wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
 A: The device will fail to connect and show an error. Double-check the password and try again.
 Q: How do I know when it connects?
-A: Type wifi to see the status. When connected, it shows the IP address and signal strength.
+A: Type wifistatus to see the connection status, IP address, and signal strength.
 
 Q: disable the gesture sensor
 Do: closeapds
@@ -141,19 +141,19 @@ A: Try typing reboot to restart it. Check that the serial connection is active.
 Q: How do I check if it crashed?
 A: Type uptime to see if it recently rebooted. Check debug logs on the SD card for crash information.
 Q: How do I enable debug logs?
-A: Type debug followed by the module name and 1. Debug output goes to the serial console.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 or debugespnow 1. Debug output goes to the serial console.
 
 Q: How do I enable debug logging?
-A: Type debug followed by the module name and 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: List the supported sensors
-A: Supported sensors include BME280 for temperature and humidity, ICM-42688-P IMU, VL53L4CX time-of-flight, MLX90640 thermal camera, MLX90614 thermometer, APDS9960 gesture sensor, and GPS.
+A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: Command to check uptime?
 A: Type uptime to see how long the device has been running since the last reboot.
 
-Q: Explain the BME280
-A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure. Type openbme to start it and bme to read it.
+Q: Explain the presence sensor
+A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
 
 Q: What is the web password?
 A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
@@ -168,13 +168,13 @@ Q: Tell me about peer-to-peer communication
 A: ESP-NOW is a direct radio link between two Hardware One devices. It works up to 200 metres in open air with no infrastructure needed.
 
 Q: Command to delete a user?
-A: Type users delete followed by the username to remove their account.
+A: Type userdelete followed by the username to remove their account.
 
 Q: Explain WiFi
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifi connect followed by the network name and password to join.
+A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: How do I create a hotspot?
-A: Type wifi ap to start the built-in access point. Connect from your phone or laptop to access the web dashboard without a router.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
 
 Q: How much memory is available?
 A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
@@ -192,16 +192,16 @@ Q: open the gamepad
 Do: opengamepad
 
 Q: I want to turn on a sensor
-A: Type open followed by the sensor name. For example, openbme starts the BME280, openimu starts the IMU, and opentof starts the time-of-flight sensor.
+A: Type open followed by the sensor name. For example, openimu starts the BNO055 IMU, opentof starts the distance sensor, and openthermal starts the thermal camera.
 
 Q: What's the command to remove an account?
-A: Type users delete followed by the username to remove their account.
+A: Type userdelete followed by the username to remove their account.
 
 Q: How do I log in to the web UI?
 A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
 
 Q: Is MQTT connected?
-A: Type mqtt status to see whether the device is connected to the broker and what topic prefix is being used.
+A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
 
 Q: Describe the GPS feature
 A: The GPS module receives satellite signals to provide latitude, longitude, altitude, and speed. Type opengps to start it and gps to read position.
@@ -210,7 +210,7 @@ Q: What is the forecast?
 A: I can only answer questions about Hardware One. Type help to see available commands.
 
 Q: How to see debug output?
-A: Type debug followed by the module name and 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: What does the dashboard show?
 A: The web dashboard has tabs for Sensors, Files, Settings, Pair, MQTT, GPS, and LLM. Each tab shows real-time data and controls for that feature.
@@ -219,7 +219,7 @@ Q: What's the difference between ESP-NOW and WiFi?
 A: ESP-NOW is a direct radio link between two Hardware One devices. It does not need any infrastructure or internet connection.
 
 Q: How do I close a sensor?
-A: Type close followed by the sensor name. For example, closebme stops the BME280.
+A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
 
 Q: What ways can I control it?
 A: You can control Hardware One through the serial command line, the web dashboard on any device with a browser, or the OLED menu and gamepad.
@@ -228,18 +228,20 @@ Q: I need to enable a feature in the build
 A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
 
 Q: stop wifi
-Do: wifi disconnect
+Do: closewifi
 
 Q: What command do I use to join a network?
-A: Type wifi connect followed by the network name and password. The device saves credentials and reconnects automatically on reboot.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. The device saves credentials and reconnects automatically on reboot.
 
 Q: check memory
 Do: memsample
 
 Hardware One uses two storage systems. Internal flash uses LittleFS for settings, web pages, and small files. An optional micro SD card provides larger storage for logs, map tiles, model files, and recorded data. The Files tab in the web UI lets you browse both storage areas.
 
+To set up a temperature monitoring station, start the thermal camera with openthermal and enable MQTT publishing with mqttPublishThermal 1. Connect to your broker with mqttHost and openmqtt. The device will publish thermal data at regular intervals. You can then view the data in Home Assistant or any MQTT dashboard.
+
 Q: What command do I use to pair with bluetooth?
-A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+A: Type openble to start Bluetooth LE. BLE enables connections from phones and other devices.
 
 Q: Explain BLE
 A: BLE is Bluetooth Low Energy. Hardware One uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
@@ -255,13 +257,13 @@ Q: Do I need to reconfigure after updating?
 A: No. Settings are stored separately from the firmware and persist across updates.
 
 Q: How do I check ESP-NOW status?
-A: Type espnow status to see the connection status and the list of paired peers.
+A: Type espnowstats to see the connection status and the list of paired peers.
 
 Q: What is the SD card used for?
 A: The SD card stores large files like map tiles, LLM models, logs, and recorded data. It mounts automatically at /sd on boot.
 
 Q: Tell me about the IMU
-A: The IMU is the ICM-42688-P inertial measurement unit. It measures acceleration and rotation. Type openimu to start it and imu to read data.
+A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 After a firmware update the device reboots automatically. Your settings are still there because they are stored separately on internal flash. WiFi reconnects using your saved credentials. If you enabled autostart for a sensor, it starts on its own. Everything is back to normal in under ten seconds.
 
@@ -278,10 +280,10 @@ Q: What are bonded microcontrollers?
 A: Bonded mode connects two Hardware One devices so they share command registries. A command typed on one device can execute on the other transparently.
 
 Q: How do I change screen brightness?
-A: Type oled brightness followed by a value from 0 to 255.
+A: Type oledbrightness followed by a value from 0 to 255.
 
 Q: I need to add a user
-A: Type users add followed by the username, password, and role.
+A: Type useradd followed by the username, password, and role.
 
 Q: start the tof sensor
 Do: opentof
@@ -299,10 +301,10 @@ Q: What is the ESP-NOW range?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
 
 Q: What command do I use to scan for networks?
-A: Type wifi scan to see a list of nearby WiFi networks with signal strength.
+A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: What's the command to get sensor data?
-A: Type the sensor name to see its current reading. For example, type bme to see temperature, humidity, and pressure from the BME280.
+A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
 Q: display automation rules
 Do: automationlist
@@ -314,7 +316,7 @@ Q: synchronize the time
 Do: ntpsync
 
 Q: My WiFi is broken
-A: Check that the network name and password are correct. Type wifi connect followed by the SSID and password. Type wifi to see the current status.
+A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
 Q: turn on the radio
 Do: openfmradio
@@ -332,7 +334,7 @@ Q: Show me the clock
 A: Type time to see the current device time, or ntpsync to sync from an NTP server.
 
 Q: How do I check WiFi?
-A: Type wifi to show the current connection status, IP address, and signal strength.
+A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: Command to scan for i2c devices?
 A: Type i2cscan to scan the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
@@ -344,11 +346,11 @@ Q: shut down the gyroscope
 Do: closeimu
 
 Q: Connect to my router
-A: Type wifi connect followed by the network name and password.
+A: Type wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
 A: The device will fail to connect and show an error. Double-check the password and try again.
 Q: How do I know when it connects?
-A: Type wifi to see the status. When connected, it shows the IP address and signal strength.
+A: Type wifistatus to see the connection status, IP address, and signal strength.
 
 Hardware One is designed for reliability in field conditions. The firmware avoids dynamic heap allocation in hot paths and uses static buffers. PSRAM is reserved for large allocations like model weights and audio buffers. The partition table supports two application images for OTA rollback.
 
@@ -356,10 +358,10 @@ Q: Tell me about i2c
 A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
 
 Q: I need to use mqtt
-A: Set the broker with mqtt broker followed by the host address, then mqtt connect. Use mqtt user and mqtt pass if authentication is needed.
+A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: turn off wifi
-Do: wifi disconnect
+Do: closewifi
 
 Q: How to get help?
 A: Type help to see all available commands. Type help followed by a command name for detailed usage information.
@@ -383,7 +385,7 @@ Q: Explain peer-to-peer communication
 A: ESP-NOW is a direct radio link between two Hardware One devices. It works up to 200 metres in open air with no infrastructure needed.
 
 Q: What is Bluetooth?
-A: Bluetooth Low Energy lets Hardware One scan for nearby devices and connect to BLE peripherals. Type bluetooth scan to find devices.
+A: Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
 
 Q: What's the current time?
 A: Type time to see the current device time, or ntpsync to sync from an NTP server.
@@ -395,7 +397,7 @@ Q: How do I turn off the LED?
 A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 
 Q: Command to read the imu?
-A: Type openimu to start the ICM-42688-P, then imu to read acceleration and gyroscope data.
+A: Type openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
 Q: Does Hardware One support SD cards?
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
@@ -404,16 +406,16 @@ Q: turn on presence detection
 Do: openpresence
 
 Q: How do I connect to WiFi?
-A: Type wifi connect followed by the network name and password. The device saves credentials and reconnects automatically on reboot.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. The device saves credentials and reconnects automatically on reboot.
 
 Q: What command do I use to backup my configuration?
-A: Type settings export or use the Settings tab to download a JSON backup. Import it on another device to copy your configuration.
+A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
 Q: What's the command to check orientation?
-A: Type openimu to start the ICM-42688-P, then imu to read acceleration and gyroscope data.
+A: Type openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
 Q: Command to find wifi networks?
-A: Type wifi scan to see a list of nearby WiFi networks with signal strength.
+A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: What's the power consumption?
 A: Battery life depends on which features are active. GPS and WiFi use the most power. With light use the device can run several hours on a LiPo battery.
@@ -443,7 +445,7 @@ Q: I want to scan for i2c devices
 A: Type i2cscan to scan the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
 
 Q: Tell me about Bluetooth
-A: Bluetooth Low Energy lets Hardware One scan for nearby devices and connect to BLE peripherals. Type bluetooth scan to find devices.
+A: Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
 
 Q: disable the accelerometer
 Do: closeimu
@@ -461,7 +463,7 @@ Q: What is the meaning of life?
 A: I only know about Hardware One. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
 
 Q: Can this device connect to WiFi?
-A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifi connect followed by the network name and password to join a network.
+A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: Does it require a smartphone?
 A: No. You can control Hardware One through the serial command line, the web dashboard on any device with a browser, or the OLED menu and gamepad.
@@ -470,19 +472,19 @@ Q: close the gamepad
 Do: closegamepad
 
 Q: How do I disable debug output?
-A: Type debug followed by the module name and 0 to disable.
+A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
 
 Q: How does Bluetooth work here?
-A: Bluetooth Low Energy lets Hardware One scan for nearby devices and connect to BLE peripherals. Type bluetooth scan to find devices.
+A: Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
 
 Q: I need to read the imu
-A: Type openimu to start the ICM-42688-P, then imu to read acceleration and gyroscope data.
+A: Type openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
 Q: How does the OLED work?
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oled menu to open the main menu.
+A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: What command do I use to see debug output?
-A: Type debug followed by the module name and 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: What boards do you run on?
 A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
@@ -507,13 +509,13 @@ A: Try typing reboot to restart it. Check that the serial connection is active.
 Q: How do I check if it crashed?
 A: Type uptime to see if it recently rebooted. Check debug logs on the SD card for crash information.
 Q: How do I enable debug logs?
-A: Type debug followed by the module name and 1. Debug output goes to the serial console.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 or debugespnow 1. Debug output goes to the serial console.
 
 Q: What tabs are in the web UI?
 A: The web dashboard has tabs for Sensors, Files, Settings, Pair, MQTT, GPS, and LLM. Each tab shows real-time data and controls for that feature.
 
 Q: WiFi won't work
-A: Check that the network name and password are correct. Type wifi connect followed by the SSID and password. Type wifi to see the current status.
+A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
 Q: What is the origin of Hardware One?
 A: Hardware One is an open-source ESP32 firmware project built on ESP-IDF.
@@ -526,15 +528,15 @@ Q: How do I remove a rule?
 A: Type automationlist to see the list, then delete the rule by its number.
 
 Q: How to check battery level?
-A: Type battery status to see voltage, charge level, and charging status.
+A: Type batterystatus to see voltage, charge level, and charging status.
 
 The thermal camera is the MLX90640. It produces a 32 by 24 pixel heat map. Type openthermal to start it. The web dashboard shows the thermal image in real time. Type closethermal to stop the camera and free its memory.
 
 Q: I want to use the display
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oled menu to open the main menu.
+A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: How to turn off logging?
-A: Type debug followed by the module name and 0 to disable.
+A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
 
 Q: How do I browse files?
 A: Go to the Files tab in the web UI or type ls to list files in the current directory.
@@ -555,7 +557,7 @@ Q: Explain your capabilities
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
 
 Q: What's the command to see all accounts?
-A: Type users list to see all user accounts and their roles.
+A: Type userlist to see all user accounts and their roles.
 
 Q: What's the command to build the firmware?
 A: Use idf.py build to compile the firmware. Flash with idf.py flash. Hardware One uses ESP-IDF, not the Arduino IDE.
@@ -574,7 +576,7 @@ Q: What can trigger an automation?
 A: Automations can trigger on sensor values, time of day, MQTT messages, or button presses. Conditions can be combined with AND and OR.
 
 Q: What is the oled?
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oled menu to open the main menu.
+A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: Tell me about MQTT
 A: MQTT is a lightweight messaging protocol for IoT. Hardware One publishes sensor data to an MQTT broker and can receive commands from subscribed topics.
@@ -587,16 +589,18 @@ Q: How do I ask it something?
 A: Type llm ask followed by your question, or use the LLM tab in the web UI.
 
 Q: Command to publish to mqtt?
-A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
+A: Type mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
 Q: Search the internet
 A: I have no internet access. I run entirely on this device. Ask me about Hardware One features.
 
 Q: I want to subscribe to mqtt topics
-A: Type mqtt subscribe followed by the topic pattern. Incoming messages appear in the serial log and can trigger automations.
+A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
 Q: Tell me about the oled
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oled menu to open the main menu.
+A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
+
+To track motion data over time, start the IMU with openimu and enable MQTT publishing with mqttPublishIMU 1. Set up your MQTT broker with mqttHost and openmqtt. The device streams orientation and acceleration data to your broker. You can add an automation like IF ACCEL>15 THEN ledcolor red to flash the LED on impact.
 
 Q: What is I2C?
 A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
@@ -611,7 +615,7 @@ Q: Tell me about the distance sensor
 A: The time-of-flight sensor is the VL53L4CX. It measures distance to objects up to six metres away using an infrared laser pulse.
 
 Q: scan for wifi networks
-Do: wifi scan
+Do: wifiscan
 
 Q: set the time from internet
 Do: ntpsync
@@ -619,8 +623,8 @@ Do: ntpsync
 Q: Which ESP32 boards are supported?
 A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
 
-Q: What is the BME280?
-A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure. Type openbme to start it and bme to read it.
+Q: What is the presence sensor?
+A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
 
 Q: What time is it?
 A: Type time to see the current device time, or ntpsync to sync from an NTP server.
@@ -638,7 +642,7 @@ Q: How do I compile Hardware One?
 A: Use idf.py build to compile the firmware. Flash with idf.py flash. Hardware One uses ESP-IDF, not the Arduino IDE.
 
 Q: What command do I use to open a sensor?
-A: Type open followed by the sensor name. For example, openbme starts the BME280, openimu starts the IMU, and opentof starts the time-of-flight sensor.
+A: Type open followed by the sensor name. For example, openimu starts the BNO055 IMU, opentof starts the distance sensor, and openthermal starts the thermal camera.
 
 Q: Describe the MQTT protocol
 A: MQTT is a lightweight messaging protocol for IoT. Hardware One publishes sensor data to an MQTT broker and can receive commands from subscribed topics.
@@ -649,8 +653,8 @@ A: Type ledcolor followed by a color name or hex code. For example, ledcolor red
 Q: How to remove a file?
 A: Type rm followed by the file path, or use the delete button in the Files tab.
 
-Q: Explain the mqtt status
-A: Type mqtt status to see whether the device is connected to the broker and what topic prefix is being used.
+Q: Explain the mqttstatus
+A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
 
 Q: How big is the PSRAM?
 A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
@@ -670,7 +674,7 @@ Q: What's the command to sync the clock?
 A: Type ntpsync to synchronise from an NTP server. You need WiFi first. Type time to see the current time.
 
 Q: How to dim the display?
-A: Type oled brightness followed by a value from 0 to 255.
+A: Type oledbrightness followed by a value from 0 to 255.
 
 Q: shut down the gps
 Do: closegps
@@ -685,7 +689,7 @@ Q: stop the gps
 Do: closegps
 
 Q: I need to delete a user
-A: Type users delete followed by the username to remove their account.
+A: Type userdelete followed by the username to remove their account.
 
 Q: Who created this?
 A: Hardware One is an open-source ESP32 firmware project built on ESP-IDF.
@@ -694,7 +698,7 @@ Q: start the imu
 Do: openimu
 
 Q: Command to disable debug output?
-A: Type debug followed by the module name and 0 to disable.
+A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
 
 Q: reboot the device
 Do: reboot
@@ -712,7 +716,7 @@ Q: How to turn on a feature?
 A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
 
 Q: How do I send a message over ESP-NOW?
-A: Type espnow send followed by the peer MAC address and your message.
+A: Type espnowsend followed by the peer MAC address and your message.
 
 Q: close the thermal camera
 Do: closethermal
@@ -726,7 +730,7 @@ Do: opengamepad
 You can deploy multiple Hardware One devices along a hiking trail. Each one needs a GPS module and an SD card for storing map tiles. The devices log their position every ten seconds. When you are done, pull the SD cards and plot the GPS tracks on a map.
 
 Q: Command to change screen brightness?
-A: Type oled brightness followed by a value from 0 to 255.
+A: Type oledbrightness followed by a value from 0 to 255.
 
 Q: How to disable the light?
 A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
@@ -735,7 +739,7 @@ Q: turn on the distance sensor
 Do: opentof
 
 Q: How do I use Bluetooth?
-A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+A: Type openble to start Bluetooth Low Energy. It allows your phone and other BLE peripherals to connect to the device.
 
 Q: check if someone is nearby
 Do: presenceread
@@ -747,13 +751,13 @@ Q: show memory usage
 Do: memsample
 
 Q: How do I disconnect from WiFi?
-A: Type wifi disconnect to disconnect from the current network.
+A: Type closewifi to disconnect from the current network.
 
 Q: Command to sync the clock?
 A: Type ntpsync to synchronise from an NTP server. You need WiFi first. Type time to see the current time.
 
 Q: How to remove an account?
-A: Type users delete followed by the username to remove their account.
+A: Type userdelete followed by the username to remove their account.
 
 Q: How are you?
 A: I am Hardware One's help system. Ask me about sensors, WiFi, ESP-NOW, MQTT, or any feature.
@@ -789,7 +793,7 @@ Q: Does it have a camera?
 A: Hardware One supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
 
 Q: The screen is blank
-A: Type oled brightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
+A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
 Q: Howdy
 A: Hello! I can help with Hardware One. Ask about WiFi, sensors, ESP-NOW, MQTT, or type help.
@@ -798,14 +802,14 @@ Q: How to see the map?
 A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
 
 Q: How to find nearby devices?
-A: Type bluetooth scan to discover nearby BLE devices. Results show the device name, address, and signal strength.
+A: Type openble to start BLE scanning. The device can detect nearby Bluetooth Low Energy peripherals and phones.
 
 Q: My device seems frozen
 A: Try typing reboot to restart it. Check that the serial connection is active.
 Q: How do I check if it crashed?
 A: Type uptime to see if it recently rebooted. Check debug logs on the SD card for crash information.
 Q: How do I enable debug logs?
-A: Type debug followed by the module name and 1. Debug output goes to the serial console.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 or debugespnow 1. Debug output goes to the serial console.
 
 Q: How much memory is free?
 A: Type memsample for a memory snapshot or memreport for a full report.
@@ -819,7 +823,7 @@ Do: closegamepad
 Q: Which development boards work?
 A: Hardware One runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
 
-Debug logging helps diagnose issues. Each subsystem has its own debug flag. Type debug followed by the module name and 1 to enable, or 0 to disable. Debug output appears on the serial console. For persistent logs, the system can write to a file on the SD card.
+Debug logging helps diagnose issues. Each subsystem has its own debug flag. Debug commands use the pattern debugmodule 1 to enable, or 0 to disable. For example, debugwifi 1 or debugespnow 1. Debug output appears on the serial console. For persistent logs, the system can write to a file on the SD card.
 
 Q: How long has the device been running?
 A: Type uptime to see how long the device has been running since the last reboot.
@@ -841,30 +845,30 @@ Q: What are your capabilities?
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
 
 Q: Command to scan for bluetooth devices?
-A: Type bluetooth scan to discover nearby BLE devices. Results show the device name, address, and signal strength.
+A: Type openble to enable Bluetooth Low Energy. Once started, the device advertises and can pair with BLE peripherals.
 
 Q: Tell me about WiFi
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifi connect followed by the network name and password to join.
+A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 If your device is running low on memory after loading the LLM model, type memsample to check usage. Most of the PSRAM is used by model weights. You can reduce the context window from 64 to 32 to free enough space for the thermal camera. Then both the LLM and the MLX90640 can run at the same time.
 
 Q: What is the temperature?
-A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
+A: The MLX90640 thermal camera shows surface temperatures in a 32 by 24 heatmap. Type openthermal to start it. The DS3231 RTC also has a built-in temperature sensor.
 
 Q: Describe hardware one
 A: I am Hardware One, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
 
 Q: show nearby wifi
-Do: wifi scan
+Do: wifiscan
 
 Q: How old is the earth?
 A: I do not have general knowledge. I can answer questions about this device and its features.
 
 Q: How do I find WiFi networks?
-A: Type wifi scan to see a list of nearby WiFi networks with signal strength.
+A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: I need to list users
-A: Type users list to see all user accounts and their roles.
+A: Type userlist to see all user accounts and their roles.
 
 Q: what can I type
 Do: help
@@ -872,8 +876,8 @@ Do: help
 Q: What is bonded mode?
 A: Bonded mode connects two Hardware One devices so they share command registries. A command typed on one device can execute on the other transparently.
 
-Q: Tell me about the mqtt status
-A: Type mqtt status to see whether the device is connected to the broker and what topic prefix is being used.
+Q: Tell me about the mqttstatus
+A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
 
 Q: I need to change settings
 A: Type settings to see current values, or use the Settings tab in the web UI. Settings are saved as JSON on internal storage.
@@ -896,12 +900,12 @@ Do: openpresence
 Q: Describe the language model
 A: The LLM is a small language model that runs entirely on the device using PSRAM. It answers questions about Hardware One with no internet needed.
 
-Q: Show me the temperature reading
-A: Type openbme to start the BME280 sensor, then type bme to read it.
+Q: Show me the distance reading
+A: Type opentof to start the VL53L4CX sensor, then tofread to see the distance to the nearest object.
 Q: Can I see it on the web UI?
-A: Yes, the Sensors tab shows live temperature, humidity, and pressure readings.
+A: Yes, the Sensors tab shows live readings from all connected sensors including distance, orientation, and thermal data.
 Q: Can I send the data to my server?
-A: Yes, set up MQTT with mqtt broker and mqtt connect. Sensor data is published to MQTT topics automatically.
+A: Yes, set up MQTT with mqttHost and openmqtt. Sensor data is published to MQTT topics automatically.
 
 Q: How do I code in C?
 A: I only know about Hardware One firmware and features. Type help to see what I can assist with.
@@ -930,25 +934,25 @@ Q: Can it take pictures?
 A: Hardware One supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
 
 Q: What's the command to turn off logging?
-A: Type debug followed by the module name and 0 to disable.
+A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
 
 Q: close the gps
 Do: closegps
 
 Q: How to scan for networks?
-A: Type wifi scan to see a list of nearby WiFi networks with signal strength.
+A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: Nothing is working
 A: Try typing reboot to restart it. Check that the serial or web connection is active. Type uptime to see if it recently rebooted.
 
 Q: How to create an account?
-A: Type users add followed by the username, password, and role.
+A: Type useradd followed by the username, password, and role.
 
 Q: How to talk to another device?
-A: Type espnow send followed by the peer MAC address and your message.
+A: Type espnowsend followed by the peer MAC address and your message.
 
 Q: Command to enable debug logging?
-A: Type debug followed by the module name and 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: Does Hardware One have a camera sensor?
 A: Hardware One supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
@@ -969,22 +973,22 @@ Q: I want to use an sd card
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
 Q: What's the command to dim the display?
-A: Type oled brightness followed by a value from 0 to 255.
+A: Type oledbrightness followed by a value from 0 to 255.
 
 Q: turn off the distance sensor
 Do: closetof
 
 Q: How to check esp-now status?
-A: Type espnow status to see the connection status and the list of paired peers.
+A: Type espnowstats to see the connection status and the list of paired peers.
 
 Q: What's the command to open the dashboard?
 A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
 
 Q: I need to change screen brightness
-A: Type oled brightness followed by a value from 0 to 255.
+A: Type oledbrightness followed by a value from 0 to 255.
 
 Q: I need to see my paired devices
-A: Type espnow status to see the connection status and the list of paired peers.
+A: Type espnowstats to see the connection status and the list of paired peers.
 
 Q: What's the command to update the firmware?
 A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
@@ -1019,7 +1023,7 @@ A: Drag and drop files in the Files tab of the web UI, or use the upload button.
 Q: disable the presence sensor
 Do: closepresence
 
-You can check battery status to see voltage and charge level. If the device has been running on battery for several hours, GPS is the biggest power draw. Turn GPS on only when you need a fix to extend battery life.
+You can check batterystatus to see voltage and charge level. If the device has been running on battery for several hours, GPS is the biggest power draw. Turn GPS on only when you need a fix to extend battery life.
 
 Q: How to control the neopixel?
 A: Type ledcolor followed by a color name or hex code. For example, ledcolor red or ledcolor FF00FF.
@@ -1046,7 +1050,7 @@ Q: stop the fm radio
 Do: closefmradio
 
 Q: I need to set up wifi
-A: Type wifi connect followed by the network name and password. The device saves credentials and reconnects automatically on reboot.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. The device saves credentials and reconnects automatically on reboot.
 
 Q: Tell me about the rtc
 A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the time. The RTC keeps time even when the device is powered off.
@@ -1066,10 +1070,10 @@ Q: What is distance measurement?
 A: Type opentof to start the VL53L4CX sensor. It measures distance up to 6 metres.
 
 Q: Command to backup my configuration?
-A: Type settings export or use the Settings tab to download a JSON backup. Import it on another device to copy your configuration.
+A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
-Q: What is the current temperature?
-A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
+Q: What is the current orientation?
+A: Type imuread to see orientation, acceleration, and gyroscope data from the BNO055 IMU sensor.
 
 Q: What is the GPS?
 A: The GPS module receives satellite signals to provide latitude, longitude, altitude, and speed. Type opengps to start it and gps to read position.
@@ -1087,13 +1091,13 @@ Q: How do I create an automation?
 A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>30 THEN ledcolor red turns the LED red when temperature exceeds 30.
 
 Q: How do I delete a user?
-A: Type users delete followed by the username to remove their account.
+A: Type userdelete followed by the username to remove their account.
 
 Q: get a tof reading
 Do: tofread
 
 Q: How do I start a sensor?
-A: Type open followed by the sensor name. For example, openbme starts the BME280, openimu starts the IMU, and opentof starts the time-of-flight sensor.
+A: Type open followed by the sensor name. For example, openimu starts the BNO055 IMU, opentof starts the distance sensor, and openthermal starts the thermal camera.
 
 Q: open the gps
 Do: opengps
@@ -1112,10 +1116,10 @@ Q: Describe Bluetooth Low Energy
 A: BLE is Bluetooth Low Energy. Hardware One uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
 
 Q: Command to start a sensor?
-A: Type open followed by the sensor name. For example, openbme starts the BME280, openimu starts the IMU, and opentof starts the time-of-flight sensor.
+A: Type open followed by the sensor name. For example, openimu starts the BNO055 IMU, opentof starts the distance sensor, and openthermal starts the thermal camera.
 
 Q: Does Hardware One have WiFi?
-A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifi connect followed by the network name and password to join a network.
+A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: check the presence detector
 Do: presenceread
@@ -1124,7 +1128,7 @@ Q: What is Hardware One?
 A: I am Hardware One, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
 
 Q: Which sensors work with Hardware One?
-A: Supported sensors include BME280 for temperature and humidity, ICM-42688-P IMU, VL53L4CX time-of-flight, MLX90640 thermal camera, MLX90614 thermometer, APDS9960 gesture sensor, and GPS.
+A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: How do I check uptime?
 A: Type uptime to see how long the device has been running since the last reboot.
@@ -1139,23 +1143,23 @@ Q: turn on the apds9960
 Do: openapds
 
 Q: How to receive mqtt messages?
-A: Type mqtt subscribe followed by the topic pattern. Incoming messages appear in the serial log and can trigger automations.
+A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
 Q: Where are the settings?
 A: Type settings to see current values, or use the Settings tab in the web UI. Settings are saved as JSON on internal storage.
 
 Q: What command do I use to send mqtt data?
-A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
+A: Type mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
 Q: I need to turn off the led
 A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 
 Q: How to join WiFi?
-A: Type wifi connect followed by the network name and password.
+A: Type wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
 A: The device will fail to connect and show an error. Double-check the password and try again.
 Q: How do I know when it connects?
-A: Type wifi to see the status. When connected, it shows the IP address and signal strength.
+A: Type wifistatus to see the connection status, IP address, and signal strength.
 
 Q: Who built Hardware One?
 A: Hardware One is an open-source ESP32 firmware project built on ESP-IDF.
@@ -1178,13 +1182,13 @@ Q: Explain the meaning of life
 A: I only know about Hardware One. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
 
 Q: Screen won't turn on
-A: Type oled brightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
+A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
-Q: Tell me about the temperature
-A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
+Q: Tell me about the IMU
+A: Type imuread to see orientation, acceleration, and gyroscope data from the BNO055 IMU sensor.
 
 Q: How do I send a file over ESP-NOW?
-A: Type espnow sendfile followed by the peer MAC address and the file path.
+A: Type espnowsendfile followed by the peer MAC address and the file path.
 
 Q: Say something funny
 A: I can only help with Hardware One features. Try asking about WiFi, sensors, or commands.
@@ -1201,8 +1205,8 @@ A: The GPS tab in the web UI shows your position on an interactive map. Map tile
 Q: How do I change the LED color?
 A: Type ledcolor followed by a color name or hex code. For example, ledcolor red or ledcolor FF00FF.
 
-Q: Describe the mqtt status
-A: Type mqtt status to see whether the device is connected to the broker and what topic prefix is being used.
+Q: Describe the mqttstatus
+A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
 
 Q: How does the RTC work?
 A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the time. The RTC keeps time even when the device is powered off.
@@ -1214,7 +1218,7 @@ Q: open the tof
 Do: opentof
 
 Q: I want to send mqtt data
-A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
+A: Type mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
 Q: I need to sync the clock
 A: Type ntpsync to synchronise from an NTP server. You need WiFi first. Type time to see the current time.
@@ -1223,10 +1227,10 @@ Q: Command to check system status?
 A: Type status to see system status including WiFi, sensors, and uptime.
 
 Q: WiFi connection failed
-A: Check that the network name and password are correct. Type wifi connect followed by the SSID and password. Type wifi to see the current status.
+A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
 Q: I want to find wifi networks
-A: Type wifi scan to see a list of nearby WiFi networks with signal strength.
+A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: What day is it today?
 A: I do not have general knowledge. I can answer questions about this device and its features.
@@ -1258,10 +1262,10 @@ Q: Look something up online
 A: I have no internet access. I run entirely on this device. Ask me about Hardware One features.
 
 Q: Command to set up mqtt?
-A: Set the broker with mqtt broker followed by the host address, then mqtt connect. Use mqtt user and mqtt pass if authentication is needed.
+A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: Command to close a sensor?
-A: Type close followed by the sensor name. For example, closebme stops the BME280.
+A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
 
 Q: Explain the I2C bus
 A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
@@ -1272,13 +1276,13 @@ A: OTA is Over-The-Air firmware update. Open the Settings tab in the web UI and 
 Q: Sensor not responding
 A: Make sure the sensor is started with its open command. Type i2cscan to check if the sensor is detected on the I2C bus.
 
-MQTT is a lightweight messaging protocol used in IoT systems. Hardware One can connect to any MQTT broker and publish sensor data to topics. Set the broker address with mqtt broker, then type mqtt connect. Incoming messages can trigger automations. The broker must be reachable on the network.
+MQTT is a lightweight messaging protocol used in IoT systems. Hardware One can connect to any MQTT broker and publish sensor data to topics. Set the broker address with mqttHost, then type openmqtt to connect. Incoming messages can trigger automations. The broker must be reachable on the network.
 
 Q: How do I check the firmware version?
 A: Type version to see the current firmware version and build date.
 
 Q: I need to send a file over esp-now
-A: Type espnow sendfile followed by the peer MAC address and the file path.
+A: Type espnowsendfile followed by the peer MAC address and the file path.
 
 Q: set the led to red
 Do: ledcolor red
@@ -1307,7 +1311,7 @@ Q: Are you an AI?
 A: I am a small language model running on this ESP32-S3 device. I answer questions about Hardware One.
 
 Q: Can I transfer files between devices?
-A: Type espnow sendfile followed by the peer MAC address and the file path.
+A: Type espnowsendfile followed by the peer MAC address and the file path.
 
 Q: memory statistics
 Do: memreport
@@ -1334,29 +1338,29 @@ Q: close the apds sensor
 Do: closeapds
 
 Q: Describe the WiFi feature
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifi connect followed by the network name and password to join.
+A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: Command to see the map?
 A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
 
 Q: Command to set up wifi?
-A: Type wifi connect followed by the network name and password. The device saves credentials and reconnects automatically on reboot.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. The device saves credentials and reconnects automatically on reboot.
 
-Q: Tell me about the BME280
-A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure. Type openbme to start it and bme to read it.
+Q: Tell me about the presence sensor
+A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
 
 Q: The device stopped working
 A: Try typing reboot to restart it. Check that the serial connection is active.
 Q: How do I check if it crashed?
 A: Type uptime to see if it recently rebooted. Check debug logs on the SD card for crash information.
 Q: How do I enable debug logs?
-A: Type debug followed by the module name and 1. Debug output goes to the serial console.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 or debugespnow 1. Debug output goes to the serial console.
 
 Q: How do I scan for Bluetooth devices?
-A: Type bluetooth scan to discover nearby BLE devices. Results show the device name, address, and signal strength.
+A: Start BLE by typing openble. The ESP32-S3 will begin scanning for nearby Bluetooth Low Energy devices.
 
 Q: How do I use the display?
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oled menu to open the main menu.
+A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: What command do I use to see ram usage?
 A: Type memsample for a memory snapshot or memreport for a full report.
@@ -1367,25 +1371,25 @@ A: Type automationlist to see all configured automation rules and their status.
 Hardware One can run a small language model entirely on the device. The model is loaded into PSRAM and uses no internet connection. Models are stored in LLM1 binary format on the SD card or internal storage. The inference engine runs the full transformer forward pass in C with no external library dependency.
 
 Q: Command to send a file over esp-now?
-A: Type espnow sendfile followed by the peer MAC address and the file path.
+A: Type espnowsendfile followed by the peer MAC address and the file path.
 
 Q: What command do I use to stop a sensor?
-A: Type close followed by the sensor name. For example, closebme stops the BME280.
+A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
 
 Q: Explain bonded microcontrollers
 A: Bonded mode connects two Hardware One devices so they share command registries. A command typed on one device can execute on the other transparently.
 
 Q: I want to turn off a sensor
-A: Type close followed by the sensor name. For example, closebme stops the BME280.
+A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
 
 Q: list wifi networks
-Do: wifi scan
+Do: wifiscan
 
 Q: What events can start an automation?
 A: Automations can trigger on sensor values, time of day, MQTT messages, or button presses. Conditions can be combined with AND and OR.
 
 Q: How does the motion sensor work?
-A: Type openimu to start the ICM-42688-P, then imu to read acceleration and gyroscope data.
+A: Type openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
 Q: Tell me about yourself.
 A: I am Hardware One, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
@@ -1404,13 +1408,13 @@ Q: How much PSRAM does it have?
 A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
 
 Q: WiFi is not connecting
-A: Check that the network name and password are correct. Type wifi connect followed by the SSID and password. Type wifi to see the current status.
+A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
 Q: take a memory snapshot
 Do: memsample
 
 Q: Is WiFi connected?
-A: Type wifi to show the current connection status, IP address, and signal strength.
+A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: What is JavaScript?
 A: I only know about Hardware One firmware and features. Type help to see what I can assist with.
@@ -1419,16 +1423,16 @@ Q: What kind of camera does it have?
 A: Hardware One supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
 
 Q: What is the IMU?
-A: The IMU is the ICM-42688-P inertial measurement unit. It measures acceleration and rotation. Type openimu to start it and imu to read data.
+A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: What's the command to remove a file?
 A: Type rm followed by the file path, or use the delete button in the Files tab.
 
 Q: Display is dark
-A: Type oled brightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
+A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
 Q: Command to get sensor data?
-A: Type the sensor name to see its current reading. For example, type bme to see temperature, humidity, and pressure from the BME280.
+A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
 Q: I want to use the hardware clock
 A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the time. The RTC keeps time even when the device is powered off.
@@ -1440,10 +1444,10 @@ Q: shut down the radio
 Do: closefmradio
 
 Q: I need to check sensor readings
-A: Type the sensor name to see its current reading. For example, type bme to see temperature, humidity, and pressure from the BME280.
+A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
 Q: How does the IMU work?
-A: The IMU is the ICM-42688-P inertial measurement unit. It measures acceleration and rotation. Type openimu to start it and imu to read data.
+A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: How to auto-start a sensor on boot?
 A: Type SENSORautostart on. For example, imuautostart on starts the IMU automatically on every boot.
@@ -1452,7 +1456,7 @@ Q: Command to use gps?
 A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
 
 Q: I need to use bluetooth
-A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+A: Type openble to activate BLE. Type closeble when you are done to free resources.
 
 Q: I need to reboot the device
 A: Type reboot to restart the device.
@@ -1461,7 +1465,7 @@ Q: show full memory report
 Do: memreport
 
 Q: Is WiFi built in?
-A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifi connect followed by the network name and password to join a network.
+A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: activate the radio
 Do: openfmradio
@@ -1474,10 +1478,10 @@ Q: Do I need to reconfigure after updating?
 A: No. Settings are stored separately from the firmware and persist across updates.
 
 Q: What sensors does Hardware One have?
-A: Supported sensors include BME280 for temperature and humidity, ICM-42688-P IMU, VL53L4CX time-of-flight, MLX90640 thermal camera, MLX90614 thermometer, APDS9960 gesture sensor, and GPS.
+A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: What is the MQTT status?
-A: Type mqtt status to see whether the device is connected to the broker and what topic prefix is being used.
+A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
 
 Q: How far can devices communicate?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
@@ -1486,7 +1490,7 @@ Q: turn off the heat sensor
 Do: closethermal
 
 Q: What's the command to leave the current network?
-A: Type wifi disconnect to disconnect from the current network.
+A: Type closewifi to disconnect from the current network.
 
 Q: How does ESP-NOW pairing work step by step?
 A: Open the Pair tab on both devices. Set the same passphrase and initiate pairing.
@@ -1508,16 +1512,16 @@ Q: What's the command to turn on a feature?
 A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
 
 Q: What command do I use to connect to mqtt?
-A: Set the broker with mqtt broker followed by the host address, then mqtt connect. Use mqtt user and mqtt pass if authentication is needed.
+A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: search for wifi
-Do: wifi scan
+Do: wifiscan
 
 Q: I want to update the firmware
 A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
 
 Q: disconnect from wifi
-Do: wifi disconnect
+Do: closewifi
 
 Q: Restore factory settings
 A: There is no factory reset command. To clear settings, delete the settings JSON file from internal storage and reboot.
@@ -1525,12 +1529,12 @@ A: There is no factory reset command. To clear settings, delete the settings JSO
 Q: measure the distance
 Do: tofread
 
-Q: How do I check the temperature?
-A: Type openbme to start the BME280 sensor, then type bme to read it.
+Q: How do I check for people nearby?
+A: Type openpresence to start the STHS34PF80 presence sensor, then presenceread to check detection status.
 Q: Can I see it on the web UI?
-A: Yes, the Sensors tab shows live temperature, humidity, and pressure readings.
+A: Yes, the Sensors tab shows live readings from all connected sensors including distance, orientation, and thermal data.
 Q: Can I send the data to my server?
-A: Yes, set up MQTT with mqtt broker and mqtt connect. Sensor data is published to MQTT topics automatically.
+A: Yes, set up MQTT with mqttHost and openmqtt. Sensor data is published to MQTT topics automatically.
 
 The web dashboard is a browser-based interface served directly from the device. It does not need the internet or any cloud service. You access it by typing the device IP address into any web browser on the same network. The dashboard has tabs for sensors, files, settings, pairing, MQTT, GPS, and the language model.
 
@@ -1540,7 +1544,7 @@ A: Yes. Hardware One works without internet. It serves its own web dashboard, ru
 Q: What is an automation?
 A: An automation is a rule that triggers actions based on conditions. Use IF followed by a condition and THEN followed by a command.
 
-When you take the device out of the box and plug in the USB cable, the OLED screen lights up and shows a welcome message. After a few seconds the device scans the I2C bus and finds connected sensors. Type bme and you will see the room temperature.
+When you take the device out of the box and plug in the USB cable, the OLED screen lights up and shows a welcome message. After a few seconds the device scans the I2C bus and finds connected sensors. Type imuread and you will see the current orientation.
 
 Q: How does OTA work?
 A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
@@ -1598,7 +1602,7 @@ Q: What command do I use to find connected sensors?
 A: Type i2cscan to scan the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
 
 Q: How do I read the IMU?
-A: Type openimu to start the ICM-42688-P, then imu to read acceleration and gyroscope data.
+A: Type openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
 Q: How to pair Hardware One devices?
 A: Open the Pair tab on both devices. Set the same passphrase and initiate pairing.
@@ -1630,10 +1634,12 @@ Q: stop the imu
 Do: closeimu
 
 Q: How do I publish to MQTT?
-A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
+A: Type mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
 Q: list available commands
 Do: help
+
+When setting up a new device, connect WiFi first with wifiadd and openwifi. Then type ntpsync to set the clock. Run i2cscan to see which sensors are plugged in. Start the sensors you need with their open commands. If you want sensors to start automatically on reboot, type SENSORautostart on for each one.
 
 Q: Tell me about SD card storage
 A: The SD card stores large files like map tiles, LLM models, logs, and recorded data. It mounts automatically at /sd on boot.
@@ -1641,11 +1647,11 @@ A: The SD card stores large files like map tiles, LLM models, logs, and recorded
 Q: activate the gamepad
 Do: opengamepad
 
-Q: What is the battery status?
-A: Type battery status to see voltage, charge level, and charging status.
+Q: What is the batterystatus?
+A: Type batterystatus to see voltage, charge level, and charging status.
 
 Q: What command do I use to talk to another device?
-A: Type espnow send followed by the peer MAC address and your message.
+A: Type espnowsend followed by the peer MAC address and your message.
 
 Q: What features do you have?
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
@@ -1657,7 +1663,7 @@ Q: I need to see ram usage
 A: Type memsample for a memory snapshot or memreport for a full report.
 
 Q: What's the command to create an account?
-A: Type users add followed by the username, password, and role.
+A: Type useradd followed by the username, password, and role.
 
 Q: Is it going to rain?
 A: I can only answer questions about Hardware One. Type help to see available commands.
@@ -1678,12 +1684,12 @@ A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna qu
 Q: Hello
 A: Hello! I can help with Hardware One. Ask about WiFi, sensors, ESP-NOW, MQTT, or type help.
 
-Q: I want to read the temperature.
-A: Type openbme to start the BME280 sensor, then type bme to read it.
+Q: I want to check for presence.
+A: Type openpresence to start the STHS34PF80 presence sensor, then presenceread to check detection status.
 Q: Can I see it on the web UI?
-A: Yes, the Sensors tab shows live temperature, humidity, and pressure readings.
+A: Yes, the Sensors tab shows live readings from all connected sensors including distance, orientation, and thermal data.
 Q: Can I send the data to my server?
-A: Yes, set up MQTT with mqtt broker and mqtt connect. Sensor data is published to MQTT topics automatically.
+A: Yes, set up MQTT with mqttHost and openmqtt. Sensor data is published to MQTT topics automatically.
 
 Q: detailed memory breakdown
 Do: memreport
@@ -1704,7 +1710,7 @@ Q: What is the reboot command?
 A: Type reboot to restart the device.
 
 Q: How does WiFi work on this device?
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifi connect followed by the network name and password to join.
+A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: How to browse files?
 A: Go to the Files tab in the web UI or type ls to list files in the current directory.
@@ -1712,12 +1718,14 @@ A: Go to the Files tab in the web UI or type ls to list files in the current dir
 Bonded mode takes ESP-NOW pairing further. When two devices are bonded, they share their command registries. A command typed on one device can execute on the other transparently. This is useful for setups where one device is a sensor node and the other is a display unit.
 
 Q: Does it support wireless networking?
-A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifi connect followed by the network name and password to join a network.
+A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
-If your sensor readings look wrong, type debugbme 1 to turn on BME280 debug logging. The serial console will show if the I2C bus is returning errors. Check the wiring for loose connections on the SDA line. Once you fix it, the sensor readings should return to normal.
+If your sensor readings look wrong, type i2cscan to check whether the sensor is detected on the bus. The serial console will show if the I2C bus is returning errors. Check the wiring for loose connections on the SDA line. Once you fix it, the sensor readings should return to normal.
+
+The APDS9960 gesture sensor detects hand waves in four directions. Type openapds to start it. The sensor can trigger automations based on gestures, making it useful for hands-free control. Type closeapds to stop it and free I2C bandwidth for other sensors.
 
 Q: What is the WiFi status?
-A: Type wifi to show the current connection status, IP address, and signal strength.
+A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: What is OTA?
 A: OTA is Over-The-Air firmware update. Open the Settings tab in the web UI and upload a new firmware binary to update the device wirelessly.
@@ -1744,15 +1752,17 @@ Q: What commands are available?
 A: Type help to see all available commands. Type help followed by a command name for detailed usage information.
 
 Q: I want to use ap mode
-A: Type wifi ap to start the built-in access point. Connect from your phone or laptop to access the web dashboard without a router.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
 
 Q: show help
 Do: help
 
 Q: Command to disconnect from wifi?
-A: Type wifi disconnect to disconnect from the current network.
+A: Type closewifi to disconnect from the current network.
 
-If NTP sync fails, make sure you are connected to WiFi first. Type wifi connect followed by the network name and password to join the network. Then type ntpsync to set the clock. The RTC saves the time so it survives a reboot even without WiFi.
+If NTP sync fails, make sure you are connected to WiFi first. Type wifiadd followed by the network name and password, then openwifi to connect. Then type ntpsync to set the clock. The RTC saves the time so it survives a reboot even without WiFi.
+
+Two Hardware One devices can work together as a wireless sensor relay. Pair them with ESP-NOW using the Pair tab. The first device reads the distance sensor with opentof. The second device can receive sensor data over espnowsend and display it on its OLED. Bond the devices to share commands across both units.
 
 Q: What can you do?
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
@@ -1760,20 +1770,22 @@ A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run autom
 Q: open the imu
 Do: openimu
 
-The BME280 sensor measures three things: temperature, humidity, and barometric pressure. Once started with openbme, you can read it by typing bme. The web UI shows live readings that update every few seconds. Sensor data can be published to MQTT or used in automation rules.
+The BNO055 IMU measures orientation, acceleration, and rotation. Once started with openimu, you can read it by typing imuread. The web UI shows live readings that update every few seconds. Sensor data can be published to MQTT or used in automation rules.
+
+The DS3231 real-time clock keeps accurate time even when the device is powered off. Start it with openrtc and read the time with rtcread. Sync the clock with ntpsync over WiFi. The RTC is useful for timestamping sensor logs and scheduling time-based automations.
 
 Q: How do I check battery level?
-A: Type battery status to see voltage, charge level, and charging status.
+A: Type batterystatus to see voltage, charge level, and charging status.
 
 Q: I need to check system status
 A: Type status to see system status including WiFi, sensors, and uptime.
 
 Q: I need to connect to a WiFi network
-A: Type wifi connect followed by the network name and password.
+A: Type wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
 A: The device will fail to connect and show an error. Double-check the password and try again.
 Q: How do I know when it connects?
-A: Type wifi to see the status. When connected, it shows the IP address and signal strength.
+A: Type wifistatus to see the connection status, IP address, and signal strength.
 
 Q: Describe over-the-air updates
 A: OTA is Over-The-Air firmware update. Open the Settings tab in the web UI and upload a new firmware binary to update the device wirelessly.
@@ -1816,15 +1828,15 @@ Q: Command to load a model?
 A: Place model.bin in /sd/llm/ on the SD card. Type llm load to load it, or llm models to list available models.
 
 Q: OLED is not showing anything
-A: Type oled brightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
+A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
 Q: What is MQTT?
 A: MQTT is a lightweight messaging protocol for IoT. Hardware One publishes sensor data to an MQTT broker and can receive commands from subscribed topics.
 
-Hardware One discovers I2C sensors automatically when it boots. It scans the I2C bus and loads drivers for any recognised device. Supported sensors include the BME280 for temperature and humidity, the ICM-42688-P IMU for motion and orientation, the VL53L4CX for distance measurement, and the MLX90640 thermal camera for infrared imaging.
+Hardware One discovers I2C sensors automatically when it boots. It scans the I2C bus and loads drivers for any recognised device. Supported sensors include the BNO055 IMU for motion and orientation, the VL53L4CX for distance measurement, the MLX90640 thermal camera for infrared imaging, and the STHS34PF80 for presence detection.
 
 Q: I want to scan for bluetooth devices
-A: Type bluetooth scan to discover nearby BLE devices. Results show the device name, address, and signal strength.
+A: Type openble to turn on Bluetooth Low Energy scanning. Nearby BLE devices will appear in the serial output.
 
 Q: How is ESP-NOW different from WiFi?
 A: ESP-NOW is a direct radio link between two Hardware One devices. It does not need any infrastructure or internet connection.
@@ -1833,9 +1845,9 @@ Q: Command to create an automation?
 A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>30 THEN ledcolor red turns the LED red when temperature exceeds 30.
 
 Q: Explain Bluetooth
-A: Bluetooth Low Energy lets Hardware One scan for nearby devices and connect to BLE peripherals. Type bluetooth scan to find devices.
+A: Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
 
-Hardware One connects to WiFi networks using the ESP32-S3 radio. When you type wifi connect followed by a network name and password, the device joins the network and gets an IP address. The credentials are saved so the device reconnects automatically after a reboot. You can check the connection by typing wifi, which shows the IP address and signal strength.
+Hardware One connects to WiFi networks using the ESP32-S3 radio. Type wifiadd followed by a network name and password to save the credentials, then openwifi to connect. The device gets an IP address and reconnects automatically after a reboot. Type wifistatus to check the connection and signal strength.
 
 Q: turn on the rtc
 Do: openrtc
@@ -1843,35 +1855,39 @@ Do: openrtc
 Q: get a thermal reading
 Do: thermalread
 
+For a security setup, start the presence sensor with openpresence. Create an automation rule: IF PRESENCE>0 THEN ledcolor red. When someone walks into the room, the STHS34PF80 detects body heat and the LED turns red. You can also publish presence data over MQTT with mqttSubscribeTopics to get alerts on your phone.
+
 Q: Command to check wifi?
-A: Type wifi to show the current connection status, IP address, and signal strength.
+A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: the weather?
 A: I can only answer questions about Hardware One. Type help to see available commands.
 
 Q: How to check wifi?
-A: Type wifi to show the current connection status, IP address, and signal strength.
+A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: Where is the GPS map?
 A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
 
 Q: What sensors can I use?
-A: Supported sensors include BME280 for temperature and humidity, ICM-42688-P IMU, VL53L4CX time-of-flight, MLX90640 thermal camera, MLX90614 thermometer, APDS9960 gesture sensor, and GPS.
+A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: stop the tof sensor
 Do: closetof
 
 Q: How to connect to wifi?
-A: Type wifi connect followed by the network name and password. The device saves credentials and reconnects automatically on reboot.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. The device saves credentials and reconnects automatically on reboot.
 
 Q: Describe the Bluetooth feature
-A: Bluetooth Low Energy lets Hardware One scan for nearby devices and connect to BLE peripherals. Type bluetooth scan to find devices.
+A: Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
+
+To use the distance sensor as a proximity alarm, start it with opentof and create an automation: IF TOF<100 THEN ledcolor red. When an object comes within 100 millimetres, the VL53L4CX triggers the LED. Type tofread to check the current distance manually.
 
 Q: What version am I running?
 A: Type version to see the current firmware version and build date.
 
 Q: How do I set up MQTT?
-A: Set the broker with mqtt broker followed by the host address, then mqtt connect. Use mqtt user and mqtt pass if authentication is needed.
+A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: ESP-NOW vs WiFi?
 A: ESP-NOW is a direct radio link between two Hardware One devices. It does not need any infrastructure or internet connection.
@@ -1898,10 +1914,10 @@ Q: Tell me about bonded mode
 A: Bonded mode connects two Hardware One devices so they share command registries. A command typed on one device can execute on the other transparently.
 
 Q: Command to subscribe to mqtt topics?
-A: Type mqtt subscribe followed by the topic pattern. Incoming messages appear in the serial log and can trigger automations.
+A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
 Q: Describe the IMU sensor
-A: The IMU is the ICM-42688-P inertial measurement unit. It measures acceleration and rotation. Type openimu to start it and imu to read data.
+A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: What's the command to transfer files to the device?
 A: Drag and drop files in the Files tab of the web UI, or use the upload button.
@@ -1913,7 +1929,7 @@ Q: start the thermal camera
 Do: openthermal
 
 Q: How to connect to mqtt?
-A: Set the broker with mqtt broker followed by the host address, then mqtt connect. Use mqtt user and mqtt pass if authentication is needed.
+A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: open the fm tuner
 Do: openfmradio
@@ -1921,12 +1937,12 @@ Do: openfmradio
 Q: I need to delete a file
 A: Type rm followed by the file path, or use the delete button in the Files tab.
 
-Q: I need temperature data
-A: Type openbme to start the BME280 sensor, then type bme to read it.
+Q: I need motion data
+A: Type openimu to start the BNO055 IMU, then imuread to see orientation and acceleration data.
 Q: Can I see it on the web UI?
-A: Yes, the Sensors tab shows live temperature, humidity, and pressure readings.
+A: Yes, the Sensors tab shows live readings from all connected sensors including distance, orientation, and thermal data.
 Q: Can I send the data to my server?
-A: Yes, set up MQTT with mqtt broker and mqtt connect. Sensor data is published to MQTT topics automatically.
+A: Yes, set up MQTT with mqttHost and openmqtt. Sensor data is published to MQTT topics automatically.
 
 Q: shut down the gamepad
 Do: closegamepad
@@ -1944,7 +1960,7 @@ Q: activate the ds3231
 Do: openrtc
 
 Q: I need to disable debug output
-A: Type debug followed by the module name and 0 to disable.
+A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
 
 Q: How do I use the web interface?
 A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
@@ -1953,7 +1969,7 @@ Q: How far does ESP-NOW reach?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
 
 Q: Command to check battery level?
-A: Type battery status to see voltage, charge level, and charging status.
+A: Type batterystatus to see voltage, charge level, and charging status.
 
 Q: Is ESP-NOW the same as WiFi?
 A: No. ESP-NOW is a direct radio link between two Hardware One devices. It does not need any infrastructure or internet connection.
@@ -1974,7 +1990,7 @@ A: I can only answer questions about Hardware One. Type help for a list of comma
 Q: What are the different setups?
 A: Four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers.
 
-Bluetooth Low Energy scanning finds nearby BLE devices and displays their names, addresses, and signal strength. Type bluetooth scan to start a scan. BLE is used for proximity detection and connecting to BLE peripherals.
+Bluetooth Low Energy lets Hardware One advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it. BLE is used for proximity detection and connecting to BLE peripherals.
 
 Q: activate distance measurement
 Do: opentof
@@ -1989,7 +2005,7 @@ Q: I need to change the led color
 A: Type ledcolor followed by a color name or hex code. For example, ledcolor red or ledcolor FF00FF.
 
 Q: I need to send a message over esp-now
-A: Type espnow send followed by the peer MAC address and your message.
+A: Type espnowsend followed by the peer MAC address and your message.
 
 Q: Tell me about the language model
 A: Type llm ask followed by your question, or use the LLM tab in the web UI. The model runs entirely on the device using PSRAM.
@@ -1997,8 +2013,8 @@ A: Type llm ask followed by your question, or use the LLM tab in the web UI. The
 Q: How do I use GPS?
 A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
 
-Q: How does the BME280 work?
-A: The BME280 is an environmental sensor that measures temperature, humidity, and barometric pressure. Type openbme to start it and bme to read it.
+Q: How does the presence sensor work?
+A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
 
 Q: What is the time-of-flight sensor?
 A: The time-of-flight sensor is the VL53L4CX. It measures distance to objects up to six metres away using an infrared laser pulse.
@@ -2019,7 +2035,7 @@ Q: Is there a sensor limit?
 A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
 
 Q: I can't connect to WiFi
-A: Check that the network name and password are correct. Type wifi connect followed by the SSID and password. Type wifi to see the current status.
+A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
 Q: Can I add more sensors?
 A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
@@ -2042,7 +2058,7 @@ Q: I need to get thermal images
 A: Type openthermal to start the MLX90640 thermal camera. The web UI shows a live 32 by 24 heatmap. Type closethermal to stop it.
 
 Q: How to publish to mqtt?
-A: Type mqtt publish followed by the topic and message. The device automatically publishes sensor data to configured topics.
+A: Type mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
 Q: Check the device time
 A: Type time to see the current device time, or ntpsync to sync from an NTP server.
@@ -2054,16 +2070,16 @@ Q: What is the LLM?
 A: The LLM is a small language model that runs entirely on the device using PSRAM. It answers questions about Hardware One with no internet needed.
 
 Q: How to export settings?
-A: Type settings export or use the Settings tab to download a JSON backup. Import it on another device to copy your configuration.
+A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
 Q: How to use an sd card?
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
 Q: Is there a WiFi radio?
-A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifi connect followed by the network name and password to join a network.
+A: Yes. Hardware One has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: I want to backup my configuration
-A: Type settings export or use the Settings tab to download a JSON backup. Import it on another device to copy your configuration.
+A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
 Q: What's the command to set up a rule?
 A: Use IF followed by a condition and THEN followed by commands. For example, IF TEMP>30 THEN ledcolor red turns the LED red when temperature exceeds 30.
@@ -2077,10 +2093,10 @@ Q: Command to use an sd card?
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
 Q: leave the wifi network
-Do: wifi disconnect
+Do: closewifi
 
 Q: How to leave the current network?
-A: Type wifi disconnect to disconnect from the current network.
+A: Type closewifi to disconnect from the current network.
 
 Q: Tell me about the forecast
 A: I can only answer questions about Hardware One. Type help to see available commands.
@@ -2089,7 +2105,7 @@ Q: I need to check the firmware version
 A: Type version to see the current firmware version and build date.
 
 Q: Command to list users?
-A: Type users list to see all user accounts and their roles.
+A: Type userlist to see all user accounts and their roles.
 
 Q: What's the range of device pairing?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
@@ -2109,6 +2125,8 @@ Q: What can they do once paired?
 A: They can send messages, transfer files, and share commands over ESP-NOW.
 Q: What is bonded mode?
 A: Bonded mode lets paired devices share command registries so commands on one execute on the other.
+
+The PCA9685 servo driver controls up to 16 servos over I2C. Type servo followed by the channel number and angle to move a servo. Type servolist to see all configured channels and their current positions. Use servoprofile to save and load servo positions.
 
 Q: I want to load a model
 A: Place model.bin in /sd/llm/ on the SD card. Type llm load to load it, or llm models to list available models.
@@ -2137,7 +2155,7 @@ Q: Command to get thermal images?
 A: Type openthermal to start the MLX90640 thermal camera. The web UI shows a live 32 by 24 heatmap. Type closethermal to stop it.
 
 Q: How do I export settings?
-A: Type settings export or use the Settings tab to download a JSON backup. Import it on another device to copy your configuration.
+A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
 Q: Hey
 A: Hello! I can help with Hardware One. Ask about WiFi, sensors, ESP-NOW, MQTT, or type help.
@@ -2149,17 +2167,17 @@ Q: What command do I use to change the llm model?
 A: Place model.bin in /sd/llm/ on the SD card. Type llm load to load it, or llm models to list available models.
 
 Q: What sensors are supported?
-A: Supported sensors include BME280 for temperature and humidity, ICM-42688-P IMU, VL53L4CX time-of-flight, MLX90640 thermal camera, MLX90614 thermometer, APDS9960 gesture sensor, and GPS.
+A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: shut down the mlx90640
 Do: closethermal
 
 Q: Set up the WiFi connection
-A: Type wifi connect followed by the network name and password.
+A: Type wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
 A: The device will fail to connect and show an error. Double-check the password and try again.
 Q: How do I know when it connects?
-A: Type wifi to see the status. When connected, it shows the IP address and signal strength.
+A: Type wifistatus to see the connection status, IP address, and signal strength.
 
 Q: restart hardware one
 Do: reboot
@@ -2168,18 +2186,18 @@ Q: give me a memory report
 Do: memreport
 
 Q: Command to add a user?
-A: Type users add followed by the username, password, and role.
+A: Type useradd followed by the username, password, and role.
 
 Q: find available networks
-Do: wifi scan
+Do: wifiscan
 
 Q: Command to use bluetooth?
-A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+A: The command is openble. It starts Bluetooth Low Energy for connecting with phones and BLE peripherals. Type closeble to stop.
 
 The automation engine evaluates rules based on sensor values, time, or messages. A rule has the form IF condition THEN action. For example, IF TEMP>30 THEN ledcolor red turns the LED red when it gets hot. Conditions can be combined with AND and OR. Actions can publish MQTT messages, control LEDs, or run any CLI command.
 
 Q: I need to disconnect from wifi
-A: Type wifi disconnect to disconnect from the current network.
+A: Type closewifi to disconnect from the current network.
 
 Q: turn off the apds9960
 Do: closeapds
@@ -2209,16 +2227,16 @@ Q: Tell me about python
 A: I only know about Hardware One firmware and features. Type help to see what I can assist with.
 
 Q: I can't see the display
-A: Type oled brightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
+A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
 Q: How does BLE work?
-A: Type bluetooth scan to find nearby BLE devices, then bluetooth connect followed by the device address to connect.
+A: BLE is Bluetooth Low Energy for short-range communication. Type openble to start it and closeble to stop. It lets phones and peripherals connect to the device.
 
 Q: Write a story
 A: I can only answer questions about Hardware One. Type help for a list of commands.
 
 Q: What command do I use to find nearby devices?
-A: Type bluetooth scan to discover nearby BLE devices. Results show the device name, address, and signal strength.
+A: For Bluetooth devices, type openble to start BLE scanning. For I2C sensors on the bus, type i2cscan.
 
 Q: Why can't I read the sensor?
 A: Make sure the sensor is started with its open command. Type i2cscan to check if the sensor is detected on the I2C bus.
@@ -2241,8 +2259,10 @@ A: ESP-NOW is a direct radio link between two Hardware One devices. It works up 
 Q: Are you ChatGPT?
 A: I am a small language model running on this ESP32-S3 device. I answer questions about Hardware One.
 
+User accounts control who can access the web dashboard and run commands. Type useradd to create a new account with a username, password, and role. Type userlist to see all accounts. Type userdelete to remove an account. Passwords can be changed with userchangepassword.
+
 Q: How do I add a user?
-A: Type users add followed by the username, password, and role.
+A: Type useradd followed by the username, password, and role.
 
 Q: Compose a haiku
 A: I can only answer questions about Hardware One. Type help for a list of commands.
@@ -2254,10 +2274,10 @@ Q: list active rules
 Do: automationlist
 
 Q: How to send a file over esp-now?
-A: Type espnow sendfile followed by the peer MAC address and the file path.
+A: Type espnowsendfile followed by the peer MAC address and the file path.
 
 Q: How do I list users?
-A: Type users list to see all user accounts and their roles.
+A: Type userlist to see all user accounts and their roles.
 
 Q: How do I delete a file?
 A: Type rm followed by the file path, or use the delete button in the Files tab.
@@ -2269,7 +2289,7 @@ Q: List your features.
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
 
 Q: drop the wifi connection
-Do: wifi disconnect
+Do: closewifi
 
 Q: full ram report
 Do: memreport
@@ -2278,10 +2298,10 @@ Q: Command to delete a file?
 A: Type rm followed by the file path, or use the delete button in the Files tab.
 
 Q: What command do I use to set up the access point?
-A: Type wifi ap to start the built-in access point. Connect from your phone or laptop to access the web dashboard without a router.
+A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
 
-Q: Explain the current temperature
-A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
+Q: What is the device orientation?
+A: Type imuread to see orientation, acceleration, and gyroscope data from the BNO055 IMU sensor.
 
 Q: Battery runtime?
 A: Battery life depends on which features are active. GPS and WiFi use the most power. With light use the device can run several hours on a LiPo battery.
@@ -2291,7 +2311,7 @@ A: Try typing reboot to restart it. Check that the serial connection is active.
 Q: How do I check if it crashed?
 A: Type uptime to see if it recently rebooted. Check debug logs on the SD card for crash information.
 Q: How do I enable debug logs?
-A: Type debug followed by the module name and 1. Debug output goes to the serial console.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 or debugespnow 1. Debug output goes to the serial console.
 
 Q: How do I scan for I2C devices?
 A: Type i2cscan to scan the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
@@ -2315,25 +2335,25 @@ Q: Tell me about the PSRAM
 A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
 
 Q: How do I read a sensor?
-A: Type the sensor name to see its current reading. For example, type bme to see temperature, humidity, and pressure from the BME280.
+A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
 Q: read the distance
 Do: tofread
 
 Q: Explain the IMU
-A: The IMU is the ICM-42688-P inertial measurement unit. It measures acceleration and rotation. Type openimu to start it and imu to read data.
+A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: I want to enable debug logging
-A: Type debug followed by the module name and 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
+A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: How to see all accounts?
-A: Type users list to see all user accounts and their roles.
+A: Type userlist to see all user accounts and their roles.
 
 Q: I want to get my location
 A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
 
 Q: How to read a sensor?
-A: Type the sensor name to see its current reading. For example, type bme to see temperature, humidity, and pressure from the BME280.
+A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
 Settings are stored as JSON on internal flash. They include WiFi credentials, MQTT configuration, device identity, sensor calibration, and feature flags. Settings can be exported and imported through the web UI. This makes it easy to provision multiple devices with the same configuration.
 
@@ -2344,7 +2364,7 @@ Q: How much battery does it use?
 A: Battery life depends on which features are active. GPS and WiFi use the most power. With light use the device can run several hours on a LiPo battery.
 
 Q: Who am I paired with?
-A: Type espnow status to see the connection status and the list of paired peers.
+A: Type espnowstats to see the connection status and the list of paired peers.
 
 Q: Reset all settings
 A: There is no factory reset command. To clear settings, delete the settings JSON file from internal storage and reboot.
@@ -2353,7 +2373,7 @@ Q: turn on the gamepad
 Do: opengamepad
 
 Q: How do I subscribe to MQTT topics?
-A: Type mqtt subscribe followed by the topic pattern. Incoming messages appear in the serial log and can trigger automations.
+A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
 To monitor a greenhouse overnight, set up an automation rule: IF TEMP>35 THEN ledcolor red. You can also configure MQTT so the device publishes temperature every minute. In the morning you can check Home Assistant and see the temperature history.
 
@@ -2363,14 +2383,254 @@ A: Type i2cscan to scan the I2C bus. The device also scans automatically at star
 Q: How to reboot the device?
 A: Type reboot to restart the device.
 
-Q: How warm is it?
-A: Type bme to read the temperature from the BME280 sensor. The reading includes temperature, humidity, and barometric pressure.
+Q: How far away is the object?
+A: Type tofread to see the distance reading from the VL53L4CX time-of-flight sensor. It measures up to six metres.
 
 Q: How to open a sensor?
-A: Type open followed by the sensor name. For example, openbme starts the BME280, openimu starts the IMU, and opentof starts the time-of-flight sensor.
+A: Type open followed by the sensor name. For example, openimu starts the BNO055 IMU, opentof starts the distance sensor, and openthermal starts the thermal camera.
 
 Q: Command to send a message over esp-now?
-A: Type espnow send followed by the peer MAC address and your message.
+A: Type espnowsend followed by the peer MAC address and your message.
 
 Q: check the thermal camera
 Do: thermalread
+
+Q: connect to wifi
+Do: openwifi
+
+Q: start the wifi radio
+Do: openwifi
+
+Q: enable wifi
+Do: openwifi
+
+Q: turn on wifi
+Do: openwifi
+
+Q: start bluetooth
+Do: openble
+
+Q: turn on ble
+Do: openble
+
+Q: enable bluetooth scanning
+Do: openble
+
+Q: activate ble
+Do: openble
+
+Q: stop bluetooth
+Do: closeble
+
+Q: turn off ble
+Do: closeble
+
+Q: disable bluetooth
+Do: closeble
+
+Q: shut down ble
+Do: closeble
+
+Q: connect to the mqtt broker
+Do: openmqtt
+
+Q: start mqtt
+Do: openmqtt
+
+Q: enable mqtt
+Do: openmqtt
+
+Q: turn on mqtt
+Do: openmqtt
+
+Q: stop mqtt
+Do: closemqtt
+
+Q: disconnect from mqtt
+Do: closemqtt
+
+Q: disable mqtt
+Do: closemqtt
+
+Q: turn off mqtt
+Do: closemqtt
+
+Q: check mqtt connection
+Do: mqttstatus
+
+Q: is mqtt connected
+Do: mqttstatus
+
+Q: mqtt status
+Do: mqttstatus
+
+Q: show mqtt status
+Do: mqttstatus
+
+Q: send an espnow message
+Do: espnowsend
+
+Q: message a peer
+Do: espnowsend
+
+Q: send over espnow
+Do: espnowsend
+
+Q: transmit via espnow
+Do: espnowsend
+
+Q: show espnow peers
+Do: espnowstats
+
+Q: check espnow connections
+Do: espnowstats
+
+Q: espnow status
+Do: espnowstats
+
+Q: who is paired
+Do: espnowstats
+
+Q: list espnow devices
+Do: espnowdevices
+
+Q: show paired devices
+Do: espnowdevices
+
+Q: what devices are paired
+Do: espnowdevices
+
+Q: see my espnow peers
+Do: espnowdevices
+
+Q: set the espnow device name
+Do: espnowsetname
+
+Q: name this device for espnow
+Do: espnowsetname
+
+Q: change espnow name
+Do: espnowsetname
+
+Q: rename this espnow node
+Do: espnowsetname
+
+Q: check the battery
+Do: batterystatus
+
+Q: battery level
+Do: batterystatus
+
+Q: how much charge is left
+Do: batterystatus
+
+Q: show battery info
+Do: batterystatus
+
+Q: read the imu
+Do: imuread
+
+Q: check orientation
+Do: imuread
+
+Q: show motion data
+Do: imuread
+
+Q: get imu readings
+Do: imuread
+
+Q: check wifi status
+Do: wifistatus
+
+Q: is wifi connected
+Do: wifistatus
+
+Q: show wifi info
+Do: wifistatus
+
+Q: wifi connection status
+Do: wifistatus
+
+Q: show saved wifi networks
+Do: wifilist
+
+Q: list saved networks
+Do: wifilist
+
+Q: what wifi networks are saved
+Do: wifilist
+
+Q: see my wifi credentials
+Do: wifilist
+
+Q: remove a wifi network
+Do: wifirm
+
+Q: delete saved wifi
+Do: wifirm
+
+Q: forget a wifi network
+Do: wifirm
+
+Q: erase wifi credentials
+Do: wifirm
+
+Q: make a network higher priority
+Do: wifipromote
+
+Q: promote a wifi network
+Do: wifipromote
+
+Q: change wifi priority
+Do: wifipromote
+
+Q: move wifi network up
+Do: wifipromote
+
+Q: add a user account
+Do: useradd
+
+Q: create a new user
+Do: useradd
+
+Q: register a user
+Do: useradd
+
+Q: make a new account
+Do: useradd
+
+Q: remove a user account
+Do: userdelete
+
+Q: delete a user
+Do: userdelete
+
+Q: remove an account
+Do: userdelete
+
+Q: erase a user
+Do: userdelete
+
+Q: show all users
+Do: userlist
+
+Q: list user accounts
+Do: userlist
+
+Q: who has access
+Do: userlist
+
+Q: see all accounts
+Do: userlist
+
+Q: make the led orange
+Do: ledcolor orange
+
+Q: set the light to yellow
+Do: ledcolor yellow
+
+Q: turn the led cyan
+Do: ledcolor cyan
+
+Q: change led to pink
+Do: ledcolor pink

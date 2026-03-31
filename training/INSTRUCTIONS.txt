@@ -25,27 +25,20 @@ GPU training (recommended):
 
     python train_tiny_model_gpu.py \
         --preset HW1HelpAgent192_deep \
-        --text hardwareone_rich.txt \
-        --negatives training_data/hardwareone_qa_negatives.txt \
-        --epochs 8 --lr 3e-4 --batch-size 16 \
+        --text training_data/hardwareone_rich.txt \
+        --epochs 250 --lr 3e-4 --batch-size 16 \
         --out ./out_HW1HelpAgent192_deep
 
 CPU training (slow, use only if no GPU available):
 
     python train_tiny_model.py \
         --preset HW1HelpAgent192_deep \
-        --text hardwareone_rich.txt \
-        --negatives training_data/hardwareone_qa_negatives.txt \
-        --epochs 300 --batch-size 8 --lr 3e-4 \
-        --neg-epochs 30 \
+        --text training_data/hardwareone_rich.txt \
+        --epochs 400 --batch-size 8 --lr 3e-4 \
         --out ./out_HW1HelpAgent192_deep
 
-Phase 1 trains on positive Q&A data. Loss should fall from ~7 down to ~0.1-0.3.
-The script runs a Q&A test after Phase 1 completes.
-
-Phase 2 continues from Phase 1 weights on combined positive + negative data.
-Teaches the model to distinguish similar-sounding topics (e.g. ESP-NOW vs WiFi).
-The --neg-lr defaults to half of --lr, which is intentionally conservative.
+Loss should fall from ~7 down to ~0.1-0.3.
+The script runs a Q&A test after training completes.
 
 To check model size before training:
 
@@ -91,16 +84,27 @@ The firmware stops generation after 2 sentences or 80 tokens (configurable).
 TRAINING DATA FILES
 --------------------
 
-    hardwareone_rich.txt                  Complete training corpus (Q&A pairs,
-                                          passages, stories, conversations).
-                                          This is a static file — edit it
-                                          directly to change training data.
-
     training_data/
-        hardwareone_qa_negatives.txt      Out-of-domain corrections (phase 2)
+        hardwareone_rich.txt              Complete training corpus (Q&A pairs,
+                                          passages, and Do: command pairs).
+                                          Edit this file directly to change
+                                          training data.
+
+    training_scripts/
+        run_all_checks.py                 Run all data quality checks at once
+        check_hallucinated_sensors.py     Flag invalid chip names
+        check_answer_consistency.py       Verify facts match across answers
+        answer_frequency_balance.py       Report answer repetition balance
+        find_near_duplicate_answers.py    Find 75%+ word-overlap answer pairs
+        answer_fluff_analysis.py          Report verbose phrases and word budget
+        topic_coverage_report.py          Count QA pairs per topic
+        prose_analysis.py                 Check prose lengths and topic coverage
 
 All Q&A pairs use Q:/A: format. Answers are 30 words or less to fit within
 the model's context window.
+
+Note: The GPU trainer masks question tokens during training (only answer tokens
+contribute to the loss). This focuses 100% of learning on answer quality.
 
 
 PRESET REFERENCE

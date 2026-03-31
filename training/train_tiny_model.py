@@ -190,13 +190,6 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Trade compute for VRAM (recommended for medium+ on one GPU)",
     )
-    p.add_argument("--negatives",     type=Path, default=None, metavar="FILE",
-                   help="Negative reinforcement text file. Two-phase training: "
-                        "(1) train on --text only with test output, (2) add negatives and continue.")
-    p.add_argument("--neg-epochs",    type=float, default=None,
-                   help="Epochs for phase 2 (negatives). Defaults to same as --epochs.")
-    p.add_argument("--neg-lr",        type=float, default=None,
-                   help="Learning rate for phase 2 (negatives). Defaults to --lr * 0.5.")
     return p.parse_args()
 
 
@@ -209,7 +202,54 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
     trainer = trainers.BpeTrainer(
         vocab_size=vocab_size,
         min_frequency=2,
-        special_tokens=["<|endoftext|>", "<pad>", "<unk>", "Q:", "A:"],
+        special_tokens=[
+            # Infrastructure
+            "<|endoftext|>", "<pad>", "<unk>", "Q:", "A:", "Do:",
+            # Sensor open/close commands — BPE would otherwise split these
+            "opentof", "closetof",
+            "openimu", "closeimu",
+            "opengps", "closegps",
+            "openthermal", "closethermal",
+            "openpresence", "closepresence",
+            "openapds", "closeapds",
+            "openfmradio", "closefmradio",
+            "opengamepad", "closegamepad",
+            "openrtc",
+            # WiFi commands — single-word
+            "openwifi", "closewifi", "wifiadd", "wifiscan", "wifistatus",
+            "wifilist", "wifirm", "wifipromote",
+            # BLE commands
+            "openble", "closeble",
+            # MQTT commands — single-word
+            "openmqtt", "closemqtt", "mqttstatus",
+            "mqttHost", "mqttUser", "mqttPassword",
+            "mqttSubscribeTopics", "mqttPublishIMU", "mqttPublishThermal",
+            # ESP-NOW commands — single-word
+            "espnowsend", "espnowsendfile", "espnowstats",
+            "espnowpair", "espnowunpair", "espnowdevices",
+            "espnowsetname", "espnowmode", "espnowremote",
+            "espnowbroadcast", "espnowpairsecure",
+            # User commands — single-word
+            "useradd", "userdelete", "userlist",
+            "userchangepassword", "userresetpassword",
+            # Battery and system
+            "batterystatus",
+            # OLED commands — single-word
+            "oledbrightness", "oledmode",
+            # Standalone domain keywords
+            "tof", "imu", "mqtt", "apds", "espnow",
+            "memsample", "memreport", "presenceread", "thermalread",
+            "debugtof", "debugwifi", "debugespnow",
+            "imuautostart", "fmradioautostart", "apdsautostart", "thermalautostart",
+            "ntpsync", "automationlist",
+            "filedelete", "i2cscan", "ledcolor", "servolist", "servoprofile",
+            "gamepadautostart", "tofread", "imuread",
+            # Platform names — hyphens and mixed case cause bad splits
+            "HardwareOne", "ESP-NOW", "ESP-IDF", "ESP32-S3",
+            # Chip part numbers — BPE fragments these into meaningless pieces
+            "VL53L4CX", "BNO055", "MLX90640", "STHS34PF80",
+            "PA1010D", "DS3231", "APDS9960", "RDA5807", "PCA9685",
+        ],
     )
     tokenizer_core.train([str(p) for p in text_paths], trainer)
     tok_path = out_dir / "tokenizer.json"
@@ -660,9 +700,6 @@ def main() -> None:
     print(f"Model: {n_params:,} parameters  |  batch={args.batch_size}  |  epochs={args.epochs}")
     print(f"Dataset: {len(lm_ds):,} blocks of {args.seq_len} tokens")
     print(f"Params-to-blocks ratio: {n_params / max(1, len(lm_ds)):.0f}:1")
-    if args.negatives:
-        print(f"Two-phase training: Phase 1 (positive only) -> test -> Phase 2 (+ negatives)")
-
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -670,8 +707,7 @@ def main() -> None:
         data_collator=collator,
     )
 
-    phase_label = "Phase 1 (positive only)" if args.negatives else "Training"
-    print(f"{phase_label}…")
+    print("Training…")
     trainer.train()
 
     # ── Post-training diagnostics ─────────────────────────────────────────────
@@ -701,79 +737,8 @@ def main() -> None:
                   f"mean={float(data.mean()):+.6f} std={float(data.std()):.6f}{nan_warn}")
 
     # Domain Q&A generation test
-    phase1_label = "Phase 1 (positive only)" if args.negatives else "Post-training"
-    run_qa_test(model, tokenizer, f"{phase1_label} Q&A Test")
+    run_qa_test(model, tokenizer, "Post-training Q&A Test")
     print("─" * 60)
-
-    # ══════════════════════════════════════════════════════════════════════
-    # Phase 2: Negative reinforcement (optional)
-    # ══════════════════════════════════════════════════════════════════════
-    if args.negatives:
-        neg_path = args.negatives.resolve()
-        if not neg_path.is_file():
-            print(f"WARNING: Negatives file not found: {neg_path} — skipping phase 2")
-        else:
-            print("═" * 60)
-            print("PHASE 2: ADDING NEGATIVE REINFORCEMENT DATA")
-            print("═" * 60)
-
-            neg_raw = neg_path.read_text(encoding="utf-8", errors="replace")
-            neg_paragraphs = [blk.strip() for blk in neg_raw.split("\n\n") if blk.strip()]
-            print(f"  Negative data: {len(neg_paragraphs)} paragraphs from {neg_path.name}")
-
-            from datasets import Dataset as _Dataset
-            combined_rows: list[str] = []
-            for p_path in text_paths:
-                if p_path.is_file():
-                    raw = p_path.read_text(encoding="utf-8", errors="replace")
-                    combined_rows.extend([blk.strip() for blk in raw.split("\n\n") if blk.strip()])
-            combined_rows.extend(neg_paragraphs)
-            print(f"  Combined dataset: {len(combined_rows)} paragraphs (original + negatives)")
-
-            ds_combined = _Dataset.from_dict({"text": combined_rows})
-            tok_combined = ds_combined.map(
-                lambda ex: tokenizer(ex["text"], truncation=True,
-                                     max_length=args.seq_len, padding=False),
-                batched=True, remove_columns=["text"],
-            )
-            if args.text:
-                # Q&A boundary-aware: keep each paragraph as its own block
-                lm_combined = tok_combined.filter(lambda ex: len(ex["input_ids"]) > 0)
-            else:
-                rm_cols2 = [c for c in tok_combined.column_names if c != "input_ids"]
-                lm_combined = tok_combined.map(group_texts, batched=True, batch_size=10_000, remove_columns=rm_cols2)
-                lm_combined = lm_combined.filter(lambda ex: len(ex["input_ids"]) > 0)
-            print(f"  Combined blocks: {len(lm_combined):,} of {args.seq_len} tokens")
-
-            neg_epochs = args.neg_epochs if args.neg_epochs is not None else args.epochs
-            neg_lr = args.neg_lr if args.neg_lr is not None else args.lr * 0.5
-            print(f"  Phase 2 config: epochs={neg_epochs} lr={neg_lr:.1e}")
-
-            ta_kw2 = dict(ta_kw)
-            ta_kw2["output_dir"] = str(out_dir / "trainer_ckpt_phase2")
-            ta_kw2["num_train_epochs"] = neg_epochs
-            ta_kw2["learning_rate"] = neg_lr
-            ta_kw2.pop("max_steps", None)
-
-            training_args2 = TrainingArguments(**ta_kw2)
-            trainer2 = Trainer(
-                model=model,
-                args=training_args2,
-                train_dataset=lm_combined,
-                data_collator=collator,
-            )
-
-            print("Phase 2 training…")
-            trainer2.train()
-
-            log2 = trainer2.state.log_history
-            losses2 = [(e["step"], e["loss"]) for e in log2 if "loss" in e]
-            if losses2:
-                print(f"  Phase 2 loss: first={losses2[0][1]:.4f}  last={losses2[-1][1]:.4f}  "
-                      f"min={min(l for _, l in losses2):.4f}  steps={losses2[-1][0]}")
-
-            run_qa_test(model, tokenizer, "Phase 2 (+ negatives) Q&A Test")
-            print("─" * 60)
 
     print(f"Saving to {out_dir} …")
     model.save_pretrained(out_dir, safe_serialization=True)

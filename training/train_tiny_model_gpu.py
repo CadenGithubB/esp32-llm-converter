@@ -220,14 +220,6 @@ def parse_args() -> argparse.Namespace:
                    help="Fine-tune from an existing model directory (loads weights + tokenizer; skips BPE training). "
                         "Use with --text and a lower --lr (e.g. 1e-4). "
                         "Example: --finetune-from ./out_stretch --text hardwareone_qa.txt")
-    p.add_argument("--negatives",     type=Path, default=None, metavar="FILE",
-                   help="Negative reinforcement text file. When provided, training runs in two phases: "
-                        "(1) train on --text files only with test output, (2) add negatives and continue training. "
-                        "This lets you verify the model before negatives are applied.")
-    p.add_argument("--neg-epochs",    type=float, default=None,
-                   help="Epochs for phase 2 (negatives). Defaults to same as --epochs.")
-    p.add_argument("--neg-lr",        type=float, default=None,
-                   help="Learning rate for phase 2 (negatives). Defaults to --lr * 0.5.")
     p.add_argument("--qa-test-prompts", type=Path, default=None, metavar="FILE",
                    help="File with Q&A test prompts (one Q: per line). Used for domain-specific generation tests.")
     return p.parse_args()
@@ -242,7 +234,54 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
     trainer = trainers.BpeTrainer(
         vocab_size=vocab_size,
         min_frequency=2,
-        special_tokens=["<|endoftext|>", "<pad>", "<unk>", "Q:", "A:"],
+        special_tokens=[
+            # Infrastructure
+            "<|endoftext|>", "<pad>", "<unk>", "Q:", "A:", "Do:",
+            # Sensor open/close commands — BPE would otherwise split these
+            "opentof", "closetof",
+            "openimu", "closeimu",
+            "opengps", "closegps",
+            "openthermal", "closethermal",
+            "openpresence", "closepresence",
+            "openapds", "closeapds",
+            "openfmradio", "closefmradio",
+            "opengamepad", "closegamepad",
+            "openrtc",
+            # WiFi commands — single-word
+            "openwifi", "closewifi", "wifiadd", "wifiscan", "wifistatus",
+            "wifilist", "wifirm", "wifipromote",
+            # BLE commands
+            "openble", "closeble",
+            # MQTT commands — single-word
+            "openmqtt", "closemqtt", "mqttstatus",
+            "mqttHost", "mqttUser", "mqttPassword",
+            "mqttSubscribeTopics", "mqttPublishIMU", "mqttPublishThermal",
+            # ESP-NOW commands — single-word
+            "espnowsend", "espnowsendfile", "espnowstats",
+            "espnowpair", "espnowunpair", "espnowdevices",
+            "espnowsetname", "espnowmode", "espnowremote",
+            "espnowbroadcast", "espnowpairsecure",
+            # User commands — single-word
+            "useradd", "userdelete", "userlist",
+            "userchangepassword", "userresetpassword",
+            # Battery and system
+            "batterystatus",
+            # OLED commands — single-word
+            "oledbrightness", "oledmode",
+            # Standalone domain keywords
+            "tof", "imu", "mqtt", "apds", "espnow",
+            "memsample", "memreport", "presenceread", "thermalread",
+            "debugtof", "debugwifi", "debugespnow",
+            "imuautostart", "fmradioautostart", "apdsautostart", "thermalautostart",
+            "ntpsync", "automationlist",
+            "filedelete", "i2cscan", "ledcolor", "servolist", "servoprofile",
+            "gamepadautostart", "tofread", "imuread",
+            # Platform names — hyphens and mixed case cause bad splits
+            "HardwareOne", "ESP-NOW", "ESP-IDF", "ESP32-S3",
+            # Chip part numbers — BPE fragments these into meaningless pieces
+            "VL53L4CX", "BNO055", "MLX90640", "STHS34PF80",
+            "PA1010D", "DS3231", "APDS9960", "RDA5807", "PCA9685",
+        ],
     )
     tokenizer_core.train([str(p) for p in text_paths], trainer)
     tok_path = out_dir / "tokenizer.json"
@@ -258,23 +297,32 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
 def run_qa_test(model, tokenizer, device, label: str, prompts: list[str] | None = None) -> None:
     """Run generation test with Q&A prompts and print results.
 
-    Uses the same stop-on-Q: rule as the ESP32 firmware (halt when the model emits the
-    atomic ``Q:`` token after the prompt) so console tests resemble on-device behavior.
+    Uses the same stop rules as the ESP32 firmware: halt when the model emits
+    ``Q:`` (token 3) or ``A:`` (token 4) after the prompt.  Repetition penalty
+    matches the device default (1.5).
+
+    Note: the device also enforces sentence_limit=2 and hard_cap=80 which
+    would truncate output further.  This test intentionally omits those limits
+    so you can see the full model output for debugging.
     """
     import torch
     from transformers import StoppingCriteria, StoppingCriteriaList
 
-    class StopOnQTokenAfterPrompt(StoppingCriteria):
-        """Stop when the last generated token is the ``Q:`` special (id matches tokenizer)."""
+    class StopOnSpecialTokenAfterPrompt(StoppingCriteria):
+        """Stop when the model emits Q: (id 3) or A: (id 4) after the prompt.
 
-        def __init__(self, prompt_len: int, q_token_id: int) -> None:
+        Matches the ESP32 firmware behaviour which halts on both tokens to
+        prevent runaway generation of additional Q&A pairs.
+        """
+
+        def __init__(self, prompt_len: int, stop_ids: list[int]) -> None:
             self.prompt_len = prompt_len
-            self.q_token_id = q_token_id
+            self.stop_ids = set(stop_ids)
 
         def __call__(self, input_ids, scores, **kwargs) -> bool:
             if input_ids.shape[1] <= self.prompt_len:
                 return False
-            return int(input_ids[0, -1].item()) == self.q_token_id
+            return int(input_ids[0, -1].item()) in self.stop_ids
 
     if prompts is None:
         prompts = [
@@ -282,7 +330,7 @@ def run_qa_test(model, tokenizer, device, label: str, prompts: list[str] | None 
             "Q: What is ESP-NOW?\nA:",
             "Q: What sensors does Hardware One have?\nA:",
             "Q: What is MQTT?\nA:",
-            "Q: What is the BME280?\nA:",
+            "Q: What is the presence sensor?\nA:",
             "Q: Is ESP-NOW the same as WiFi?\nA:",
             "Q: How do I update the firmware?\nA:",
             "Q: What is BLE?\nA:",
@@ -291,12 +339,17 @@ def run_qa_test(model, tokenizer, device, label: str, prompts: list[str] | None 
         ]
 
     q_enc = tokenizer.encode("Q:", add_special_tokens=False)
-    q_token_id = q_enc[0] if q_enc else None
+    a_enc = tokenizer.encode("A:", add_special_tokens=False)
+    stop_ids: list[int] = []
+    if q_enc:
+        stop_ids.append(q_enc[0])
+    if a_enc:
+        stop_ids.append(a_enc[0])
 
     print()
     print(f"  === {label} ===")
-    if q_token_id is not None:
-        print(f"  (generation stops if model emits Q: token id={q_token_id}, same as device firmware)")
+    if stop_ids:
+        print(f"  (generation stops on Q:/A: token ids={stop_ids}, same as device firmware)")
     model.eval()
     for prompt_text in prompts:
         try:
@@ -311,26 +364,30 @@ def run_qa_test(model, tokenizer, device, label: str, prompts: list[str] | None 
                 attention_mask=attn,
                 max_new_tokens=max_new,
                 do_sample=False,
-                repetition_penalty=1.3,
+                repetition_penalty=1.5,  # match device firmware LLM_DEFAULT_REP_PENALTY
                 pad_token_id=tokenizer.eos_token_id,
             )
-            if q_token_id is not None:
+            if stop_ids:
                 gen_kw["stopping_criteria"] = StoppingCriteriaList(
-                    [StopOnQTokenAfterPrompt(prompt_len, q_token_id)]
+                    [StopOnSpecialTokenAfterPrompt(prompt_len, stop_ids)]
                 )
             with torch.no_grad():
                 output = model.generate(**gen_kw)
             new_ids = output[0, prompt_len:]
-            ended_on_q = (
-                q_token_id is not None
+            ended_on_stop = (
+                stop_ids
                 and new_ids.numel() > 0
-                and int(new_ids[-1].item()) == q_token_id
+                and int(new_ids[-1].item()) in stop_ids
             )
-            to_dec = new_ids[:-1] if ended_on_q else new_ids
+            stop_name = ""
+            if ended_on_stop:
+                last_id = int(new_ids[-1].item())
+                stop_name = "Q:" if (q_enc and last_id == q_enc[0]) else "A:"
+            to_dec = new_ids[:-1] if ended_on_stop else new_ids
             answer = tokenizer.decode(to_dec, skip_special_tokens=False)
             if len(answer) > 280:
                 answer = answer[:280] + "..."
-            tail = "  [stopped: Q:]" if ended_on_q else ""
+            tail = f"  [stopped: {stop_name}]" if ended_on_stop else ""
             print(f"    {prompt_text}")
             print(f"      -> {answer}{tail}")
             print()
@@ -584,6 +641,16 @@ def main() -> None:
             padding=False,
         )
 
+    # Pre-compute the token ids for "\nA:" and "\nDo:" so we can find the
+    # answer/command boundary.  In Q&A paragraphs the format is either
+    # "Q: question\nA: answer" or "Q: intent\nDo: command".  We mask the
+    # question portion so the model only trains on predicting the response.
+    # Prose paragraphs (no Q:/A:/Do: markers) are left fully unmasked.
+    _a_marker_ids = tokenizer.encode("\nA:", add_special_tokens=False)
+    _a_marker_len = len(_a_marker_ids)
+    _do_marker_ids = tokenizer.encode("\nDo:", add_special_tokens=False)
+    _do_marker_len = len(_do_marker_ids)
+
     if args.text:
         tok_ds = ds_raw.map(tokenize_no_trunc, batched=True, remove_columns=["text"])
     else:
@@ -597,45 +664,110 @@ def main() -> None:
 
     block_size = args.seq_len
 
-    def pack_qa_blocks(examples):
-        """Pack complete Q&A pairs into blocks without splitting any entry.
+    # Pre-compute Q: token id for multi-turn masking
+    _q_marker_ids = tokenizer.encode("\nQ:", add_special_tokens=False)
+    _q_marker_len = len(_q_marker_ids)
+    # Also detect Q: at position 0 (start of block, no leading newline)
+    _q_start_ids = tokenizer.encode("Q:", add_special_tokens=False)
+    _q_start_len = len(_q_start_ids)
 
-        Unlike the naive concatenate-and-chunk approach, this ensures every
-        Q&A pair stays intact within a single training block.  Entries are
-        separated by EOS tokens so the model learns answer boundaries.
-        Blocks are padded to block_size; labels use -100 on padding so
-        the loss ignores those positions.
+    def _build_label_mask(ids: list[int]) -> list[int]:
+        """Build a per-token label mask for Q&A training blocks.
+
+        For single-turn Q&A: mask the question, train on the answer.
+        For multi-turn Q&A: mask ALL question portions, train on ALL answers.
+        For prose (no markers): train on everything.
+
+        Returns a list of labels where -100 = masked (question/padding),
+        and the actual token id = trainable (answer content).
+        """
+        n = len(ids)
+
+        # Find all answer/command start positions (after \nA: or \nDo:)
+        answer_starts: list[int] = []
+        for i in range(n - max(_a_marker_len, _do_marker_len) + 1):
+            if ids[i:i + _a_marker_len] == _a_marker_ids:
+                answer_starts.append(i + _a_marker_len)
+            elif ids[i:i + _do_marker_len] == _do_marker_ids:
+                answer_starts.append(i + _do_marker_len)
+
+        if not answer_starts:
+            return list(ids)  # prose — train on all tokens
+
+        # Find all question start positions (\nQ: within the block)
+        question_starts: list[int] = []
+        # Check for Q: at the very start of the block (no \n prefix)
+        if _q_start_len <= n and ids[:_q_start_len] == _q_start_ids:
+            question_starts.append(0)
+        # Find all \nQ: markers within the block (subsequent questions)
+        for i in range(n - _q_marker_len + 1):
+            if ids[i:i + _q_marker_len] == _q_marker_ids:
+                question_starts.append(i)  # include the \n as part of question
+        question_starts.sort()  # ensure ascending order
+
+        # Build mask: default to masked (-100), then unmask answer regions
+        labels = [-100] * n
+
+        for ans_pos in answer_starts:
+            # Find the next question start after this answer
+            next_q = n  # default: answer runs to end of block
+            for qs in question_starts:
+                if qs > ans_pos:
+                    next_q = qs
+                    break
+            # Unmask the answer region
+            for j in range(ans_pos, min(next_q, n)):
+                labels[j] = ids[j]
+
+        return labels
+
+    def pack_qa_blocks(examples):
+        """One Q&A pair (or multi-turn block) per training block.
+
+        Each entry gets its own training block so the model never attends
+        across unrelated pair boundaries.  Question tokens are masked (-100)
+        so the loss only trains on answer prediction.  For multi-turn blocks,
+        ALL question portions are masked and ALL answer portions are trained.
+        Prose paragraphs have no Q:/A: markers and are trained on fully.
+        Padding is also masked.
         """
         blocks = []
         labels_list = []
-        current: list[int] = []
 
+        _n_empty = 0
+        _n_total = len(examples["input_ids"])
         for ids in examples["input_ids"]:
             if not ids:
+                _n_empty += 1
                 continue
             entry = list(ids[:block_size]) if len(ids) > block_size else list(ids)
-            # +1 for EOS separator between entries within a block
-            space_needed = len(entry) + (1 if current else 0)
 
-            if current and len(current) + space_needed > block_size:
-                # Finalize current block: pad to block_size
-                real_len = len(current)
-                pad_len = block_size - real_len
-                labels_list.append(current[:] + [-100] * pad_len)
-                blocks.append(current + [eos_id] * pad_len)
-                current = []
+            # Build labels: mask all question tokens, keep all answer tokens
+            entry_labels = _build_label_mask(entry)
 
-            if current:
-                current.append(eos_id)
-            current.extend(entry)
+            # Pad single entry to block_size
+            pad_len = block_size - len(entry)
+            blocks.append(entry + [eos_id] * pad_len)
+            labels_list.append(entry_labels + [-100] * pad_len)
 
-        if current and len(current) >= 4:
-            real_len = len(current)
-            pad_len = block_size - real_len
-            labels_list.append(current[:] + [-100] * pad_len)
-            blocks.append(current + [eos_id] * pad_len)
+        if _n_empty > 0:
+            print(f"  pack_qa_blocks: {_n_empty}/{_n_total} inputs had empty input_ids")
+        if len(blocks) != _n_total:
+            print(f"  pack_qa_blocks: {_n_total} inputs → {len(blocks)} blocks ({_n_total - len(blocks)} dropped)")
 
         return {"input_ids": blocks, "labels": labels_list}
+
+    # Pre-packing diagnostic: check how many tokenized entries are empty
+    _pre_empty = sum(1 for ex in tok_ds if not ex["input_ids"])
+    _pre_total = len(tok_ds)
+    print(f"Pre-packing: {_pre_total} tokenized paragraphs, {_pre_empty} empty")
+    if _pre_empty > 0:
+        for i, ex in enumerate(tok_ds):
+            if not ex["input_ids"]:
+                print(f"  Empty at index {i}")
+                if i >= 10:
+                    print(f"  ... (showing first 10 of {_pre_empty})")
+                    break
 
     rm_cols = [c for c in tok_ds.column_names if c != "input_ids"]
     lm_ds = tok_ds.map(
@@ -647,6 +779,21 @@ def main() -> None:
     lm_ds = lm_ds.filter(lambda ex: len(ex["input_ids"]) > 0)
     if len(lm_ds) == 0:
         sys.exit("No training blocks after packing — use more samples or lower --seq-len.")
+
+    # Diagnostic: report data loss if significant
+    _n_input = len(tok_ds)
+    _n_output = len(lm_ds)
+    if _n_output < _n_input:
+        _dropped = _n_input - _n_output
+        print(f"  WARNING: {_dropped}/{_n_input} paragraphs dropped during packing "
+              f"({_dropped/_n_input*100:.0f}% loss). Check for empty tokenizations.")
+        # Sample some dropped entries to help debug
+        _empty_count = 0
+        for i, ex in enumerate(tok_ds):
+            if not ex["input_ids"]:
+                _empty_count += 1
+                if _empty_count <= 5:
+                    print(f"    Empty input_ids at index {i}")
 
     collator = DataCollatorForLanguageModeling(tokenizer, mlm=False)
 
@@ -688,11 +835,7 @@ def main() -> None:
     total_steps = int(steps_per_epoch * args.epochs // args.grad_accum)
     print(f"Estimated steps: ~{total_steps:,}")
     print(f"Params-to-blocks ratio: {n_params / max(1, len(lm_ds)):.0f}:1")
-    if args.negatives:
-        print(f"Two-phase training: Phase 1 (positive only) -> test -> Phase 2 (+ negatives)")
-        print(f"  Negatives file: {args.negatives}")
-    phase_label = "Phase 1 (positive only)" if args.negatives else "Training"
-    print(f"{phase_label}…")
+    print("Training…")
 
     trainer = Trainer(
         model=model,
@@ -805,90 +948,9 @@ def main() -> None:
         qa_prompts = [f"{q}\nA:" if "\nA:" not in q else q for q in qa_prompts]
         print(f"  Loaded {len(qa_prompts)} custom test prompts from {args.qa_test_prompts}")
 
-    phase1_label = "Phase 1 (positive only)" if args.negatives else "Post-training"
-    run_qa_test(inspect_model, tokenizer, device, f"{phase1_label} Q&A Test", qa_prompts)
+    run_qa_test(inspect_model, tokenizer, device, "Post-training Q&A Test", qa_prompts)
 
     print("─" * 60)
-
-    # ══════════════════════════════════════════════════════════════════════
-    # Phase 2: Negative reinforcement (optional)
-    # ══════════════════════════════════════════════════════════════════════
-    if args.negatives:
-        neg_path = args.negatives.resolve()
-        if not neg_path.is_file():
-            print(f"WARNING: Negatives file not found: {neg_path} — skipping phase 2")
-        else:
-            print("═" * 60)
-            print("PHASE 2: ADDING NEGATIVE REINFORCEMENT DATA")
-            print("═" * 60)
-
-            # Read negative data and combine with original text data
-            neg_raw = neg_path.read_text(encoding="utf-8", errors="replace")
-            neg_paragraphs = [blk.strip() for blk in neg_raw.split("\n\n") if blk.strip()]
-            print(f"  Negative data: {len(neg_paragraphs)} paragraphs from {neg_path.name}")
-
-            # Rebuild dataset: original text + negatives
-            from datasets import Dataset as _Dataset
-            combined_rows: list[str] = []
-            for p_path in text_paths:
-                if p_path.is_file():
-                    raw = p_path.read_text(encoding="utf-8", errors="replace")
-                    combined_rows.extend([blk.strip() for blk in raw.split("\n\n") if blk.strip()])
-            combined_rows.extend(neg_paragraphs)
-            print(f"  Combined dataset: {len(combined_rows)} paragraphs (original + negatives)")
-
-            ds_combined = _Dataset.from_dict({"text": combined_rows})
-            tok_combined = ds_combined.map(
-                lambda ex: tokenizer(ex["text"], truncation=False, padding=False),
-                batched=True, remove_columns=["text"],
-            )
-            rm_cols2 = [c for c in tok_combined.column_names if c != "input_ids"]
-            lm_combined = tok_combined.map(pack_qa_blocks, batched=True, batch_size=10_000, remove_columns=rm_cols2)
-            lm_combined = lm_combined.filter(lambda ex: len(ex["input_ids"]) > 0)
-            print(f"  Combined blocks: {len(lm_combined):,} of {args.seq_len} tokens")
-
-            neg_epochs = args.neg_epochs if args.neg_epochs is not None else args.epochs
-            neg_lr = args.neg_lr if args.neg_lr is not None else args.lr * 0.5
-            print(f"  Phase 2 config: epochs={neg_epochs} lr={neg_lr:.1e}")
-
-            ta_kw2 = dict(ta_kw)  # copy phase 1 args
-            ta_kw2["output_dir"] = str(out_dir / "trainer_ckpt_phase2")
-            ta_kw2["num_train_epochs"] = neg_epochs
-            ta_kw2["learning_rate"] = neg_lr
-            ta_kw2.pop("max_steps", None)  # no step limit for phase 2
-
-            training_args2 = TrainingArguments(**ta_kw2)
-
-            # Reuse Phase 1 optimizer to preserve Adam momentum/variance.
-            # Only the LR changes; the optimizer's learned gradient statistics
-            # carry over so Phase 2 doesn't start from a cold optimizer.
-            p1_optimizer = getattr(trainer, 'optimizer', None)
-            if p1_optimizer is not None:
-                for pg in p1_optimizer.param_groups:
-                    pg['lr'] = neg_lr
-                print(f"  Carrying over Phase 1 optimizer state (Adam momentum preserved)")
-
-            trainer2 = Trainer(
-                model=model,  # continues from phase 1 weights
-                args=training_args2,
-                train_dataset=lm_combined,
-                data_collator=collator,
-                optimizers=(p1_optimizer, None) if p1_optimizer else (None, None),
-            )
-
-            print("Phase 2 training…")
-            trainer2.train()
-
-            # Phase 2 loss report
-            log2 = trainer2.state.log_history
-            losses2 = [(e["step"], e["loss"]) for e in log2 if "loss" in e]
-            if losses2:
-                print(f"  Phase 2 loss: first={losses2[0][1]:.4f}  last={losses2[-1][1]:.4f}  "
-                      f"min={min(l for _, l in losses2):.4f}  steps={losses2[-1][0]}")
-
-            # Test after negatives
-            run_qa_test(inspect_model, tokenizer, device, "Phase 2 (+ negatives) Q&A Test", qa_prompts)
-            print("─" * 60)
 
     print(f"Saving to {out_dir} …")
     model.save_pretrained(out_dir, safe_serialization=True)
