@@ -1059,7 +1059,7 @@ Q: scan for G2 glasses nearby
 Do: g2scan
 
 Q: secure the device
-A: Type useradd to create accounts with passwords. Use certgen to generate an HTTPS certificate. Set serialrequireauth and oledrequireauth to require login.
+A: Type useradd to create user accounts with passwords. Login is required before running admin commands.
 
 Q: How far can devices communicate?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
@@ -1997,7 +1997,7 @@ Q: add a wifi network
 Do: wifiadd
 
 Q: connect two devices
-A: Type espnowpair on both devices with each other's MAC address. Then use bondconnect to link them for remote control and sensor sharing.
+A: Type espnowpair followed by the other device's MAC address and a name. Both devices must pair with each other.
 
 Q: enable the microphone
 Do: openmic
@@ -2859,8 +2859,8 @@ A: Type espnowpair followed by the MAC address and a name. Use espnowlist to see
 Q: start gps on boot
 Do: gpsautostart on
 
-Q: make the device quiet
-A: Type fmradiomute to mute the radio, oledmode off to turn off the display, and ledclear to turn off the LED. Type loglevel error to reduce log output.
+Q: mute the radio
+Do: fmradiomute
 
 Q: set the led to red
 Do: ledcolor red
@@ -3951,7 +3951,7 @@ Q: check logging status
 Do: log status
 
 Q: What is the temperature?
-A: The MLX90640 thermal camera shows surface temperatures in a 32 by 24 heatmap. Type openthermal to start it. The DS3231 RTC also has a built-in temperature sensor.
+A: Type temperature to read the ESP32 internal chip temperature.
 
 Q: Screen won't turn on
 A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
@@ -4102,8 +4102,8 @@ Do: ledcolor red
 Q: turn on mqtt
 Do: openmqtt
 
-Q: show everything running
-A: Type status for a system overview, sensors for active sensors, taskstats for running tasks, and wifistatus for network info.
+Q: system overview
+Do: status
 
 Q: How do I read a serial port in Python?
 A: I only know about HardwareOne device commands. Python serial programming is outside my scope.
@@ -4211,7 +4211,7 @@ Q: What features do you have?
 A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
 
 Q: start logging data
-A: Type sensorlog to log sensor readings to a file or log start to log debug output. Sensor logs go to SD card. Debug logs go to flash.
+Do: sensorlog
 
 Q: Where is the GPS map?
 A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.

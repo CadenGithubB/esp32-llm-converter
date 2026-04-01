@@ -246,36 +246,110 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
             "openapds", "closeapds",
             "openfmradio", "closefmradio",
             "opengamepad", "closegamepad",
-            "openrtc",
-            # WiFi commands — single-word
+            "openrtc", "closertc",
+            "opencamera", "closecamera",
+            "openmic", "closemic",
+            "openespnow", "closeespnow",
+            "opensr", "closesr",
+            # WiFi commands
             "openwifi", "closewifi", "wifiadd", "wifiscan", "wifistatus",
             "wifilist", "wifirm", "wifipromote",
+            "wifiautoreconnect", "wifitxpower", "wifigettxpower",
             # BLE commands
             "openble", "closeble",
-            # MQTT commands — single-word
-            "openmqtt", "closemqtt", "mqttstatus",
+            "bleinfo", "blesend", "blestatus", "bleautostart",
+            # MQTT commands
+            "openmqtt", "closemqtt", "mqttstatus", "mqttautostart",
             "mqttHost", "mqttUser", "mqttPassword",
             "mqttSubscribeTopics", "mqttPublishIMU", "mqttPublishThermal",
-            # ESP-NOW commands — single-word
+            # ESP-NOW commands
             "espnowsend", "espnowsendfile", "espnowstats",
             "espnowpair", "espnowunpair", "espnowdevices",
             "espnowsetname", "espnowmode", "espnowremote",
-            "espnowbroadcast", "espnowpairsecure",
-            # User commands — single-word
+            "espnowbroadcast", "espnowpairsecure", "espnowlist",
+            # Bond commands
+            "bondconnect", "bonddisconnect", "bondstatus",
+            # User commands
             "useradd", "userdelete", "userlist",
             "userchangepassword", "userresetpassword",
+            "userapprove", "userdeny", "userpromote", "userdemote",
+            "userrequest", "usersync",
+            # Session commands
+            "sessionlist", "sessionrevoke", "pendinglist",
             # Battery and system
-            "batterystatus",
-            # OLED commands — single-word
-            "oledbrightness", "oledmode",
+            "batterystatus", "status", "reboot",
+            "cpufreq", "temperature", "voltage", "uptime", "time",
+            "sleep", "lightsleep",
+            "login", "logout", "savesettings", "taskstats",
+            # OLED commands
+            "oledbrightness", "oledmode", "oledstatus", "oledtext", "oledclear",
+            # LED commands
+            "ledcolor", "ledclear", "ledeffect", "ledbrightness",
+            "ledstartupeffect", "ledstartupcolor", "ledstartupcolor2",
+            "ledstartupduration", "ledstartupenabled",
+            # File commands
+            "files", "filecreate", "filedelete", "filerename", "fileview", "mkdir",
+            "fsusage",
+            # SD card commands
+            "sdinfo", "sdformat", "sdmount", "sdunmount", "sddiag",
+            # Camera commands
+            "cameracapture", "camerasave", "cameraread", "cameraautostart",
+            # Microphone commands
+            "micrecord", "micread", "miclevel", "miclist", "micdelete",
+            "micgain", "micautostart",
+            # GPS commands
+            "gpsread", "gpsautostart",
+            # FM radio commands
+            "fmradiotune", "fmradioseek", "fmradiovolume",
+            "fmradiomute", "fmradiounmute", "fmradioread",
+            # RTC commands
+            "rtcread", "rtcset", "rtcsync", "rtcautostart",
+            # Presence sensor
+            "presenceread", "presencestatus", "presenceautostart",
+            # APDS sensor
+            "apdsread", "apdscolor", "apdsproximity", "apdsgesture", "apdsmode",
+            # Servo commands
+            "servolist", "servoprofile", "servocalibrate",
+            # LLM commands
+            "llmload", "llmunload", "llmmodels", "llmstatus",
+            # Edge Impulse commands
+            "eienable", "eidetect", "eifile", "eicontinuous",
+            "eiconfidence", "eistatus",
+            "eimodellist", "eimodelload", "eimodelinfo", "eimodelunload",
+            "eitrackstatus", "eitrackenable", "eitrackclear",
+            # G2 glasses commands
+            "g2show", "g2scan", "g2init", "g2deinit",
+            "g2clear", "g2status", "g2verbose", "g2nav",
+            # Speech recognition commands
+            "srstatus", "srcmdslist",
+            "srconfidence", "sraccept", "srdyngain", "srraw",
+            "srautotune", "srtuning",
+            "srtuningswgain", "srtuninggain", "srtuningagc",
+            "srtuningvad", "srtuningfilters",
+            "srsnipon", "srsnipoff", "srsnipstart", "srsnipstop",
+            "srsnipstatus", "srsnipconfig",
+            "srdebuglevel", "srdebugstats", "srdebugtelem", "srdebugreset",
+            # Voice commands
+            "voicearm", "voicedisarm", "voicestatus",
+            "voicecancel", "voicehelp",
+            # Certificate commands
+            "certgen", "certinfo",
+            # Logging commands
+            "log", "loglevel", "autolog",
+            # Automation commands
+            "automationlist", "automationadd", "automationrun",
+            # Sensor and diagnostics
+            "sensors", "sensorinfo", "i2cscan",
+            "memsample", "memreport",
+            "help",
+            # Autostart commands
+            "imuautostart", "fmradioautostart", "apdsautostart",
+            "thermalautostart", "gamepadautostart", "tofautostart",
             # Standalone domain keywords
             "tof", "imu", "mqtt", "apds", "espnow",
-            "memsample", "memreport", "presenceread", "thermalread",
+            "thermalread", "tofread", "imuread", "gamepadread",
+            "ntpsync",
             "debugtof", "debugwifi", "debugespnow",
-            "imuautostart", "fmradioautostart", "apdsautostart", "thermalautostart",
-            "ntpsync", "automationlist",
-            "filedelete", "i2cscan", "ledcolor", "servolist", "servoprofile",
-            "gamepadautostart", "tofread", "imuread",
             # Platform names — hyphens and mixed case cause bad splits
             "HardwareOne", "ESP-NOW", "ESP-IDF", "ESP32-S3",
             # Chip part numbers — BPE fragments these into meaningless pieces
