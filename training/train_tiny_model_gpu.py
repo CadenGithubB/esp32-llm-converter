@@ -810,7 +810,6 @@ def main() -> None:
         learning_rate=args.lr,
         lr_scheduler_type="cosine",                 # smooth ease-in/ease-out LR curve
         warmup_steps=_warmup_steps,                # ramp LR from ~0 over first 6% of steps
-        label_smoothing_factor=0.1,                 # train toward 90% confidence — prevents spiky distributions
         weight_decay=0.01,                         # L2 regularization — prevents weight explosion
         logging_steps=50,
         save_steps=5_000,
