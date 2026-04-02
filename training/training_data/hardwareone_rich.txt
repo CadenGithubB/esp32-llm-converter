@@ -15,9 +15,6 @@ A: No. You can control HardwareOne through the serial command line, the web dash
 Q: check the i2c bus
 Do: i2cscan
 
-Q: Tell me about the language model
-A: Use the LLM tab in the web UI to ask a question. The model runs entirely on the device using PSRAM.
-
 Q: clear the oled
 Do: oledclear
 
@@ -77,13 +74,10 @@ A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights w
 Q: new directory
 Do: mkdir
 
-Q: Does HardwareOne support SD cards?
-A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
-
 Q: Can this run MicroPython?
 A: This device runs compiled ESP-IDF firmware. I can help with its built-in commands and features.
 
-Q: what station is playing
+Q: what FM station is playing
 Do: fmradioread
 
 Q: How far does ESP-NOW reach?
@@ -155,7 +149,7 @@ A: No. Settings are stored separately from the firmware and persist across updat
 Q: enable voice snippet capture on wake word
 Do: srsnipon
 
-Q: how hot is the chip
+Q: how hot is the ESP32 chip
 Do: temperature
 
 Q: device status
@@ -206,7 +200,7 @@ Do: login
 Q: How old is the earth?
 A: I do not have general knowledge. I can answer questions about this device and its features.
 
-Q: capture heat map
+Q: capture thermal heat map
 Do: thermalread
 
 Q: How does OTA updating work step by step?
@@ -216,7 +210,7 @@ A: The device keeps the old firmware and can roll back. Two firmware slots ensur
 Q: Will I lose my settings after a firmware update?
 A: No. Settings are stored separately from the firmware and persist across updates.
 
-Q: what model is loaded
+Q: what Edge Impulse model is loaded
 Do: eimodelinfo
 
 Q: I need motion data
@@ -362,10 +356,10 @@ Do: ledcolor blue
 Q: WiFi connection failed
 A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
-Q: is anyone detected
+Q: is anyone detected by presence sensor
 Do: presenceread
 
-Q: dim the display
+Q: dim the OLED display
 Do: oledbrightness 50
 
 Q: is mqtt connected
@@ -458,7 +452,7 @@ Do: wifiautoreconnect 0
 Q: name this device for espnow
 Do: espnowsetname
 
-Q: check if someone is nearby
+Q: check presence sensor for nearby people
 Do: presenceread
 
 Q: Show me the distance reading
@@ -480,9 +474,6 @@ Q: What features work after pairing?
 A: They can send messages, transfer files, and share commands over ESP-NOW.
 Q: How does bonding differ from pairing?
 A: Bonded mode lets paired devices share command registries so commands on one execute on the other.
-
-Q: I want to update the firmware
-A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
 
 Q: read proximity from the APDS sensor
 Do: apdsproximity
@@ -665,7 +656,7 @@ A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, the
 
 To track motion data over time, start the IMU with openimu and enable MQTT publishing with mqttPublishIMU 1. Set up your MQTT broker with mqttHost and openmqtt. The device streams orientation and acceleration data to your broker. You can add an automation like IF ACCEL>15 THEN ledcolor red to flash the LED on impact.
 
-Q: show the loaded model info
+Q: show the loaded TFLite model info
 Do: eimodelinfo
 
 Q: stop mqtt
@@ -708,7 +699,7 @@ A: Use IF followed by a condition and THEN followed by commands. For example, IF
 Q: show uptime
 Do: uptime
 
-Q: check memory
+Q: quick memory snapshot
 Do: memsample
 
 Q: device uptime
@@ -860,7 +851,7 @@ Do: ledstartupeffect
 Q: My WiFi is broken
 A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
 
-Q: commands
+Q: list all commands
 Do: help
 
 Q: start the real time clock
@@ -1001,7 +992,7 @@ A: Run settings to see current values, or use the Settings tab in the web UI. Se
 Q: restart hardware one
 Do: reboot
 
-Q: check voltage
+Q: check power supply voltage
 Do: voltage
 
 Q: check speech recognition
@@ -1013,7 +1004,7 @@ A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any de
 Q: I need to read the imu
 A: Run openimu to start the BNO055, then imuread to read orientation, acceleration, and gyroscope data.
 
-Q: low power mode
+Q: enter light sleep low power mode
 Do: lightsleep
 
 Q: turn off the real time clock
@@ -1127,7 +1118,7 @@ Do: apdsread
 Q: Tell me about BLE
 A: BLE is Bluetooth Low Energy. HardwareOne uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
 
-Q: battery
+Q: how much battery is left
 Do: batterystatus
 
 Q: How do I close a sensor?
@@ -1203,7 +1194,7 @@ A: Run ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 Q: read the rtc clock
 Do: rtcread
 
-Q: unload the current model
+Q: unload the current Edge Impulse model
 Do: eimodelunload
 
 Q: How do I adjust mic sensitivity?
@@ -1249,7 +1240,7 @@ A: The command is close followed by the sensor name. For example, closeimu stops
 Q: How much battery is left?
 A: Type batterystatus to see voltage, charge level, and charging status.
 
-Q: turn on the llm
+Q: load the language model
 Do: llmload
 
 Q: show storage contents
@@ -1273,7 +1264,7 @@ Do: opentof
 Q: Command to use the web interface?
 A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
 
-Q: activate the ai
+Q: start the LLM model
 Do: llmload
 
 Q: stop the camera
@@ -1435,10 +1426,10 @@ A: I can only answer questions about HardwareOne. Type help to see available com
 Q: read fm radio status
 Do: fmradioread
 
-Q: memory usage
+Q: detailed memory usage by subsystem
 Do: memreport
 
-Q: ble info
+Q: bluetooth connection status
 Do: blestatus
 
 Q: disable G2 gesture navigation
@@ -1468,9 +1459,6 @@ Do: fileview
 Q: List the supported sensors
 A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
-Q: Describe what automations do
-A: An automation is a rule that triggers actions based on conditions. Use IF followed by a condition and THEN followed by a command.
-
 Q: Command to publish to mqtt?
 A: Run mqttPublishIMU 1 or mqttPublishThermal 1 to enable automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
 
@@ -1491,9 +1479,6 @@ A: The STHS34PF80 is a presence sensor that detects nearby people using infrared
 
 Q: How do I adjust WiFi transmit power?
 A: Type wifitxpower followed by the power in dBm to set it. Type wifigettxpower to read the current value. Higher power improves range but uses more battery.
-
-Q: How to see the map?
-A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
 
 The automation engine evaluates rules based on sensor values, time, or messages. A rule has the form IF condition THEN action. For example, IF TEMP>30 THEN ledcolor red turns the LED red when it gets hot. Conditions can be combined with AND and OR. Actions can publish MQTT messages, control LEDs, or run any CLI command.
 
@@ -1518,14 +1503,8 @@ A: Type opengps to start the GPS module, then gps to see latitude, longitude, al
 Q: take a presence reading
 Do: presenceread
 
-Q: What is the web password?
-A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
-
 Q: led green
 Do: ledcolor green
-
-Q: Tell me about i2c
-A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
 
 Q: How do I control log verbosity?
 A: Type loglevel followed by error, warn, info, or debug. Type loglevel with no argument to see the current level.
@@ -1593,7 +1572,7 @@ A: Run status to see system status including WiFi, sensors, and uptime.
 Q: What's the current time?
 A: Run time to see the current device time, or ntpsync to sync from an NTP server.
 
-Q: check memory
+Q: heap and psram usage per module
 Do: memreport
 
 Q: show oled status
@@ -1707,9 +1686,6 @@ Do: opencamera
 Q: What is the reboot command?
 A: Type reboot to restart the device.
 
-Q: How to connect to mqtt?
-A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
-
 Q: Command to backup my configuration?
 A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
@@ -1788,9 +1764,6 @@ A: WiFi connects the device to a router for internet access and the web dashboar
 Q: activate the gamepad
 Do: opengamepad
 
-Q: Tell me about the presence sensor
-A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
-
 Q: start thermal on boot
 Do: thermalautostart on
 
@@ -1820,7 +1793,7 @@ A: Type openoled to start the display. Check that oledbrightness is not 0. Try o
 Q: close the fm tuner
 Do: closefmradio
 
-Q: check the presence detector
+Q: read presence detection values
 Do: presenceread
 
 Q: shut down the mlx90640
@@ -1855,9 +1828,6 @@ Do: sensorinfo
 Q: check the APDS9960
 Do: apdsread
 
-Q: How to turn on a feature?
-A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
-
 Q: Connect to my router
 A: Run wifiadd followed by the network name and password, then openwifi to connect.
 Q: What if the password is wrong?
@@ -1887,9 +1857,6 @@ A: Try typing reboot to restart it. Check that the serial or web connection is a
 Q: shut down ble
 Do: closeble
 
-Q: What is WiFi?
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
-
 Q: show motion data
 Do: imuread
 
@@ -1914,9 +1881,6 @@ Do: ntpsync
 Q: How to set the time?
 A: ntpsync synchronises from an NTP server. You need WiFi first. time shows the current device time.
 
-Q: Browse the web for me
-A: I have no internet access. I run entirely on this device. Ask me about HardwareOne features.
-
 Q: How do I pair two devices?
 A: Open the Pair tab on both devices. Set the same passphrase and initiate pairing.
 Q: What can paired devices share?
@@ -1926,9 +1890,6 @@ A: Bonded mode lets paired devices share command registries so commands on one e
 
 Q: open the esp-now radio
 Do: openespnow
-
-Q: motion sensor reading
-Do: presenceread
 
 Q: How do I see automation examples?
 A: Use automationadd followed by a rule. For example, automationadd IF TEMP>30 THEN ledcolor red turns the LED red when temperature exceeds 30. Type automationlist to see all rules.
@@ -1945,7 +1906,7 @@ A: Four configurations: Barebones headless node, Sensor Appliance, Standard Hand
 Q: How to ask the ai a question?
 A: Use the LLM tab in the web UI to ask a question. The model runs entirely on the device using PSRAM.
 
-Q: change led to blue
+Q: make the neopixel blue
 Do: ledcolor blue
 
 Q: autostart the camera
@@ -1984,9 +1945,6 @@ A: Type cpufreq to see the current frequency. Type cpufreq followed by 80, 160, 
 Q: turn the led cyan
 Do: ledcolor cyan
 
-Q: How do I use the LLM?
-A: Use the LLM tab in the web UI to ask a question. The model runs entirely on the device using PSRAM.
-
 Q: How to find nearby devices?
 A: Type openble to start BLE scanning. The device can detect nearby Bluetooth Low Energy peripherals and phones.
 
@@ -2002,9 +1960,6 @@ A: Type espnowpair followed by the other device's MAC address and a name. Both d
 Q: enable the microphone
 Do: openmic
 
-Q: How to turn off logging?
-A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
-
 Q: show gps location
 Do: gpsread
 
@@ -2014,20 +1969,14 @@ Do: sleep
 Q: disable SR audio filters
 Do: srtuningfilters off
 
-Q: Command to disable debug output?
-A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
-
 Q: Describe the Bluetooth feature
 A: Bluetooth Low Energy lets HardwareOne advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
 
 Q: disable APDS autostart
 Do: apdsautostart off
 
-Q: temperature
+Q: cpu temperature
 Do: temperature
-
-Q: What command do I use to change the llm model?
-A: Place the model file on the SD card and use the web UI to load it. The model runs entirely on the device using PSRAM.
 
 Q: What's the difference between ESP-NOW and WiFi?
 A: ESP-NOW is a direct radio link between two HardwareOne devices. It does not need any infrastructure or internet connection.
@@ -2035,17 +1984,11 @@ A: ESP-NOW is a direct radio link between two HardwareOne devices. It does not n
 Q: How to use an sd card?
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
-Q: find the next station
+Q: find the next FM station
 Do: fmradioseek
-
-Q: How do you feel?
-A: I am HardwareOne's help system. Ask me about sensors, WiFi, ESP-NOW, MQTT, or any feature.
 
 Q: activate the radio
 Do: openfmradio
-
-Q: How do I check WiFi?
-A: Type wifistatus to show the current connection status, IP address, and signal strength.
 
 Q: How many I2C devices can I attach?
 A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
@@ -2072,9 +2015,6 @@ Do: logout
 Q: start continuous inference mode
 Do: eicontinuous 1
 
-Q: How do I disable debug output?
-A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
-
 Q: What's the range of device pairing?
 A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
 
@@ -2084,7 +2024,7 @@ A: The command is open followed by the sensor name. For example, openimu starts 
 Q: Is ESP-NOW the same as WiFi?
 A: No. ESP-NOW is a direct radio link between two HardwareOne devices. It does not need any infrastructure or internet connection.
 
-Q: free memory
+Q: free memory report by subsystem
 Do: memreport
 
 Q: Describe the VL53L4CX
@@ -2101,9 +2041,6 @@ A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the tim
 
 Q: What goes on the SD card?
 A: The SD card stores large files like map tiles, LLM models, logs, and recorded data. It mounts automatically at /sd on boot.
-
-Q: Write some code
-A: I can only answer questions about HardwareOne. Type help for a list of commands.
 
 Q: How do I tune the speech recognition audio pipeline?
 A: Type srtuning to see current audio settings. Use srtuninggain to set the AFE gain, srtuningswgain for software gain, srtuningagc for AGC mode, srtuningvad for voice activity detection sensitivity, and srtuningfilters to toggle the high-pass and pre-emphasis filters.
@@ -2142,13 +2079,10 @@ Do: voicearm
 Q: read the mic
 Do: micread
 
-Q: Tell me about OTA
-A: OTA is Over-The-Air firmware update. Open the Settings tab in the web UI and upload a new firmware binary to update the device wirelessly.
-
 Q: set SR AGC mode
 Do: srtuningagc
 
-Q: disk space
+Q: filesystem disk space usage
 Do: fsusage
 
 Q: list wifi networks
@@ -2178,7 +2112,7 @@ A: Type ledcolor followed by a color name or hex code. For example, ledcolor red
 Q: make a new file
 Do: filecreate
 
-Q: battery level
+Q: show battery percentage
 Do: batterystatus
 
 Q: Describe the MQTT protocol
@@ -2199,7 +2133,7 @@ Do: temperature
 Q: open the gps
 Do: opengps
 
-Q: show mqtt status
+Q: is MQTT connected to the broker
 Do: mqttstatus
 
 Q: What command do I use to talk to another device?
@@ -2236,9 +2170,6 @@ A: The model must fit in PSRAM. With 8 MB of PSRAM, models up to about 6 MB work
 Q: Where do I type a question for the AI?
 A: Use the LLM tab in the web UI to ask a question. The model runs entirely on the device using PSRAM.
 
-Q: Tell me about the IMU
-A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
-
 Q: show wifi info
 Do: wifistatus
 
@@ -2261,9 +2192,6 @@ When you take the device out of the box and plug in the USB cable, the OLED scre
 Q: How do I take a picture?
 A: Type opencamera to start the camera, then cameracapture to take a photo. Type camerasave to save it to the SD card. You can also enable automatic capture with cameraautostart on.
 
-Q: WiFi won't work
-A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
-
 Q: change file name
 Do: filerename
 
@@ -2273,10 +2201,7 @@ Do: micdelete
 Q: light sleep
 Do: lightsleep
 
-Q: Are you alive?
-A: I am HardwareOne's help system. Ask me about sensors, WiFi, ESP-NOW, MQTT, or any feature.
-
-Q: turn off the llm
+Q: unload the language model from memory
 Do: llmunload
 
 Q: voice recognition status
@@ -2336,9 +2261,6 @@ Do: ledbrightness
 Q: How to create an account?
 A: Type useradd followed by the username, password, and role.
 
-Q: What is an automation?
-A: An automation is a rule that triggers actions based on conditions. Use IF followed by a condition and THEN followed by a command.
-
 Q: What is this device?
 A: I am HardwareOne, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
 
@@ -2348,7 +2270,7 @@ A: Type servocalibrate followed by the channel number. Follow the prompts to set
 Q: start mic on boot
 Do: micautostart on
 
-Q: cpu speed
+Q: check cpu clock speed
 Do: cpufreq
 
 Q: turn off voice arming
@@ -2365,9 +2287,6 @@ A: mqttSubscribeTopics followed by a comma-separated list of topics subscribes t
 
 Q: check gamepad buttons
 Do: gamepadread
-
-Q: memory statistics
-Do: memreport
 
 Q: use a servo preset
 Do: servoprofile
@@ -2392,9 +2311,6 @@ Do: closewifi
 
 Q: enable bluetooth scanning
 Do: openble
-
-Q: How many sensors can I connect?
-A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
 
 Q: I need to disable debug output
 A: Debug commands use the pattern debugmodule 0 to disable. For example, debugwifi 0 or debugespnow 0.
@@ -2439,11 +2355,8 @@ Do: openimu
 Q: How do I use the presence sensor?
 A: Type openpresence to start the STHS34PF80 sensor. Use presenceread to get a motion and temperature reading and presencestatus to see sensor state and thresholds.
 
-Q: show memory usage
+Q: sample current heap and psram
 Do: memsample
-
-Q: Does HardwareOne have a camera sensor?
-A: HardwareOne supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
 
 Q: activate distance measurement
 Do: opentof
@@ -2541,9 +2454,6 @@ A: Type userlist to see all user accounts and their roles.
 Q: end logging to file
 Do: log stop
 
-Q: Write a story
-A: I can only answer questions about HardwareOne. Type help for a list of commands.
-
 Q: check G2 glasses status
 Do: g2status
 
@@ -2552,9 +2462,6 @@ A: Run status to see the current firmware version, WiFi, filesystem, and memory 
 
 Q: How to stop a sensor?
 A: Type close followed by the sensor name. For example, closeimu stops the BNO055 IMU, closetof stops the distance sensor.
-
-Q: Explain the meaning of life
-A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
 
 Q: what time is it
 Do: time
@@ -2565,7 +2472,7 @@ A: Yes. HardwareOne has built-in WiFi on the ESP32-S3. Type wifiadd followed by 
 Q: start RTC automatically on boot
 Do: rtcautostart on
 
-Q: show help
+Q: show command help menu
 Do: help
 
 Q: enable the accelerometer
@@ -2588,9 +2495,6 @@ MQTT is a lightweight messaging protocol used in IoT systems. HardwareOne can co
 Q: What's the command to disable the light?
 A: Type ledcolor off or ledcolor 000000 to turn off the NeoPixel LED.
 
-Q: The device is not responding
-A: Try typing reboot to restart it. Check that the serial or web connection is active. Type uptime to see if it recently rebooted.
-
 Q: enable APDS autostart on boot
 Do: apdsautostart on
 
@@ -2599,12 +2503,6 @@ Do: opengps
 
 Q: wifi ip
 Do: wifistatus
-
-Q: How do I export settings?
-A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
-
-Q: Do you know any jokes?
-A: I can only help with HardwareOne features. Try asking about WiFi, sensors, or commands.
 
 Q: check speech recognition tuning
 Do: srtuning
@@ -2648,14 +2546,8 @@ Do: sdmount
 Q: switch the oled to status mode
 Do: oledmode status
 
-Q: Tell me about MQTT
-A: MQTT is a lightweight messaging protocol for IoT. HardwareOne publishes sensor data to an MQTT broker and can receive commands from subscribed topics.
-
 Q: What is the batterystatus?
 A: batterystatus shows the voltage, charge level, and charging status.
-
-Q: Explain peer-to-peer communication
-A: ESP-NOW is a direct radio link between two HardwareOne devices. It works up to 200 metres in open air with no infrastructure needed.
 
 Q: How to check esp-now status?
 A: Type espnowstats to see the connection status and the list of paired peers.
@@ -2677,9 +2569,6 @@ Do: srautotune start
 
 Q: show all sensors
 Do: sensors
-
-Q: restart the device
-Do: reboot
 
 Q: What configurations can HardwareOne run in?
 A: Four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers.
@@ -2733,9 +2622,6 @@ Do: mqttautostart on
 Q: remove an account
 Do: userdelete
 
-Q: Is there a WiFi radio?
-A: Yes. HardwareOne has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
-
 Q: close the thermal camera
 Do: closethermal
 
@@ -2770,7 +2656,7 @@ Do: uptime
 Q: How to remove a file?
 A: Type filedelete followed by the file path, or use the delete button in the Files tab.
 
-Q: change radio station
+Q: change FM radio station
 Do: fmradiotune
 
 Q: delete a user
@@ -2782,9 +2668,6 @@ Do: ledstartupeffect pulse
 Q: take a photo
 Do: cameracapture
 
-Q: read the presence sensor
-Do: presenceread
-
 Q: Command to change the led color?
 A: ledcolor followed by a color name or hex code sets the LED. For example, ledcolor red or ledcolor FF00FF.
 
@@ -2794,7 +2677,7 @@ Do: openthermal
 Q: autostart the gamepad
 Do: gamepadautostart on
 
-Q: open a file
+Q: view a file on the filesystem
 Do: fileview
 
 Q: set display brightness to zero
@@ -2803,14 +2686,8 @@ Do: oledbrightness 0
 Q: set SR software gain
 Do: srtuningswgain
 
-Q: Who developed this firmware?
-A: HardwareOne is an open-source ESP32 firmware project built on ESP-IDF.
-
 Q: I want to scan for i2c devices
 A: i2cscan scans the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
-
-Q: show nearby wifi
-Do: wifiscan
 
 After a firmware update the device reboots automatically. Your settings are still there because they are stored separately on internal flash. WiFi reconnects using your saved credentials. If you enabled autostart for a sensor, it starts on its own. Everything is back to normal in under ten seconds.
 
@@ -2838,9 +2715,6 @@ Do: userdeny
 Q: stop the rtc
 Do: closertc
 
-Q: list available commands
-Do: help
-
 Q: I need to upload a file
 A: Drag and drop files in the Files tab of the web UI, or use the upload button.
 
@@ -2859,23 +2733,17 @@ A: Type espnowpair followed by the MAC address and a name. Use espnowlist to see
 Q: start gps on boot
 Do: gpsautostart on
 
-Q: mute the radio
+Q: mute the FM receiver
 Do: fmradiomute
 
 Q: set the led to red
 Do: ledcolor red
-
-Q: What time zone am I in?
-A: I do not have general knowledge. I can answer questions about this device and its features.
 
 Q: disconnect from wifi
 Do: closewifi
 
 Q: scan for sensors
 Do: i2cscan
-
-Q: Wipe the configuration
-A: There is no factory reset command. To clear settings, delete the settings JSON file from internal storage and reboot.
 
 Q: enable G2 gesture navigation
 Do: g2nav on
@@ -2891,7 +2759,7 @@ A: The command is help. It lists all available commands. help followed by a comm
 Q: make the light cyan
 Do: ledcolor cyan
 
-Q: activate voice control
+Q: start speech recognition
 Do: opensr
 
 Q: what servos are connected
@@ -2903,10 +2771,7 @@ Do: opentof
 Q: led off
 Do: ledcolor off
 
-Q: How to transfer files to the device?
-A: Drag and drop files in the Files tab of the web UI, or use the upload button.
-
-Q: device temp
+Q: ESP32 chip temperature
 Do: temperature
 
 The BNO055 IMU measures orientation, acceleration, and rotation. Once started with openimu, you can read it by typing imuread. The web UI shows live readings that update every few seconds. Sensor data can be published to MQTT or used in automation rules.
@@ -2917,23 +2782,11 @@ A: BLE is Bluetooth Low Energy for short-range communication. Type openble to st
 Q: see my wifi credentials
 Do: wifilist
 
-Q: Reset all settings
-A: There is no factory reset command. To clear settings, delete the settings JSON file from internal storage and reboot.
-
-Q: scan the i2c bus
-Do: i2cscan
-
-Q: scan wifi
-Do: wifiscan
-
 Q: sync the clock
 Do: ntpsync
 
-Q: voltage
+Q: check battery voltage
 Do: voltage
-
-Q: Describe Bluetooth Low Energy
-A: BLE is Bluetooth Low Energy. HardwareOne uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
 
 Q: ESP-NOW vs WiFi?
 A: ESP-NOW is a direct radio link between two HardwareOne devices. It does not need any infrastructure or internet connection.
@@ -2962,26 +2815,20 @@ Do: filedelete
 Q: autostart the microphone
 Do: micautostart on
 
-Q: show paired devices
+Q: show discovered espnow devices
 Do: espnowdevices
 
-Q: show automation rules
+Q: list all automation rules
 Do: automationlist
 
 Q: start bluetooth
 Do: openble
-
-Q: Tell me about python
-A: I only know about HardwareOne firmware and features. Type help to see what I can assist with.
 
 Q: run an automation
 Do: automationrun
 
 Q: What command do I use to set up the access point?
 A: The command is wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
-
-Q: What command do I use to backup my configuration?
-A: Use the Settings tab in the web UI to download a JSON backup. Import it on another device to copy your configuration.
 
 Q: Tell me about the dashboard tabs
 A: The web dashboard has tabs for Sensors, Files, Settings, Pair, MQTT, GPS, and LLM. Each tab shows real-time data and controls for that feature.
@@ -2997,9 +2844,6 @@ Do: closegamepad
 
 The GPS module provides latitude, longitude, altitude, and speed. Type opengps to start it and gps to read the current position. The web UI shows the position on an interactive map. Map tiles are cached on the SD card so the map works offline.
 
-Q: Tell me about the forecast
-A: I can only answer questions about HardwareOne. Type help to see available commands.
-
 Q: Command to enable a feature in the build?
 A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
 
@@ -3008,9 +2852,6 @@ A: Use idf.py build to compile the firmware. Flash with idf.py flash. HardwareOn
 
 Q: I need to log in to the web ui
 A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
-
-Q: What is the SD card used for?
-A: The SD card stores large files like map tiles, LLM models, logs, and recorded data. It mounts automatically at /sd on boot.
 
 Q: turn on wifi
 Do: openwifi
@@ -3024,23 +2865,14 @@ A: Use openrtc to start the DS3231 real-time clock, then rtcread to get the time
 Q: What command do I use to set up mesh networking?
 A: Open the Pair tab on both devices, set the same passphrase, then initiate pairing on one while the other accepts.
 
-Q: Explain MQTT
-A: MQTT is a lightweight messaging protocol for IoT. HardwareOne publishes sensor data to an MQTT broker and can receive commands from subscribed topics.
-
 Q: disable bluetooth
 Do: closeble
 
 Q: start the gamepad
 Do: opengamepad
 
-Q: list active rules
-Do: automationlist
-
 Q: unmute the radio
 Do: fmradiounmute
-
-Q: read apds9960
-Do: apdsread
 
 Q: Is there a sensor limit?
 A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
@@ -3063,7 +2895,7 @@ Do: userresetpassword
 Q: Where are the settings?
 A: Type settings to see current values, or use the Settings tab in the web UI. Settings are saved as JSON on internal storage.
 
-Q: show files
+Q: list files on the filesystem
 Do: files
 
 Q: Command to see my paired devices?
@@ -3082,14 +2914,8 @@ A: Type automationlist to see the list, then delete the rule by its number.
 Q: Command to scan for i2c devices?
 A: Type i2cscan to scan the I2C bus. The device also scans automatically at startup and loads drivers for recognised sensors.
 
-Q: What is the PSRAM size?
-A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
-
 Q: How do I flash the firmware from the command line?
 A: Firmware updates are done through the web UI Settings tab using OTA upload. There is no CLI flash command on the device itself.
-
-Q: Hey
-A: Hello! I can help with HardwareOne. Ask about WiFi, sensors, ESP-NOW, MQTT, or type help.
 
 Q: Why is the sky blue?
 A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
@@ -3106,17 +2932,8 @@ Do: oledmode menu
 Q: What's the command to get sensor data?
 A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
-Q: Explain the web password
-A: The default login uses the credentials set during first-time setup. You can change the password in the Settings tab.
-
 Q: Is MQTT connected?
 A: Type mqttstatus to see whether the device is connected to the broker and what topic prefix is being used.
-
-Q: What is Python?
-A: I only know about HardwareOne firmware and features. Type help to see what I can assist with.
-
-Q: Explain OTA updates
-A: OTA is Over-The-Air firmware update. Open the Settings tab in the web UI and upload a new firmware binary to update the device wirelessly.
 
 Q: device keeps rebooting
 A: A crash loop may be caused by low memory. Check the serial console for error messages. Try removing autostart settings or reducing active sensors.
@@ -3126,9 +2943,6 @@ Do: ledstartupcolor2
 
 Q: What ways can I control it?
 A: You can control HardwareOne through the serial command line, the web dashboard on any device with a browser, or the OLED menu and gamepad.
-
-Q: Describe the IMU sensor
-A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: accept a user's registration
 Do: userapprove
@@ -3181,14 +2995,8 @@ Do: closesr
 Q: set log level to warn
 Do: loglevel warn
 
-Q: Stream some music
-A: I cannot play media. I can help with HardwareOne features. Type help for available commands.
-
 Q: load a servo profile
 Do: servoprofile
-
-Q: Tell me about the LLM
-A: The LLM is a small language model that runs entirely on the device using PSRAM. It answers questions about HardwareOne with no internet needed.
 
 Q: shut down the gamepad
 Do: closegamepad
@@ -3201,9 +3009,6 @@ Do: imuautostart on
 
 Q: who is paired
 Do: espnowlist
-
-Q: What are you?
-A: I am HardwareOne, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
 
 Q: can't see the web page
 A: Make sure WiFi is connected with wifistatus. Check the IP address and open it in a browser on the same network. Type openhttp if the server is stopped.
@@ -3220,16 +3025,10 @@ Do: ledcolor blue
 Q: How do I check my IP address?
 A: Type wifistatus to see your current IP address, signal strength, and connected network name.
 
-Q: Explain the ToF sensor
-A: The time-of-flight sensor is the VL53L4CX. It measures distance to objects up to six metres away using an infrared laser pulse.
-
 Q: change led to red
 Do: ledcolor red
 
-Q: how much charge is left
-Do: batterystatus
-
-Q: who is paired
+Q: espnow connection statistics
 Do: espnowstats
 
 Q: mqtt connection info
@@ -3244,12 +3043,6 @@ A: Type files to list files, fileview to read a file, filecreate to make a new f
 Q: led red
 Do: ledcolor red
 
-Q: What is the ESP-NOW range?
-A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
-
-Q: Command to use gps?
-A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
-
 Q: I want to use the llm
 A: Use the LLM tab in the web UI to ask a question. The model runs entirely on the device using PSRAM.
 
@@ -3261,9 +3054,6 @@ Do: closeimu
 
 Q: How does I2C work?
 A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
-
-Q: i2c bus
-Do: i2cscan
 
 Q: read a swipe or wave gesture
 Do: apdsgesture
@@ -3278,9 +3068,6 @@ A: Run status to see system status including WiFi, sensors, and uptime.
 
 Q: remove a user account
 Do: userdelete
-
-Q: What tabs are in the web UI?
-A: The web dashboard has tabs for Sensors, Files, Settings, Pair, MQTT, GPS, and LLM. Each tab shows real-time data and controls for that feature.
 
 Q: show sensors
 Do: sensors
@@ -3303,14 +3090,8 @@ Do: closefmradio
 Q: take a picture
 Do: cameracapture
 
-Q: What modes does HardwareOne have?
-A: Four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers.
-
 Q: What boards do you run on?
 A: HardwareOne runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
-
-Q: Google something
-A: I have no internet access. I run entirely on this device. Ask me about HardwareOne features.
 
 Q: Can I open a web browser on this?
 A: This device runs a web server, not a browser. Connect from a computer or phone browser using the IP shown by wifistatus.
@@ -3321,17 +3102,11 @@ Do: eitrackstatus
 Q: I need to check sensor readings
 A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
 
-Q: What command do I use to connect to mqtt?
-A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
-
 Q: How much memory is free?
 A: Type memsample for a memory snapshot or memreport for a full report.
 
 Q: How to publish to mqtt?
 A: mqttPublishIMU 1 or mqttPublishThermal 1 enables automatic sensor publishing. The device publishes sensor data to configured MQTT topics at regular intervals.
-
-Q: What's the command to open the dashboard?
-A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
 
 Q: What sensors are supported?
 A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
@@ -3344,9 +3119,6 @@ A: The time-of-flight sensor is the VL53L4CX. It measures distance to objects up
 
 Q: sync a user to another device
 Do: usersync
-
-Q: Does it support wireless networking?
-A: Yes. HardwareOne has built-in WiFi on the ESP32-S3. Type wifiadd followed by the network name and password, then openwifi to connect.
 
 Q: change someone else's password
 Do: userresetpassword
@@ -3376,29 +3148,14 @@ A: Type i2cscan to scan the I2C bus for detected sensors. Type sensors to see wh
 Q: send over espnow
 Do: espnowsend
 
-Q: What is the forecast?
-A: I can only answer questions about HardwareOne. Type help to see available commands.
-
-Q: Can I add more sensors?
-A: You can connect any number of I2C sensors as long as they have unique addresses. The I2C bus is scanned automatically at startup.
-
 Q: I need to use mqtt
 A: Set the broker with mqttHost followed by the broker address, then openmqtt to connect. Use mqttUser and mqttPassword if authentication is needed.
 
 Q: show configured servos
 Do: servolist
 
-Q: What microcontrollers are compatible?
-A: HardwareOne runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
-
-Q: ble details
+Q: bluetooth device info and address
 Do: bleinfo
-
-Q: I can't connect to WiFi
-A: Check that the network name and password are correct. Type wifiadd followed by the SSID and password, then openwifi to connect. Type wifistatus to see the current status.
-
-Q: What inputs can automations respond to?
-A: Automations can trigger on sensor values, time of day, MQTT messages, or button presses. Conditions can be combined with AND and OR.
 
 Q: generate an HTTPS certificate
 Do: certgen
@@ -3434,13 +3191,10 @@ A: Type uptime to see how long the device has been running since the last reboot
 Q: I need to delete a file
 A: Use filedelete followed by the file path, or use the delete button in the Files tab.
 
-Q: Command to build the firmware?
-A: Use idf.py build to compile the firmware. Flash with idf.py flash. HardwareOne uses ESP-IDF, not the Arduino IDE.
-
 Q: How do I check memory usage?
 A: memsample gives a memory snapshot and memreport gives a full report.
 
-Q: check the presence sensor
+Q: presence sensor thresholds and state
 Do: presencestatus
 
 Q: save settings
@@ -3470,17 +3224,8 @@ Do: imuread
 Q: what devices are paired
 Do: espnowdevices
 
-Q: set the time from internet
-Do: ntpsync
-
-Q: How do I load a model?
-A: Place the model file on the SD card and use the web UI to load it. The model runs entirely on the device using PSRAM.
-
 Q: How do I compile the code?
 A: I only know about operating this device. Compiling firmware is done on a computer using ESP-IDF, not on the device.
-
-Q: What's the command to build the firmware?
-A: Use idf.py build to compile the firmware. Flash with idf.py flash. HardwareOne uses ESP-IDF, not the Arduino IDE.
 
 Q: Sensor data is missing
 A: Make sure the sensor is started with its open command. Type i2cscan to check if the sensor is detected on the I2C bus.
@@ -3503,10 +3248,7 @@ Do: closeimu
 Q: display a message on G2
 Do: g2show
 
-Q: Who created this?
-A: HardwareOne is an open-source ESP32 firmware project built on ESP-IDF.
-
-Q: list espnowdevices
+Q: list espnow paired peers
 Do: espnowlist
 
 Q: startup LED duration 3 seconds
@@ -3520,9 +3262,6 @@ A: Type open followed by the sensor name. For example, openimu starts the BNO055
 
 Q: Command to add a user?
 A: Type useradd followed by the username, password, and role.
-
-Q: What's the command to transfer files to the device?
-A: Drag and drop files in the Files tab of the web UI, or use the upload button.
 
 Q: How do I set the timezone?
 A: Type tzoffsetminutes followed by the offset in minutes from UTC. For example, tzoffsetminutes -480 for Pacific time. Then run ntpsync to update the clock.
@@ -3539,23 +3278,14 @@ A: Use ledstartupeffect to pick an animation like rainbow, pulse, or fade. Use l
 Q: is the llmloaded
 Do: llmstatus
 
-Q: Tell me about Bluetooth
-A: Bluetooth Low Energy lets HardwareOne advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
-
 Q: start esp-now
 Do: openespnow
-
-Q: What is BLE?
-A: BLE is Bluetooth Low Energy. HardwareOne uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
 
 Q: open the rtc
 Do: openrtc
 
 Q: shut down mic
 Do: closemic
-
-Q: Hi
-A: Hello! I can help with HardwareOne. Ask about WiFi, sensors, ESP-NOW, MQTT, or type help.
 
 Q: turn on the gamepad
 Do: opengamepad
@@ -3578,20 +3308,11 @@ Do: srdebugstats
 Q: promote a user to admin
 Do: userpromote
 
-Q: How to read a sensor?
-A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
-
 Q: What command do I use to receive mqtt messages?
 A: Type mqttSubscribeTopics followed by a comma-separated list of topics. Incoming messages appear in the serial log and can trigger automations.
 
-Q: full ram report
-Do: memreport
-
 Q: Is WiFi connected?
 A: wifistatus shows the current connection status, IP address, and signal strength.
-
-Q: Make me laugh
-A: I can only help with HardwareOne features. Try asking about WiFi, sensors, or commands.
 
 Q: start camera on boot
 Do: cameraautostart on
@@ -3614,21 +3335,12 @@ A: The command is opentof. It starts the VL53L4CX sensor and measures distance u
 Q: How do I manage the SD card?
 A: Type sdinfo to check SD card status and space. Use sdmount and sdunmount to attach or detach the card. Type sdformat to erase and format the SD card.
 
-Q: What is the time-of-flight sensor?
-A: The time-of-flight sensor is the VL53L4CX. It measures distance to objects up to six metres away using an infrared laser pulse.
-
-Q: Command to see what files are on the device?
-A: Go to the Files tab in the web UI or type files to list files in the current directory.
-
-Q: list automations
-Do: automationlist
-
 If your sensor readings look wrong, type i2cscan to check whether the sensor is detected on the bus. The serial console will show if the I2C bus is returning errors. Check the wiring for loose connections on the SDA line. Once you fix it, the sensor readings should return to normal.
 
 Q: What is the thermal camera?
 A: Run openthermal to start the MLX90640 thermal camera. The web UI shows a live 32 by 24 heatmap. Run closethermal to stop it.
 
-Q: make the light white
+Q: set neopixel to white
 Do: ledcolor white
 
 Q: Command to do a firmware update?
@@ -3648,7 +3360,7 @@ Do: status
 Q: stop the language model
 Do: llmunload
 
-Q: search for a station
+Q: search for an FM station
 Do: fmradioseek
 
 Q: promote a wifi network
@@ -3669,16 +3381,13 @@ Do: espnowunpair
 Q: How do I save settings?
 A: Settings are saved automatically when changed. Type savesettings to force an immediate save to flash storage. Settings persist across reboots.
 
-Q: Command to get sensor data?
-A: Type the sensor read command to see its current data. For example, type imuread to see orientation from the BNO055, or tofread to see distance from the VL53L4CX.
-
 Q: set the light to yellow
 Do: ledcolor yellow
 
 Q: start the thermal camera
 Do: openthermal
 
-Q: list espnowdevices
+Q: show all discovered espnow devices
 Do: espnowdevices
 
 Q: How does the thermal camera work?
@@ -3719,9 +3428,6 @@ Do: sddiag
 Q: show raw SR hypotheses
 Do: srraw on
 
-Q: Which sensors work with HardwareOne?
-A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
-
 Q: fm radio info
 Do: fmradioread
 
@@ -3740,9 +3446,6 @@ Do: closefmradio
 Q: thermal camera shows nothing
 A: Make sure the sensor is started with openthermal. Type thermalread to check for data. Try i2cscan to verify the MLX90640 is detected.
 
-Q: How do I compile HardwareOne?
-A: Use idf.py build to compile the firmware. Flash with idf.py flash. HardwareOne uses ESP-IDF, not the Arduino IDE.
-
 Q: turn off esp-now
 Do: closeespnow
 
@@ -3752,7 +3455,7 @@ Do: thermalread
 Q: I want to use an sd card
 A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
-Q: list tasks
+Q: show running task statistics
 Do: taskstats
 
 Q: change led to orange
@@ -3781,20 +3484,8 @@ ESP-NOW is a wireless protocol from Espressif that allows direct device-to-devic
 Q: where am i
 Do: gpsread
 
-Q: sync clock
-Do: ntpsync
-
 Q: set the clock manually
 Do: rtcset
-
-Q: Explain the I2C bus
-A: I2C is a two-wire bus that connects sensors and peripherals to the device. Multiple devices share the same two wires using different addresses.
-
-Q: show full memory report
-Do: memreport
-
-Q: I need to see the map
-A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
 
 Q: start the gps
 Do: opengps
@@ -3818,14 +3509,8 @@ A: Use wifiadd followed by the network name and password, then openwifi to conne
 Q: activate camera
 Do: opencamera
 
-Q: What's the command to update the firmware?
-A: Open the Settings tab in the web UI and use the OTA section to upload a new firmware binary. The device reboots automatically after update.
-
 Q: delete a file
 Do: filedelete
-
-Q: How can HardwareOne be configured?
-A: Four configurations: Barebones headless node, Sensor Appliance, Standard Handheld with OLED and gamepad, and Bonded Microcontrollers.
 
 Q: show servo list
 Do: servolist
@@ -3838,9 +3523,6 @@ Do: tofread
 
 Q: What is the rtc?
 A: Type openrtc to start the DS3231 real-time clock, then rtcread to get the time. The RTC keeps time even when the device is powered off.
-
-Q: What sensors can I use?
-A: Supported sensors include BNO055 IMU for orientation and motion, VL53L4CX time-of-flight, MLX90640 thermal camera, APDS9960 gesture sensor, STHS34PF80 presence sensor, and GPS.
 
 Q: disable RTC autostart
 Do: rtcautostart off
@@ -3881,17 +3563,8 @@ Do: tofautostart on
 Q: check SD card hardware
 Do: sddiag
 
-Q: Tell me about WiFi
-A: WiFi connects the device to a router for internet access and the web dashboard. Type wifiadd followed by the network name and password, then openwifi to connect.
-
 Q: I need to build the firmware
 A: Use idf.py build to compile the firmware. Flash with idf.py flash. HardwareOne uses ESP-IDF, not the Arduino IDE.
-
-Q: What is ChatGPT?
-A: I am a small language model running on this ESP32-S3 device. I answer questions about HardwareOne.
-
-Q: How does the OLED work?
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: open the presence detector
 Do: openpresence
@@ -3920,17 +3593,11 @@ Do: userpromote
 Q: turn off the motion sensor
 Do: closeimu
 
-Q: How does device bonding work?
-A: Bonded mode connects two HardwareOne devices so they share command registries. A command typed on one device can execute on the other transparently.
-
 Q: How to scan for networks?
 A: Type wifiscan to see a list of nearby WiFi networks with signal strength.
 
 Q: open the apds sensor
 Do: openapds
-
-Q: Battery runtime?
-A: Battery life depends on which features are active. GPS and WiFi use the most power. With light use the device can run several hours on a LiPo battery.
 
 Q: How far away is the object?
 A: Type tofread to see the distance reading from the VL53L4CX time-of-flight sensor. It measures up to six metres.
@@ -3974,13 +3641,10 @@ Do: temperature
 Q: set speech recognition VAD sensitivity
 Do: srtuningvad
 
-Q: Sensor not responding
-A: Make sure the sensor is started with its open command. Type i2cscan to check if the sensor is detected on the I2C bus.
-
 Q: log out
 Do: logout
 
-Q: seek next station
+Q: seek next FM radio station
 Do: fmradioseek
 
 Q: stop the gps
@@ -3998,23 +3662,11 @@ A: The command is SENSORautostart on. For example, imuautostart on starts the IM
 Q: play led animation
 Do: ledeffect
 
-Q: reboot now
-Do: reboot
-
 Q: led blue
 Do: ledcolor blue
 
 Q: set minimum confidence for SR commands
 Do: srconfidence
-
-Q: HardwareOne is not responding
-A: Try typing reboot to restart it. Check that the serial or web connection is active. Type uptime to see if it recently rebooted.
-
-Q: get a presence reading
-Do: presenceread
-
-Q: What command do I use to see debug output?
-A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
 
 Q: how much ram is free
 Do: memsample
@@ -4039,17 +3691,11 @@ Do: certgen rsa
 Q: enable gps tracking
 Do: opengps
 
-Q: device status
-Do: status
-
 Q: close esp-now
 Do: closeespnow
 
 Q: Explain the GPS module
 A: The GPS module receives satellite signals to provide latitude, longitude, altitude, and speed. Type opengps to start it and gps to read position.
-
-Q: How do I pair with another device?
-A: Open the Pair tab on both devices, set the same passphrase, then initiate pairing on one while the other accepts.
 
 Q: are the G2 glasses connected
 Do: g2status
@@ -4078,9 +3724,6 @@ A: Type ledcolor followed by a color name or hex code. For example, ledcolor red
 Q: turn on speech recognition
 Do: opensr
 
-Q: Which development boards work?
-A: HardwareOne runs on the Seeed XIAO ESP32-S3, Adafruit QT PY ESP32-S3, Adafruit QT PY ESP32, and Adafruit Feather ESP32.
-
 Q: start the language model
 Do: llmload
 
@@ -4093,17 +3736,11 @@ Do: closemqtt
 Q: disable the clock chip
 Do: closertc
 
-Q: What does BLE stand for?
-A: BLE is Bluetooth Low Energy. HardwareOne uses it to scan for nearby devices and connect to BLE peripherals for short-range communication.
-
 Q: make the light red
 Do: ledcolor red
 
 Q: turn on mqtt
 Do: openmqtt
-
-Q: system overview
-Do: status
 
 Q: How do I read a serial port in Python?
 A: I only know about HardwareOne device commands. Python serial programming is outside my scope.
@@ -4114,14 +3751,11 @@ Do: apdsproximity
 Q: How do I capture voice snippets for analysis?
 A: Type srsnipon to enable automatic snippet capture whenever the wake word fires. Use srsnipstart and srsnipstop for manual capture. Type srsnipstatus to see whether capture is active and srsnipconfig to adjust pre-capture time, maximum duration, and save destination.
 
-Q: reset password
+Q: change my own password
 Do: userchangepassword
 
 Q: Can you go online?
 A: I have no internet access. I run entirely on this device. Ask me about HardwareOne features.
-
-Q: Why can't I read the sensor?
-A: Make sure the sensor is started with its open command. Type i2cscan to check if the sensor is detected on the I2C bus.
 
 Q: oled info
 Do: oledstatus
@@ -4162,9 +3796,6 @@ Do: ledstartupenabled 1
 Q: start the gesture sensor
 Do: openapds
 
-Q: Play a song
-A: I cannot play media. I can help with HardwareOne features. Type help for available commands.
-
 Q: turn off the apds9960
 Do: closeapds
 
@@ -4186,9 +3817,6 @@ Do: srsnipoff
 Q: How to see all accounts?
 A: Type userlist to see all user accounts and their roles.
 
-Q: Does it have a camera?
-A: HardwareOne supports the MLX90640 thermal camera which produces a 32 by 24 pixel heat map. It does not have a visible light camera.
-
 Q: approve a waiting account request
 Do: userapprove
 
@@ -4198,26 +3826,17 @@ Do: espnowsendfile
 Q: deny a pending user request
 Do: userdeny
 
-Q: Describe the GPS feature
-A: The GPS module receives satellite signals to provide latitude, longitude, altitude, and speed. Type opengps to start it and gps to read position.
-
 Q: turn on esp-now
 Do: openespnow
 
 Q: command not found
 A: Type help to see all available commands. Check the spelling. Some commands need a sensor to be started first with its open command.
 
-Q: What features do you have?
-A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
-
 Q: start logging data
 Do: sensorlog
 
 Q: Where is the GPS map?
 A: The GPS tab in the web UI shows your position on an interactive map. Map tiles are cached on the SD card for offline use.
-
-Q: What's the command to turn on a feature?
-A: Edit System_BuildConfig.h and set the flag for the feature you want to 1, then rebuild and reflash.
 
 Q: record audio
 Do: micrecord
@@ -4233,9 +3852,6 @@ Do: sdunmount
 Q: enable object state tracking
 Do: eitrackenable 1
 
-Q: What is the battery life?
-A: Battery life depends on which features are active. GPS and WiFi use the most power. With light use the device can run several hours on a LiPo battery.
-
 Q: get a thermal reading
 Do: thermalread
 
@@ -4245,29 +3861,8 @@ A: Type opensr to start speech recognition. Once active, speak a wake word follo
 Q: I want to find wifi networks
 A: wifiscan shows a list of nearby WiFi networks with signal strength.
 
-Q: ESP-NOW distance limit?
-A: ESP-NOW works up to about 200 metres in open air. Range depends on antenna quality and obstacles between devices.
-
-Q: Are you ChatGPT?
-A: I am a small language model running on this ESP32-S3 device. I answer questions about HardwareOne.
-
-Q: Tell me about the GPS
-A: The GPS module receives satellite signals to provide latitude, longitude, altitude, and speed. Type opengps to start it and gps to read position.
-
-Q: How does GPS work?
-A: Type opengps to start the GPS module, then gps to see latitude, longitude, altitude, and speed.
-
 Q: automation not running
 A: Type automationlist to check if the rule exists. Make sure the automation system is enabled. Check that the trigger condition is being met.
-
-Q: Explain bonded microcontrollers
-A: Bonded mode connects two HardwareOne devices so they share command registries. A command typed on one device can execute on the other transparently.
-
-Q: How to browse files?
-A: Go to the Files tab in the web UI or type files to list files in the current directory.
-
-Q: Command to pair with another device?
-A: Open the Pair tab on both devices, set the same passphrase, then initiate pairing on one while the other accepts.
 
 Q: enable the hardware clock
 Do: openrtc
@@ -4281,10 +3876,7 @@ Do: apdscolor
 Q: turn off the radio
 Do: closefmradio
 
-Q: What is the meaning of life?
-A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
-
-Q: microphone status
+Q: read microphone audio level
 Do: micread
 
 Q: What is the origin of HardwareOne?
@@ -4295,9 +3887,6 @@ A: Each sensor has its own close command. Type closegps, closeimu, closethermal,
 
 Q: stop bonded connection
 Do: bonddisconnect
-
-Q: How does the IMU work?
-A: The IMU is the BNO055 inertial measurement unit. It measures orientation, acceleration, and rotation. Type openimu to start it and imuread to read data.
 
 Q: How do I diagnose SD card problems?
 A: Type sddiag to run low-level hardware diagnostics including SPI bus checks and read/write tests.
@@ -4337,9 +3926,6 @@ A: They can send messages, transfer files, and share commands over ESP-NOW.
 Q: Explain bonded mode for ESP-NOW
 A: Bonded mode lets paired devices share command registries so commands on one execute on the other.
 
-Q: display the command list
-Do: help
-
 Q: How to remove an account?
 A: Use userdelete followed by the username to remove their account.
 
@@ -4363,19 +3949,13 @@ A: Make sure the mic is started with openmic. Check miclevel to see if audio is 
 
 The web dashboard is a browser-based interface served directly from the device. It does not need the internet or any cloud service. You access it by typing the device IP address into any web browser on the same network. The dashboard has tabs for sensors, files, settings, pairing, MQTT, GPS, and the language model.
 
-Q: What sections does the dashboard have?
-A: The web dashboard has tabs for Sensors, Files, Settings, Pair, MQTT, GPS, and LLM. Each tab shows real-time data and controls for that feature.
-
-Q: Tell me about peer-to-peer communication
-A: ESP-NOW is a direct radio link between two HardwareOne devices. It works up to 200 metres in open air with no infrastructure needed.
-
 Q: blank the G2 glasses screen
 Do: g2clear
 
 Q: Command to scan for bluetooth devices?
 A: The command is openble. Once started, the device advertises and can pair with BLE peripherals.
 
-Q: change led to pink
+Q: set the neopixel color to pink
 Do: ledcolor pink
 
 Q: How do I check ESP-NOW status?
@@ -4393,14 +3973,8 @@ Do: sddiag
 Q: How do I promote or demote a user?
 A: Type userpromote to grant admin rights or userdemote to remove them. Only admins can change roles.
 
-Q: How to see debug output?
-A: Debug commands use the pattern debugmodule 1 to enable. For example, debugwifi 1 turns on WiFi debug logging.
-
 Q: list connected sensors
 Do: sensors
-
-Q: Why do I need an SD card?
-A: The SD card stores large files like map tiles, LLM models, logs, and recorded data. It mounts automatically at /sd on boot.
 
 Q: Who am I paired with?
 A: Type espnowstats to see the connection status and the list of paired peers.
@@ -4417,23 +3991,14 @@ Do: micrecord
 Q: I can't see the display
 A: Type oledbrightness 255 to set maximum brightness. Make sure the OLED is initialised by navigating to the OLED menu.
 
-Q: How big is the PSRAM?
-A: The ESP32-S3 has 8 MB of PSRAM. Most of it is used by the LLM model weights when the language model is loaded.
-
 Q: check if voice commands are armed
 Do: voicestatus
 
 Q: close the presence detector
 Do: closepresence
 
-Q: Describe the presence sensor
-A: The STHS34PF80 is a presence sensor that detects nearby people using infrared. Type openpresence to start it and presenceread to see detection status.
-
 Q: Command to set up the access point?
 A: Type wifiadd followed by the network name and password, then openwifi to connect. Once connected, open the web dashboard from your phone or laptop using the device IP address.
-
-Q: How do I use an SD card?
-A: Insert a micro SD card and it mounts automatically at /sd. Use it for logs, map tiles, model files, and large data.
 
 Bonded mode takes ESP-NOW pairing further. When two devices are bonded, they share their command registries. A command typed on one device can execute on the other transparently. This is useful for setups where one device is a sensor node and the other is a display unit.
 
@@ -4462,20 +4027,8 @@ Do: uptime
 Q: I need to check system status
 A: Use status to see system status including WiFi, sensors, and uptime.
 
-Q: show battery info
-Do: batterystatus
-
-Q: Describe hardware one
-A: I am HardwareOne, an ESP32-S3 device with WiFi, sensors, a web dashboard, and ESP-NOW mesh networking.
-
 Q: demote a user from admin
 Do: userdemote
-
-Q: read the gesture sensor
-Do: apdsread
-
-Q: Explain your capabilities
-A: I connect to WiFi, run a web UI, read sensors, send data over MQTT, run automations, and pair with other devices over ESP-NOW.
 
 Q: check the device uptime
 Do: uptime
@@ -4483,25 +4036,19 @@ Do: uptime
 Q: voice commands not recognized
 A: Type srstatus to check if speech recognition is running. Use srconfidence to lower the threshold. Speak clearly after the wake word. Type srcmdslist to see valid commands.
 
-Q: led off
+Q: turn the neopixel LED off
 Do: ledcolor off
 
 Q: enable Edge Impulse
 Do: eienable 1
 
-Q: What triggers are available for rules?
-A: Automations can trigger on sensor values, time of day, MQTT messages, or button presses. Conditions can be combined with AND and OR.
-
 Q: create an automation
 Do: automationadd
 
-Q: Who is the president?
-A: I do not have general knowledge. I can answer questions about this device and its features.
-
-Q: activate voice control
+Q: arm voice command execution
 Do: voicearm
 
-Q: what models are available
+Q: what LLM models are available
 Do: llmmodels
 
 Q: Explain the mqttstatus
@@ -4510,14 +4057,8 @@ A: mqttstatus shows whether the device is connected to the broker and what topic
 Q: enable the thermal sensor
 Do: openthermal
 
-Q: How do I use the web interface?
-A: Open the device IP address in a web browser on the same WiFi network. The dashboard shows sensors, files, settings, and more.
-
 Q: close the tof
 Do: closetof
-
-Q: What is the oled?
-A: The SSD1306 OLED shows status information, sensor readings, and menu options. Type oledmode menu to open the main menu.
 
 Q: save new wifi credentials
 Do: wifiadd
@@ -4549,14 +4090,1866 @@ A: Type oledbrightness followed by a value from 0 to 255.
 
 For a security setup, start the presence sensor with openpresence. Create an automation rule: IF PRESENCE>0 THEN ledcolor red. When someone walks into the room, the STHS34PF80 detects body heat and the LED turns red. You can also publish presence data over MQTT with mqttSubscribeTopics to get alerts on your phone.
 
-Q: Explain the LLM
-A: The LLM is a small language model that runs entirely on the device using PSRAM. It answers questions about HardwareOne with no internet needed.
-
 Q: I need to add a user
 A: Run useradd followed by the username, password, and role.
 
-Q: What is Bluetooth?
-A: Bluetooth Low Energy lets HardwareOne advertise and connect with BLE devices. Type openble to start BLE and closeble to stop it.
-
 Q: get RGB color values
 Do: apdscolor
+
+Q: How do I tell the time
+A: Type time to display the current device clock. Use ntpsync to synchronise from the internet if WiFi is connected.
+
+Q: How do I check the time
+A: Run time to see the current device time, or ntpsync to sync from an NTP server.
+
+Q: How do I know what time it is
+A: The time command shows the device clock. Sync it with ntpsync over WiFi for accuracy.
+
+Q: What is the time command
+A: time displays the current device clock. The clock can be set with ntpsync over WiFi or rtcset manually.
+
+Q: How do I check the device clock
+A: Use time to see the current clock. Sync with ntpsync if connected to WiFi, or use rtcset to set it by hand.
+
+Q: I want to know the time
+A: Run time to see the current device clock, or ntpsync to sync from an NTP server.
+
+Q: what is the time
+Do: time
+
+Q: check the system clock
+Do: time
+
+Q: current time
+Do: time
+
+Q: How do I turn off wifi
+A: Type closewifi to turn off the WiFi radio and disconnect from the network.
+
+Q: How do I disable wifi
+A: Run closewifi to disable WiFi. The device disconnects from the router and frees the radio.
+
+Q: How do I stop wifi
+A: closewifi stops the WiFi radio. Saved credentials are kept so you can reconnect later with openwifi.
+
+Q: I want to turn off the wifi radio
+A: Use closewifi to shut down WiFi. Your saved networks remain stored for next time.
+
+Q: Can I shut down wifi to save power
+A: Yes, type closewifi to turn off WiFi. This saves battery. Type openwifi to reconnect when needed.
+
+Q: How do I power down wifi
+A: closewifi shuts down the WiFi radio. Credentials stay saved. Reconnect anytime with openwifi.
+
+Q: disable the wireless connection
+Do: closewifi
+
+Q: shut down wifi
+Do: closewifi
+
+Q: How do I set the ESP-NOW name
+A: Type espnowsetname followed by the name you want. This name identifies the device to other ESP-NOW peers.
+
+Q: How do I change the ESP-NOW device name
+A: Run espnowsetname followed by the new name. Other paired devices will see this name in their peer list.
+
+Q: What is the espnowsetname command
+A: espnowsetname sets the device name shown to ESP-NOW peers. Type it followed by the name you want.
+
+Q: How do I identify my device on ESP-NOW
+A: Use espnowsetname to set a readable name. Paired devices see this name instead of the MAC address.
+
+Q: I want to give my device an ESP-NOW name
+A: Type espnowsetname followed by a name. This labels your device for other ESP-NOW peers.
+
+Q: give this device an espnow label
+Do: espnowsetname
+
+Q: set my espnow identity
+Do: espnowsetname
+
+The DS3231 real-time clock keeps accurate time even when the device is off. A coin cell battery maintains the clock. Start the RTC with openrtc and read the time with rtcread. Sync it from NTP with rtcsync after connecting to WiFi.
+
+Q: What is the DS3231
+A: The DS3231 is a precision real-time clock module. It keeps the time accurate even when the device is powered off using a backup battery.
+
+Q: Explain the real-time clock
+A: The RTC is a DS3231 clock module. It stores the time independently so the device knows the time even after a reboot or power loss.
+
+Q: What does the RTC do
+A: The RTC keeps the current time even when the device has no power. Start it with openrtc and read with rtcread.
+
+Q: How do I read the clock time
+A: Type rtcread to get the current time from the DS3231 RTC module.
+
+Q: How do I get the time from the RTC
+A: Run rtcread to read the current time stored in the DS3231 real-time clock.
+
+Q: What command reads the RTC
+A: rtcread returns the time from the DS3231 clock module.
+
+Q: How do I set the RTC manually
+A: Type rtcset followed by the date and time in YYYY-MM-DD HH:MM:SS format.
+
+Q: How do I program the clock
+A: Use rtcset followed by the date and time. For automatic updates, connect WiFi and run rtcsync.
+
+Q: How do I sync the RTC to the internet time
+A: Connect WiFi first, then run rtcsync to copy the NTP time into the DS3231 hardware clock.
+
+Q: Does the RTC work without power
+A: Yes. The DS3231 has a backup battery that keeps the time running even when the device is unplugged.
+
+Q: Does the clock keep running when the device is off
+A: Yes. The DS3231 RTC has a coin cell battery. It keeps accurate time even without main power.
+
+Q: How do I autostart the RTC
+A: Type rtcautostart on to start the DS3231 automatically on every boot.
+
+Q: What is the difference between time and rtcread
+A: time shows the system clock. rtcread shows the DS3231 hardware clock. Use rtcsync to copy between them.
+
+Q: How do I copy the RTC to the system clock
+A: Run rtcsync to synchronise the DS3231 hardware clock with the system time in either direction.
+
+Q: read the hardware clock
+Do: rtcread
+
+Q: check the RTC
+Do: rtcread
+
+Q: what time does the DS3231 say
+Do: rtcread
+
+Q: program the clock time
+Do: rtcset
+
+Q: write a time to the RTC
+Do: rtcset
+
+Q: set the hardware clock time
+Do: rtcset
+
+Q: copy NTP time to the RTC
+Do: rtcsync
+
+Q: sync hardware clock with system
+Do: rtcsync
+
+Q: start the clock module
+Do: openrtc
+
+Q: stop the clock module
+Do: closertc
+
+The PCA9685 is an I2C servo driver that controls up to 16 servo motors. Type servo followed by the channel number and angle to move a servo. Use servolist to see all channels and their positions. Profiles save and recall multi-servo arrangements for repeatable motion.
+
+Q: What is the servo controller
+A: The PCA9685 is an I2C driver that controls up to 16 servo motors. Type servo followed by a channel and angle to move one.
+
+Q: What is the PCA9685
+A: The PCA9685 is a 16-channel I2C servo controller. Each channel drives one servo independently.
+
+Q: Explain the servo system
+A: HardwareOne uses the PCA9685 to control up to 16 servos over I2C. Type servo with a channel and angle to set a position.
+
+Q: How do I move a servo
+A: Type servo followed by the channel number and the target angle in degrees.
+
+Q: How do I set a servo position
+A: Run servo followed by the channel number and angle. The servo moves to the specified position immediately.
+
+Q: How do I control a servo motor
+A: Type servo followed by the channel number and angle to move the servo. Use servolist to see all channels.
+
+Q: How do I see connected servos
+A: Type servolist to see all configured servo channels and their current positions.
+
+Q: What servos are attached
+A: Run servolist to display all active servo channels, their angles, and pulse widths.
+
+Q: How do I calibrate a servo motor
+A: Type servocalibrate followed by the channel number. Follow the prompts to set the minimum, center, and maximum positions.
+
+Q: How do I adjust servo limits
+A: Run servocalibrate followed by the channel to set pulse width limits for that servo.
+
+Q: My servo moves to the wrong angle
+A: Run servocalibrate for that channel to fix the range. Check servolist to confirm the current position.
+
+Q: How do I save servo positions
+A: Type servoprofile followed by save and a name to store all current servo angles as a profile.
+
+Q: How do I load a saved servo arrangement
+A: Run servoprofile followed by load and the profile name to recall a saved set of servo positions.
+
+Q: How many servos can I control
+A: The PCA9685 supports up to 16 independent servo channels on a single I2C board.
+
+Q: Servo not moving at all
+A: Check i2cscan to verify the PCA9685 is detected. Make sure the servo has power. Try servocalibrate.
+
+Q: My servo is jittering
+A: Recalibrate with servocalibrate to set correct pulse widths. Check that the power supply can handle the load.
+
+Q: set a servo angle
+Do: servo
+
+Q: move the servo to a position
+Do: servo
+
+Q: position servo motor
+Do: servo
+
+Q: display servo channel list
+Do: servolist
+
+Q: what servos are active
+Do: servolist
+
+Q: list servo channels
+Do: servolist
+
+Q: run servo calibration
+Do: servocalibrate
+
+Q: calibrate servo range
+Do: servocalibrate
+
+Q: adjust servo limits
+Do: servocalibrate
+
+Q: store servo positions
+Do: servoprofile
+
+Q: recall a servo arrangement
+Do: servoprofile
+
+Q: load servo preset
+Do: servoprofile
+
+The Seesaw gamepad connects over I2C and provides a thumb joystick and buttons. It navigates the OLED menu system without needing a phone or computer. Start it with opengamepad and read input with gamepadread.
+
+Q: What is the Seesaw gamepad
+A: The Seesaw gamepad is an I2C input device with a joystick and buttons. It controls the OLED menu and triggers device actions.
+
+Q: Explain the gamepad
+A: The gamepad is an Adafruit Seesaw module. It has a joystick and buttons for navigating the OLED menu hands-free.
+
+Q: What does the gamepad do
+A: The gamepad provides physical button and joystick input. It navigates the OLED menu and can trigger automations.
+
+Q: How do I read gamepad buttons
+A: Type gamepadread to see the current joystick position and button states from the Seesaw gamepad.
+
+Q: How do I see joystick input
+A: Run gamepadread to display the current x and y axis values and which buttons are pressed.
+
+Q: Can I use the gamepad without the OLED
+A: Yes, gamepadread shows raw input data. The gamepad also works with automations and custom actions.
+
+Q: How do I navigate the OLED with the gamepad
+A: Start the gamepad with opengamepad, then use the joystick to scroll through OLED menu items and the button to select.
+
+Q: How does gamepad OLED navigation work
+A: The joystick moves between menu items on the OLED screen. Press the center button to select an option.
+
+Q: How do I autostart the gamepad
+A: Type gamepadautostart on to start the Seesaw gamepad automatically at boot.
+
+Q: The gamepad is not working
+A: Check i2cscan to verify the Seesaw is detected. Make sure it is started with opengamepad.
+
+Q: Gamepad does not respond
+A: Run i2cscan to check the connection. Try closegamepad then opengamepad to reinitialise.
+
+Q: Gamepad buttons stuck
+A: Type gamepadread to check the raw input values. If stuck, close and reopen with closegamepad then opengamepad.
+
+Q: check joystick position
+Do: gamepadread
+
+Q: read the joystick
+Do: gamepadread
+
+Q: see button states
+Do: gamepadread
+
+Q: start the joystick
+Do: opengamepad
+
+Q: enable the joystick input
+Do: opengamepad
+
+Q: stop the joystick
+Do: closegamepad
+
+Q: disable the joystick
+Do: closegamepad
+
+Q: autostart joystick at boot
+Do: gamepadautostart on
+
+The APDS9960 sensor has three modes: color reads RGB values, proximity measures distance to nearby objects, and gesture detects hand swipes in four directions. Switch between modes with apdsmode. Start the sensor with openapds.
+
+Q: What can the APDS9960 detect
+A: The APDS9960 detects RGB color, proximity to nearby objects, and hand gestures in four directions.
+
+Q: What modes does the APDS sensor have
+A: Three modes: color for RGB readings, proximity for short-range distance, and gesture for detecting hand swipes.
+
+Q: How does the gesture sensor work
+A: The APDS9960 gesture mode detects hand waves in up, down, left, and right directions. Start with openapds and apdsmode gesture on.
+
+Q: How do I detect a hand wave
+A: Enable gesture mode with apdsmode gesture on, then run apdsgesture to see the latest detected swipe direction.
+
+Q: What gestures can it recognise
+A: The APDS9960 detects up, down, left, and right hand swipes. Start it with openapds and enable gesture mode.
+
+Q: How do I read RGB color values
+A: Enable color mode with apdsmode color on, then type apdscolor to see red, green, blue, and clear readings.
+
+Q: How do I measure colour with the APDS
+A: Run apdsmode color on to enable colour sensing, then apdscolor to read the red, green, blue, and clear channels.
+
+Q: How do I use the proximity feature
+A: Enable proximity mode with apdsmode proximity on. Then type apdsproximity to see how close an object is.
+
+Q: What is the APDS proximity range
+A: The APDS9960 proximity sensor detects objects within a few centimetres. Use apdsproximity to check the current reading.
+
+Q: How do I switch APDS modes
+A: Type apdsmode followed by the mode name and on or off. For example, apdsmode gesture on or apdsmode color off.
+
+Q: Can I use multiple APDS modes at once
+A: Yes, enable each mode independently with apdsmode. For example, apdsmode color on and apdsmode proximity on together.
+
+Q: APDS sensor gives no data
+A: Check openapds is running and i2cscan detects the chip. Make sure the mode you need is enabled with apdsmode.
+
+Q: The gesture sensor is not detecting anything
+A: Run apdsmode gesture on to enable gesture mode. Wave your hand close to the sensor slowly. Check sensorinfo apds.
+
+Q: measure APDS distance
+Do: apdsproximity
+
+Q: how close is my hand
+Do: apdsproximity
+
+Q: check colour reading
+Do: apdscolor
+
+Q: read APDS colour channels
+Do: apdscolor
+
+Q: detect a hand wave
+Do: apdsgesture
+
+Q: sense a swipe
+Do: apdsgesture
+
+Q: switch to gesture mode
+Do: apdsmode gesture on
+
+Q: enable colour sensing
+Do: apdsmode color on
+
+The STHS34PF80 presence sensor detects people using infrared. It can distinguish between someone standing still and someone walking past. The detection range is several metres. Start it with openpresence and check readings with presenceread.
+
+Q: How does the presence sensor detect people
+A: The STHS34PF80 uses infrared to detect body heat. It can tell the difference between a stationary person and someone moving.
+
+Q: What is the range of the presence sensor
+A: The STHS34PF80 detects people up to several metres away depending on the environment and sensor orientation.
+
+Q: How far can the presence sensor see
+A: Detection range is several metres in typical conditions. Performance depends on line of sight and ambient temperature.
+
+Q: Can the presence sensor tell if someone is moving
+A: Yes. The STHS34PF80 distinguishes between stationary presence and active motion using separate detection channels.
+
+Q: How do I check presence sensor thresholds
+A: Type presencestatus to see the current detection state, sensitivity thresholds, and temperature readings.
+
+Q: What does presencestatus show
+A: presencestatus displays whether the sensor detects presence or motion, the threshold levels, and ambient temperature.
+
+Q: How do I adjust presence sensitivity
+A: The sensor thresholds are configured in the settings. Use presencestatus to see current values. Adjust through the web UI.
+
+Q: How do I autostart presence detection
+A: Type presenceautostart on to start the STHS34PF80 automatically at boot.
+
+Q: Can I use presence detection with automations
+A: Yes. Create a rule like IF PRESENCE>0 THEN espnowsend. The sensor triggers when it detects body heat.
+
+Q: Presence sensor shows false positives
+A: Check presencestatus for ambient temperature shifts. Move the sensor away from heat sources and direct sunlight.
+
+Q: No one is there but presence reads true
+A: False triggers can be caused by heat sources near the sensor. Check presencestatus and adjust the mounting position.
+
+Q: show presence thresholds
+Do: presencestatus
+
+Q: check presence settings
+Do: presencestatus
+
+Q: presence sensor state
+Do: presencestatus
+
+Q: start detecting people
+Do: openpresence
+
+Q: begin presence monitoring
+Do: openpresence
+
+Q: stop detecting people
+Do: closepresence
+
+Q: end presence monitoring
+Do: closepresence
+
+The RDA5807 FM radio chip receives standard FM broadcasts from 87 to 108 MHz. Tune to a station with fmradiotune and search for the next strong signal with fmradioseek. Volume runs from 0 to 15 with fmradiovolume.
+
+Q: What is the FM radio module
+A: The RDA5807 is an FM radio receiver. It tunes the standard 87 to 108 MHz band and plays through a connected speaker or headphones.
+
+Q: What chip is the FM radio
+A: The FM radio uses the RDA5807 receiver. It covers 87 to 108 MHz and supports seek, volume, and mute controls.
+
+Q: How do I listen to the radio
+A: Start the radio with openfmradio, tune to a station with fmradiotune followed by the frequency, and set volume with fmradiovolume.
+
+Q: How do I tune to a specific station
+A: Type fmradiotune followed by the frequency in MHz. For example, fmradiotune 101.5 tunes to 101.5 MHz.
+
+Q: How do I find radio stations
+A: Type fmradioseek to scan for the next station with a strong signal. Repeat to find more stations.
+
+Q: How do I scan for FM stations
+A: Run fmradioseek to search for the next receivable station. The radio tunes to it automatically.
+
+Q: How do I change the radio volume
+A: Type fmradiovolume followed by a number from 0 to 15. Zero is silent, fifteen is maximum.
+
+Q: How do I make the radio louder
+A: Increase the volume with fmradiovolume followed by a higher number. The range is 0 to 15.
+
+Q: How do I mute the FM radio
+A: Type fmradiomute to silence the radio without losing the tuned frequency. Use fmradiounmute to restore sound.
+
+Q: How do I unmute the radio
+A: Type fmradiounmute to restore the audio output. The station and volume settings are preserved.
+
+Q: tune to 95.5
+Do: fmradiotune 95.5
+
+Q: tune to an FM station
+Do: fmradiotune
+
+Q: seek next FM station
+Do: fmradioseek
+
+Q: auto scan for FM stations
+Do: fmradioseek
+
+Q: raise the FM radio volume
+Do: fmradiovolume
+
+Q: silence the FM radio output
+Do: fmradiomute
+
+Q: restore radio audio
+Do: fmradiounmute
+
+Q: How do I start debug logging for a subsystem
+A: Type debugmodule 1 where module is the name. For example, debugwifi 1 enables WiFi debug, debugespnow 1 enables ESP-NOW debug.
+
+Q: How do I see debug output for WiFi
+A: Type debugwifi 1 to enable WiFi debug logging. Output appears on the serial console.
+
+Q: How do I log debug messages to a file
+A: Type log start to begin writing debug output to a file. The path is auto-generated. Use log stop to finish.
+
+Q: How do I check if debug logging is active
+A: Run log status to see whether debug logging is running and where the log file is being written.
+
+Q: What debug modules are available
+A: Each subsystem has its own flag. Common ones include debugwifi, debugespnow, debugmqtt, and debugble. Set to 1 to enable, 0 to disable.
+
+Q: How do I reduce log noise
+A: Type loglevel error to show only errors. Use loglevel warn for warnings and errors. Use loglevel info for normal detail.
+
+Q: begin logging to file
+Do: log start
+
+Q: stop file logging
+Do: log stop
+
+Q: is debug logging active
+Do: log status
+
+Q: enable wifi debug
+Do: debugwifi 1
+
+Q: turn off wifi debug
+Do: debugwifi 0
+
+Q: write settings to flash
+Do: savesettings
+
+Q: persist current settings
+Do: savesettings
+
+Q: start sensor data logging
+Do: sensorlog
+
+Q: log sensor readings to file
+Do: sensorlog
+
+Q: read wifi radio power
+Do: wifigettxpower
+
+Q: check wifi transmit power level
+Do: wifigettxpower
+
+Q: change wifi transmit power
+Do: wifitxpower
+
+Q: set wifi radio output power
+Do: wifitxpower
+
+Q: show presence sensor info
+Do: presencestatus
+
+Q: presence detection details
+Do: presencestatus
+
+Q: configure SR acceptance gap
+Do: sraccept
+
+Q: set SR gap threshold
+Do: sraccept
+
+Q: change SR verbosity
+Do: srdebuglevel
+
+Q: SR debug detail level
+Do: srdebuglevel
+
+Q: zero SR counters
+Do: srdebugreset
+
+Q: clear SR statistics
+Do: srdebugreset
+
+Q: turn on SR telemetry
+Do: srdebugtelem
+
+Q: enable SR periodic stats
+Do: srdebugtelem
+
+Q: change snippet capture settings
+Do: srsnipconfig
+
+Q: adjust snippet parameters
+Do: srsnipconfig
+
+Q: turn off snippet capture
+Do: srsnipoff
+
+Q: stop saving wake word clips
+Do: srsnipoff
+
+Q: auto capture on wake word
+Do: srsnipon
+
+Q: save audio when wake detected
+Do: srsnipon
+
+Q: begin manual audio capture
+Do: srsnipstart
+
+Q: record a voice snippet now
+Do: srsnipstart
+
+Q: is snippet capture active
+Do: srsnipstatus
+
+Q: check voice snippet state
+Do: srsnipstatus
+
+Q: finish and save snippet
+Do: srsnipstop
+
+Q: end the current snippet
+Do: srsnipstop
+
+Q: change SR AGC setting
+Do: srtuningagc
+
+Q: set automatic gain control mode
+Do: srtuningagc
+
+Q: set SR input gain
+Do: srtuninggain
+
+Q: adjust SR microphone gain
+Do: srtuninggain
+
+Q: set SR software gain level
+Do: srtuningswgain
+
+Q: adjust software amplification
+Do: srtuningswgain
+
+Q: set voice activity sensitivity
+Do: srtuningvad
+
+Q: adjust VAD threshold
+Do: srtuningvad
+
+Q: set Edge Impulse threshold
+Do: eiconfidence
+
+Q: change EI detection sensitivity
+Do: eiconfidence
+
+Q: load a TFLite model
+Do: eimodelload
+
+Q: import an Edge Impulse model
+Do: eimodelload
+
+Q: remove all tracked objects
+Do: eitrackclear
+
+Q: reset EI tracker
+Do: eitrackclear
+
+Q: set secondary boot LED color
+Do: ledstartupcolor2
+
+Q: change the second startup color
+Do: ledstartupcolor2
+
+Q: set boot animation length
+Do: ledstartupduration
+
+Q: change startup LED duration
+Do: ledstartupduration
+
+Q: How does HTTPS work on this device
+A: The device can serve over HTTPS using a self-signed certificate. Type certgen to create one and certinfo to check it.
+
+Q: How do I enable HTTPS
+A: Generate a certificate with certgen. The HTTPS server activates automatically when a certificate is present.
+
+Q: What is the certgen command
+A: certgen creates a self-signed TLS certificate. The device uses it to encrypt web dashboard traffic over HTTPS.
+
+Q: How do I check my TLS certificate
+A: Type certinfo to see the certificate subject, issuer, key type, validity dates, and days until expiry.
+
+Q: How does the camera work
+A: Type opencamera to start the DVP camera, cameracapture to take a photo, and camerasave to store it on the SD card.
+
+Q: What camera does HardwareOne support
+A: HardwareOne supports OV2640, OV3660, and OV5640 DVP cameras on ESP32-S3 boards with a camera connector.
+
+Q: How do I preview the camera
+A: Start the camera with opencamera. The web UI shows a live stream. Use cameracapture to grab a still frame.
+
+Q: Can I record video
+A: HardwareOne captures still photos, not video. Use cameracapture for a single frame or cameraautostart on for timed captures.
+
+Q: How do I put the device into sleep mode
+A: Type sleep for deep sleep or lightsleep for light sleep. Deep sleep saves the most power but takes longer to wake.
+
+Q: What is the difference between sleep and lightsleep
+A: Deep sleep powers down most of the chip and wakes on a timer or button. Light sleep keeps WiFi state and wakes faster.
+
+Q: How do I wake the device from sleep
+A: The device wakes from a timer, button press, or configured GPIO event depending on the sleep mode used.
+
+Q: How do I save battery
+A: Turn off unused features with their close commands. Use lightsleep between readings. Lower CPU speed with cpufreq 80.
+
+Q: How do I set the timezone
+A: Type tzoffsetminutes followed by the offset in minutes from UTC. For example, tzoffsetminutes -480 for US Pacific time.
+
+Q: How does the timezone affect the clock
+A: The timezone offset adjusts the displayed time after ntpsync. Set it with tzoffsetminutes before syncing.
+
+Q: What is tzoffsetminutes
+A: tzoffsetminutes sets the local time offset from UTC in minutes. Positive values are east of Greenwich, negative are west.
+
+Q: set the timezone offset
+Do: tzoffsetminutes
+
+Q: change UTC offset in minutes
+Do: tzoffsetminutes
+
+Q: configure local timezone
+Do: tzoffsetminutes
+
+Q: What is ESP-NOW mesh networking
+A: Mesh lets devices relay messages through intermediate peers so you can reach nodes beyond direct radio range. Enable with espnowrelay.
+
+Q: Can ESP-NOW forward messages to devices out of range
+A: Yes, mesh routing forwards packets hop-by-hop. Use espnowmeshbroadcast to send to all reachable nodes across the mesh.
+
+Q: Command to see all mesh peers
+Do: espnowmeshpeers
+
+Q: list devices in the mesh network
+Do: espnowmeshpeers
+
+Q: Which devices can my mesh reach
+A: Type espnowmeshreachable to list all nodes the mesh can deliver to, including multi-hop peers not in direct range.
+
+Q: show reachable mesh nodes
+Do: espnowmeshreachable
+
+Q: How do I check the mesh route to a device
+A: espnowmeshroute shows the hop-by-hop path a message takes to reach a specific peer through the mesh.
+
+Q: trace mesh route
+Do: espnowmeshroute
+
+Q: What does mesh TTL mean
+A: TTL is the maximum number of hops a mesh message travels before being dropped. Set it with espnowmeshttl to limit flooding.
+
+Q: set mesh hop limit
+Do: espnowmeshttl
+
+Q: broadcast to all mesh devices
+Do: espnowmeshbroadcast
+
+Q: I want to debug mesh traffic
+A: Type espnowmeshlog to enable mesh debug output. It shows forwarded packets, route discoveries, and TTL expiries.
+
+Q: enable mesh logging
+Do: espnowmeshlog
+
+Q: What are ESP-NOW rooms
+A: Rooms are named groups of devices. Join a room with espnowroomjoin and send messages only to members with espnowroomsend.
+
+Q: How do I join an ESP-NOW room
+A: Type espnowroomjoin followed by the room name. Your device receives messages sent to that room by other members.
+
+Q: join an espnow room
+Do: espnowroomjoin
+
+Q: leave a room
+Do: espnowroomleave
+
+Q: list rooms I belong to
+Do: espnowroomlist
+
+Q: send a message to a room
+Do: espnowroomsend
+
+Q: Who is in my room
+A: espnowroompeers lists all devices that have joined the same room as you.
+
+Q: show room members
+Do: espnowroompeers
+
+Q: broadcast to everyone in a room
+Do: espnowroombroadcast
+
+Q: What is ESP-NOW relay mode
+A: Relay mode lets your device forward messages between peers that cannot see each other directly. Toggle with espnowrelay.
+
+Q: enable relay forwarding
+Do: espnowrelay
+
+Q: list relay routes
+Do: espnowrelaylist
+
+Q: Can I ping another ESP-NOW device
+A: Yes, espnowping sends a round-trip probe to a peer and reports whether it responded and the latency.
+
+Q: measure espnow latency
+Do: espnowrtt
+
+Q: ping an espnow peer
+Do: espnowping
+
+Q: send raw bytes over ESP-NOW
+Do: espnowsendraw
+
+Q: What is the map system
+A: Maps store named key-value pairs on the device. Use mapset to save a value, mapget to read it, and maplist to see all entries.
+
+Q: How do I save a value to the map
+A: Type mapset followed by a key name and value. The pair is stored persistently and survives reboots.
+
+Q: store a key-value pair
+Do: mapset
+
+Q: retrieve a map value
+Do: mapget
+
+Q: I want to look up a saved map entry
+A: Use mapget followed by the key name to retrieve its stored value from the map.
+
+Q: delete a map entry
+Do: mapdelete
+
+Q: list all map entries
+Do: maplist
+
+Q: clear all stored map data
+Do: mapclear
+
+Q: What does mapnav do
+A: mapnav calculates a route between two named map waypoints. Set waypoints first with mapset, then navigate between them.
+
+Q: navigate between waypoints
+Do: mapnav
+
+Q: How do I manage images on the device
+A: Use imagelist to see stored images, imageupload to add one, imagedownload to retrieve one, and imagedelete to remove one.
+
+Q: list stored images
+Do: imagelist
+
+Q: delete an image
+Do: imagedelete
+
+Q: upload an image to the device
+Do: imageupload
+
+Q: download an image from the device
+Do: imagedownload
+
+Q: I need to see what images are saved
+A: Type imagelist to see all images stored on the device with their file names and sizes.
+
+Q: How do I start the web server
+A: Type httpstart to launch the built-in HTTP server. The web dashboard becomes available at the device IP address.
+
+Q: start the HTTP server
+Do: httpstart
+
+Q: stop the web server
+Do: httpstop
+
+Q: Is the web server running
+A: Type httpstatus to check whether the HTTP server is active and which port it listens on.
+
+Q: What are features in HardwareOne
+A: Features are hardware modules you can enable or disable at runtime. Use featureenable and featuredisable followed by the feature name.
+
+Q: enable a hardware feature
+Do: featureenable
+
+Q: disable a feature
+Do: featuredisable
+
+Q: Can I turn off a feature I do not need
+A: Yes, type featuredisable followed by the feature name. This frees resources and stops background tasks for that module.
+
+Q: What is the ban system
+A: The ban system blocks specific MAC addresses from connecting to the device. Use ban to block and unban to allow again.
+
+Q: How do I block a device
+A: Type ban followed by the MAC address to block it. Banned devices cannot connect via WiFi, BLE, or ESP-NOW.
+
+Q: block a MAC address
+Do: ban
+
+Q: unblock a device
+Do: unban
+
+Q: list banned devices
+Do: banlist
+
+Q: clear all bans
+Do: banclear
+
+Q: I want to see who is banned
+A: Type banlist to see all currently banned MAC addresses and when they were added.
+
+Q: How do I configure the MQTT broker address
+A: Type mqttsetbroker followed by the broker hostname or IP. Then use mqttsetport if the port differs from 1883.
+
+Q: set MQTT broker
+Do: mqttsetbroker
+
+Q: change MQTT port
+Do: mqttsetport
+
+Q: How do I set MQTT credentials
+A: Use mqttsetuser and mqttsetpass to set the username and password. The device stores them for reconnection.
+
+Q: set MQTT username
+Do: mqttsetuser
+
+Q: set MQTT password
+Do: mqttsetpass
+
+Q: change the MQTT client ID
+Do: mqttsetclient
+
+Q: What topic does MQTT publish to
+A: The default topic is set with mqttsettopic. Sensor data goes to subtopics under it like /temp and /imu.
+
+Q: set MQTT topic
+Do: mqttsettopic
+
+Q: change MQTT publish interval
+Do: mqttsetinterval
+
+Q: set MQTT quality of service level
+Do: mqttsetqos
+
+Q: I want MQTT to send temperature readings
+A: Type mqttpublishtemp on to include thermal sensor data in MQTT publishes. Disable with mqttpublishtemp off.
+
+Q: publish temperature over MQTT
+Do: mqttpublishtemp
+
+Q: publish IMU data over MQTT
+Do: mqttpublishmmu
+
+Q: How do I set the Bluetooth device name
+A: Type blesetname followed by the name. Other devices see this name when scanning for BLE peripherals.
+
+Q: change BLE name
+Do: blesetname
+
+Q: set BLE transmit power
+Do: blesetpower
+
+Q: change BLE connection interval
+Do: blesetinterval
+
+Q: set BLE MTU size
+Do: blesetmtu
+
+Q: I want to adjust BLE settings
+A: Use blesetname for the advertised name, blesetpower for transmit strength, blesetinterval for connection timing, and blesetmtu for packet size.
+
+Q: How do I change the ESP-NOW radio channel
+A: Type espnowchannel followed by a WiFi channel number. All paired devices must use the same channel to communicate.
+
+Q: set espnow channel
+Do: espnowchannel
+
+Q: change ESP-NOW transmit power
+Do: espnowpower
+
+Q: adjust WiFi transmit power
+Do: wifitxpower
+
+Q: How do I adjust WiFi signal strength
+A: Type wifitxpower followed by a dBm value to raise or lower the WiFi radio transmit power. Higher values increase range but use more current.
+
+Q: What is the meaning of life
+A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
+
+Q: Can you browse the web
+A: I cannot access the internet. I run locally on this device and answer questions about HardwareOne features.
+
+Q: How do I install Python packages
+A: I only know about HardwareOne device commands. Python package management is outside my scope.
+
+Q: Translate this to Spanish
+A: I can only answer questions about HardwareOne. Type help for a list of commands.
+
+Q: What is the capital of France
+A: I only know about HardwareOne. Ask me about sensors, WiFi, ESP-NOW, or any device feature.
+
+Q: Can you make a phone call
+A: I cannot make calls. I can help with HardwareOne features. Type help for available commands.
+
+Q: Set an alarm for 7am
+A: I cannot set alarms. For timed actions, use the automation system with time-based rules.
+
+Q: Do my homework
+A: I can only help with HardwareOne features. Try asking about WiFi, sensors, or commands.
+
+Q: How do I use docker
+A: I only know about HardwareOne firmware and features. Type help to see what I can assist with.
+
+Q: Can you order pizza
+A: I can only answer questions about HardwareOne. Type help to see available commands.
+
+Q: How do I move a servo to 90 degrees
+A: Type servo followed by the channel number and 90. For example, servo 0 90 moves channel zero to ninety degrees.
+
+Q: Point a servo to a specific angle
+A: Run servo followed by the channel and the angle. The PCA9685 moves the servo immediately.
+
+Q: What happens if a servo loses power
+A: The servo stops holding its position. Reconnect power and run servo with the channel and angle to return it.
+
+Q: Can I control multiple servos at once
+A: Run servo for each channel separately. The PCA9685 updates each channel independently.
+
+Q: My servo makes a buzzing noise
+A: Buzzing usually means the servo is straining at its limit. Run servocalibrate to set correct pulse boundaries.
+
+Q: What servo profiles are saved
+A: Type servoprofile list to see all saved servo position profiles. Load one with servoprofile load followed by the name.
+
+Q: How do I delete a servo profile
+A: Type servoprofile delete followed by the profile name to remove a saved servo arrangement.
+
+Q: set servo to zero
+Do: servo
+
+Q: How far away does the presence sensor detect
+A: The STHS34PF80 detects people up to several metres away depending on the environment and sensor orientation.
+
+Q: Does the presence sensor work through walls
+A: No. The STHS34PF80 uses infrared which requires line of sight. Walls and thick objects block detection.
+
+Q: Can I trigger an action when someone is detected
+A: Yes. Create an automation rule like IF PRESENCE>0 THEN ledcolor green. The presence sensor feeds into the automation engine.
+
+Q: Why does the presence sensor give false readings
+A: Heat sources like heaters or sunlight can trigger false positives. Check presencestatus and move the sensor away from heat.
+
+Q: What is the difference between presence and motion
+A: Presence detects a stationary warm body. Motion detects active movement. The STHS34PF80 has separate channels for each.
+
+Q: How sensitive is the presence sensor
+A: Sensitivity depends on the configured thresholds. Check presencestatus to see current levels. Adjust through the web UI settings.
+
+Q: presence sensor keeps triggering
+A: Check for heat sources nearby. Run presencestatus to view ambient temperature. Reposition the sensor away from warm objects.
+
+Q: How do I read colour with the APDS
+A: Enable color mode with apdsmode color on, then type apdscolor to see red, green, blue, and clear channel values.
+
+Q: Can the gesture sensor detect taps
+A: No. The APDS9960 detects directional swipes only: up, down, left, and right. It does not sense tapping.
+
+Q: APDS proximity reads zero
+A: Make sure openapds is running and proximity mode is on with apdsmode proximity on. Check i2cscan for the sensor.
+
+Q: How close does something need to be for proximity
+A: The APDS9960 proximity sensor works within a few centimetres. Objects further away read as zero proximity.
+
+Q: Can I use gestures to control automations
+A: Yes. Read the gesture with apdsgesture and create automation rules that react to the detected swipe direction.
+
+Q: What does openapds do
+A: openapds initialises the APDS9960 sensor. After starting, enable the modes you need with apdsmode.
+
+Q: Is the RTC accurate
+A: The DS3231 is accurate to about two parts per million, which means it drifts less than a minute per year.
+
+Q: My RTC shows the wrong time
+A: Set it manually with rtcset or sync from the internet with rtcsync after connecting WiFi. Check with rtcread.
+
+Q: Can I use the RTC without WiFi
+A: Yes. The DS3231 runs on its own battery. Set the time once with rtcset and it keeps ticking independently.
+
+Q: What battery does the RTC use
+A: The DS3231 uses a CR2032 coin cell for backup power. It keeps time for years on a single cell.
+
+Q: How often should I sync the RTC
+A: The DS3231 is very accurate. Sync once with rtcsync after connecting WiFi and it stays within seconds for months.
+
+Q: Can I use the RTC with automations
+A: Yes. Time-based automation rules use the system clock. Sync it from the RTC with rtcsync for accurate scheduling.
+
+Q: What buttons does the gamepad have
+A: The Seesaw gamepad has a joystick and several buttons. Use gamepadread to see which ones are currently pressed.
+
+Q: Can the gamepad trigger commands
+A: Yes. Gamepad input can navigate the OLED menu and trigger automations bound to button presses.
+
+Q: My gamepad joystick drifts
+A: Some joystick drift is normal. Check gamepadread for raw values. If severe, close and reopen with closegamepad then opengamepad.
+
+Q: Does the gamepad work without the OLED
+A: Yes. The gamepad provides raw input via gamepadread even without an OLED screen attached.
+
+Q: How do I use the gamepad for menu navigation
+A: Start it with opengamepad. The joystick scrolls OLED menu items and the button selects the highlighted option.
+
+Q: gamepad is unresponsive
+A: Check i2cscan for the Seesaw chip. Try closegamepad then opengamepad to reinitialise the connection.
+
+Q: GPS takes a long time to get a fix
+A: First fix can take minutes, especially indoors. Move to an area with a clear view of the sky for faster satellite lock.
+
+Q: Can I track my location over time
+A: Start the GPS with opengps. The web dashboard GPS tab shows your position history on a map with cached tiles.
+
+Q: How do I check satellite count
+A: Type gpsread to see satellite count, fix status, latitude, longitude, altitude, and speed.
+
+Q: GPS shows no position
+A: Check gpsread for satellite count. Zero satellites means no sky visibility. Move outdoors and wait for a fix.
+
+Q: What data does the GPS provide
+A: The GPS reports latitude, longitude, altitude, speed, heading, satellite count, and fix quality. Read with gpsread.
+
+Q: Can I log GPS coordinates
+A: Enable GPS with opengps. The device logs positions to the GPS tab in the web UI. Use sensorlog for raw data logging.
+
+Q: How do I enable debug for a specific sensor
+A: Type debugmodule 1 where module is the sensor name. For example, debugimu 1 for IMU debug or debugtof 1 for distance.
+
+Q: What debug info goes to the serial console
+A: All debug output goes to serial. Use debugmodule 1 to enable and loglevel to control how verbose the output is.
+
+Q: How do I save debug logs for later
+A: Type log start to write all debug output to a file. Check log status to see the log path. Stop with log stop.
+
+Q: Can I debug MQTT connections
+A: Type debugmqtt 1 to enable MQTT debug logging. Connection attempts, publishes, and errors appear on serial.
+
+Q: debug output is too noisy
+A: Use loglevel warn to show only warnings and errors. Or disable individual modules with debugmodule 0.
+
+Q: What I2C address does the sensor use
+A: Run i2cscan to see all detected devices and their hex addresses. Each sensor type uses a fixed default address.
+
+Q: Can I change the I2C address
+A: Most I2C sensors have fixed addresses. Some have address jumpers. Check the sensor datasheet for options.
+
+Q: I2C scan finds nothing
+A: Check wiring: SDA and SCL must be connected. Verify the sensor has power. Run i2cscan again after checking connections.
+
+Q: How many I2C buses does HardwareOne have
+A: HardwareOne uses one I2C bus shared by all sensors. Each device needs a unique address on the bus.
+
+Q: What sensors does i2cscan detect
+A: i2cscan reports all devices on the I2C bus by address. HardwareOne automatically loads drivers for recognised sensor chips.
+
+Q: Can I see a live thermal image
+A: Yes. Start the camera with openthermal. The Sensors tab in the web dashboard shows a live 32 by 24 pixel heatmap.
+
+Q: What resolution is the thermal camera
+A: The MLX90640 produces a 32 by 24 pixel thermal image. Each pixel reports temperature in degrees Celsius.
+
+Q: How hot can the thermal camera measure
+A: The MLX90640 measures temperatures from minus 40 to 300 degrees Celsius depending on the sensor variant.
+
+Q: thermal image looks noisy
+A: Some noise is normal. Multiple readings average out. Make sure the sensor is firmly seated on the I2C bus.
+
+Q: How do I listen to FM radio
+A: Type openfmradio to start the receiver, then fmradiotune followed by a frequency like 101.5 to tune in.
+
+Q: What FM frequencies can it receive
+A: The RDA5807 receives standard FM broadcast frequencies from 87 to 108 MHz. Tune with fmradiotune.
+
+Q: radio has no sound
+A: Check fmradioread for signal strength. Try fmradioseek to find a strong station. Make sure volume is up with fmradiovolume.
+
+Q: How far can the distance sensor measure
+A: The VL53L4CX measures distances up to about six metres. Accuracy is best within two metres.
+
+Q: distance sensor reads zero
+A: Make sure opentof is running. Check i2cscan for the VL53L4CX. Ensure nothing blocks the sensor lens.
+
+Q: Can I use distance for proximity alerts
+A: Yes. Create an automation rule like IF DISTANCE<50 THEN ledcolor red to react when something is within 50mm.
+
+Q: What is the help command
+A: help lists all available commands. Type help followed by a command name for detailed usage and examples.
+
+Q: How do I find a specific command
+A: Type help to see all commands. Use help followed by a keyword to search for related commands.
+
+Q: I do not know what to type
+A: Start with help to see all available commands. Try status for system info or sensors to see active sensors.
+
+Q: What can the LLM do
+A: The on-device LLM answers questions about HardwareOne features and commands. It runs entirely on the ESP32-S3.
+
+Q: How do I ask the LLM a question
+A: Type llm generate followed by your question. The model processes it locally and prints a short answer.
+
+Q: Is the LLM connected to the internet
+A: No. The LLM runs fully on-device in PSRAM. It has no internet access and only knows about HardwareOne.
+
+Q: How do I show something on the OLED
+A: Type oledtext followed by your message. Use oledclear to wipe the screen first if needed.
+
+Q: Can I draw on the OLED
+A: The OLED supports text lines with oledtext, screen clearing with oledclear, and brightness control with oledbrightness.
+
+Q: OLED screen is blank
+A: Type openoled to start the display. Then use oledtext to write a line. Check oledbrightness is above zero.
+
+Q: How much memory is free
+A: Type memsample to check current heap and PSRAM usage. memreport gives a detailed breakdown by subsystem.
+
+Q: device is running slow
+A: Check memsample for low memory. Unload features you are not using. The LLM model uses the most PSRAM.
+
+Q: Is there enough memory for the LLM
+A: Type memsample to check PSRAM. The LLM model needs about 7 MB of free PSRAM to load successfully.
+
+Q: How do I check if MQTT is connected
+A: Type mqttstatus to see the MQTT connection state, broker address, and publish interval.
+
+Q: MQTT is not publishing
+A: Check mqttstatus for connection state. Verify the broker address with mqttsetbroker. Make sure openmqtt has been run.
+
+Q: send a message to the whole mesh
+Do: espnowmeshbroadcast
+
+Q: broadcast across all mesh nodes
+Do: espnowmeshbroadcast
+
+Q: show mesh network peers
+Do: espnowmeshpeers
+
+Q: who is in the mesh
+Do: espnowmeshpeers
+
+Q: trace the mesh path to a node
+Do: espnowmeshroute
+
+Q: how does a message reach that peer
+Do: espnowmeshroute
+
+Q: set the mesh hop limit
+Do: espnowmeshttl
+
+Q: change mesh TTL value
+Do: espnowmeshttl
+
+Q: which mesh nodes are reachable
+Do: espnowmeshreachable
+
+Q: can the mesh reach that device
+Do: espnowmeshreachable
+
+Q: turn on mesh debug output
+Do: espnowmeshlog
+
+Q: show mesh forwarding log
+Do: espnowmeshlog
+
+Q: join an espnow chat room
+Do: espnowroomjoin
+
+Q: enter an espnow room
+Do: espnowroomjoin
+
+Q: exit an espnow room
+Do: espnowroomleave
+
+Q: leave the espnow room
+Do: espnowroomleave
+
+Q: which espnow rooms am I in
+Do: espnowroomlist
+
+Q: show my room memberships
+Do: espnowroomlist
+
+Q: message everyone in the espnow room
+Do: espnowroomsend
+
+Q: send text to my espnow room
+Do: espnowroomsend
+
+Q: who else is in this espnow room
+Do: espnowroompeers
+
+Q: list espnow room members
+Do: espnowroompeers
+
+Q: broadcast to the entire espnow room
+Do: espnowroombroadcast
+
+Q: send to all room members
+Do: espnowroombroadcast
+
+Q: turn on espnow relay forwarding
+Do: espnowrelay
+
+Q: enable espnow message relay
+Do: espnowrelay
+
+Q: show espnow relay routes
+Do: espnowrelaylist
+
+Q: which peers relay through me
+Do: espnowrelaylist
+
+Q: ping an espnow peer device
+Do: espnowping
+
+Q: test espnow connectivity to a peer
+Do: espnowping
+
+Q: measure espnow round-trip time
+Do: espnowrtt
+
+Q: espnow latency to a peer
+Do: espnowrtt
+
+Q: send raw espnow bytes
+Do: espnowsendraw
+
+Q: transmit raw data over espnow
+Do: espnowsendraw
+
+Q: change the espnow radio channel
+Do: espnowchannel
+
+Q: switch espnow to a different channel
+Do: espnowchannel
+
+Q: set espnow transmit power level
+Do: espnowpower
+
+Q: adjust espnow radio strength
+Do: espnowpower
+
+Q: save a key-value pair to the map
+Do: mapset
+
+Q: store a map entry
+Do: mapset
+
+Q: look up a map value by key
+Do: mapget
+
+Q: read a map entry
+Do: mapget
+
+Q: remove a map entry
+Do: mapdelete
+
+Q: delete a key from the map
+Do: mapdelete
+
+Q: show all map keys
+Do: maplist
+
+Q: list stored map entries
+Do: maplist
+
+Q: erase all map data
+Do: mapclear
+
+Q: wipe the entire map store
+Do: mapclear
+
+Q: navigate between map waypoints
+Do: mapnav
+
+Q: route between two map points
+Do: mapnav
+
+Q: show images stored on the device
+Do: imagelist
+
+Q: what images are saved
+Do: imagelist
+
+Q: remove a stored image
+Do: imagedelete
+
+Q: erase an image file
+Do: imagedelete
+
+Q: send an image to the device
+Do: imageupload
+
+Q: upload a picture
+Do: imageupload
+
+Q: retrieve an image from the device
+Do: imagedownload
+
+Q: download a saved image
+Do: imagedownload
+
+Q: launch the HTTP web server
+Do: httpstart
+
+Q: start serving the web dashboard
+Do: httpstart
+
+Q: shut down the HTTP server
+Do: httpstop
+
+Q: stop the web server process
+Do: httpstop
+
+Q: turn on a hardware feature
+Do: featureenable
+
+Q: activate a device feature
+Do: featureenable
+
+Q: turn off a hardware feature
+Do: featuredisable
+
+Q: deactivate a device feature
+Do: featuredisable
+
+Q: block a device by MAC address
+Do: ban
+
+Q: ban a MAC from connecting
+Do: ban
+
+Q: remove a device from the ban list
+Do: unban
+
+Q: allow a banned MAC to connect again
+Do: unban
+
+Q: show all banned MAC addresses
+Do: banlist
+
+Q: who is currently banned
+Do: banlist
+
+Q: remove all bans at once
+Do: banclear
+
+Q: clear the entire ban list
+Do: banclear
+
+Q: set the MQTT broker hostname
+Do: mqttsetbroker
+
+Q: configure MQTT server address
+Do: mqttsetbroker
+
+Q: set the MQTT broker port
+Do: mqttsetport
+
+Q: change MQTT port number
+Do: mqttsetport
+
+Q: set the MQTT login username
+Do: mqttsetuser
+
+Q: configure MQTT credentials user
+Do: mqttsetuser
+
+Q: set the MQTT login password
+Do: mqttsetpass
+
+Q: configure MQTT credentials password
+Do: mqttsetpass
+
+Q: set the MQTT client identifier
+Do: mqttsetclient
+
+Q: change MQTT client name
+Do: mqttsetclient
+
+Q: set the MQTT publish topic
+Do: mqttsettopic
+
+Q: change MQTT base topic
+Do: mqttsettopic
+
+Q: set MQTT publish frequency
+Do: mqttsetinterval
+
+Q: change how often MQTT publishes
+Do: mqttsetinterval
+
+Q: set MQTT quality of service
+Do: mqttsetqos
+
+Q: change MQTT QoS level
+Do: mqttsetqos
+
+Q: enable MQTT temperature publishing
+Do: mqttpublishtemp
+
+Q: send thermal data over MQTT
+Do: mqttpublishtemp
+
+Q: enable MQTT IMU data publishing
+Do: mqttpublishmmu
+
+Q: send motion data over MQTT
+Do: mqttpublishmmu
+
+Q: set the BLE advertised name
+Do: blesetname
+
+Q: change bluetooth device name
+Do: blesetname
+
+Q: adjust BLE radio power
+Do: blesetpower
+
+Q: set bluetooth transmit strength
+Do: blesetpower
+
+Q: set BLE connection timing
+Do: blesetinterval
+
+Q: change bluetooth connection interval
+Do: blesetinterval
+
+Q: set bluetooth packet size
+Do: blesetmtu
+
+Q: change BLE maximum transfer unit
+Do: blesetmtu
+
+Q: pair with an espnow device
+Do: espnowpair
+
+Q: unpair an espnow peer
+Do: espnowunpair
+
+Q: enable wifi debug messages
+Do: debugwifi 1
+
+Q: put the device into light sleep
+Do: lightsleep
+
+Q: save power with light sleep mode
+Do: lightsleep
+
+Q: set the microphone input gain
+Do: micgain
+
+Q: adjust mic sensitivity
+Do: micgain
+
+Q: read current microphone level
+Do: micread
+
+Q: see what the mic is picking up
+Do: micread
+
+Q: list available microphones
+Do: miclist
+
+Q: show mic devices
+Do: miclist
+
+Q: check microphone audio level
+Do: miclevel
+
+Q: mic volume meter
+Do: miclevel
+
+Q: remove a recorded audio clip
+Do: micdelete
+
+Q: delete a mic recording
+Do: micdelete
+
+Q: autostart the microphone on boot
+Do: micautostart
+
+Q: enable mic at startup
+Do: micautostart
+
+Q: enable speech recognition tuning view
+Do: srtuning
+
+Q: show SR tuning parameters
+Do: srtuning
+
+Q: see raw speech recognition audio
+Do: srraw
+
+Q: show SR raw input waveform
+Do: srraw
+
+Q: adjust SR noise filters
+Do: srtuningfilters
+
+Q: change speech recognition filter settings
+Do: srtuningfilters
+
+Q: toggle dynamic gain for SR
+Do: srdyngain
+
+Q: enable SR dynamic gain control
+Do: srdyngain
+
+Q: print speech recognition stats
+Do: srdebugstats
+
+Q: show SR recognition accuracy
+Do: srdebugstats
+
+Q: set SR wake word confidence level
+Do: srconfidence
+
+Q: adjust speech recognition threshold
+Do: srconfidence
+
+Q: write text to the OLED screen
+Do: oledtext
+
+Q: display a message on the OLED
+Do: oledtext
+
+Q: clear the OLED screen
+Do: oledclear
+
+Q: wipe the OLED display
+Do: oledclear
+
+Q: show OLED display status
+Do: oledstatus
+
+Q: is the OLED running
+Do: oledstatus
+
+Q: start thermal camera at boot
+Do: thermalautostart
+
+Q: autostart the MLX90640
+Do: thermalautostart
+
+Q: autostart the RTC clock module
+Do: rtcautostart
+
+Q: start DS3231 on boot
+Do: rtcautostart
+
+Q: autostart presence detection on boot
+Do: presenceautostart
+
+Q: start presence sensor at startup
+Do: presenceautostart
+
+Q: autostart MQTT connection on boot
+Do: mqttautostart
+
+Q: connect to MQTT broker at startup
+Do: mqttautostart
+
+Q: autostart GPS module on boot
+Do: gpsautostart
+
+Q: start GPS at power on
+Do: gpsautostart
+
+Q: autostart BLE at boot
+Do: bleautostart
+
+Q: start bluetooth on power up
+Do: bleautostart
+
+Q: check wifi auto-reconnect setting
+Do: wifiautoreconnect
+
+Q: toggle automatic wifi reconnection
+Do: wifiautoreconnect
+
+Q: mount the SD card
+Do: sdmount
+
+Q: initialise the SD card reader
+Do: sdmount
+
+Q: rename a file on the filesystem
+Do: filerename
+
+Q: change a filename
+Do: filerename
+
+Q: create a new empty file
+Do: filecreate
+
+Q: make a blank file on the filesystem
+Do: filecreate
+
+Q: show voice command status
+Do: voicestatus
+
+Q: is voice command armed
+Do: voicestatus
+
+Q: list voice command keywords
+Do: voicehelp
+
+Q: what voice commands can I say
+Do: voicehelp
+
+Q: sync user accounts across devices
+Do: usersync
+
+Q: replicate user database to peers
+Do: usersync
+
+Q: show startup LED color setting
+Do: ledstartupcolor
+
+Q: what color does the LED boot to
+Do: ledstartupcolor
+
+Q: toggle startup LED on or off
+Do: ledstartupenabled
+
+Q: disable the boot LED animation
+Do: ledstartupenabled
+
+Q: capture a still from the camera
+Do: cameraread
+
+Q: take a photo with the camera
+Do: cameraread
+
+Q: save a camera photo to SD
+Do: camerasave
+
+Q: write camera image to the SD card
+Do: camerasave
+
+Q: start camera at boot
+Do: cameraautostart
+
+Q: autostart the DVP camera
+Do: cameraautostart
+
+Q: disconnect from the bonded peer
+Do: bonddisconnect
+
+Q: break the bond connection
+Do: bonddisconnect
+
+Q: show bluetooth device address
+Do: bleinfo
+
+Q: see BLE hardware details
+Do: bleinfo
+
+Q: check G2 smart glasses connection
+Do: g2status
+
+Q: are the G2 glasses connected
+Do: g2status
+
+Q: initialise the G2 glasses display
+Do: g2init
+
+Q: start the G2 smart glasses
+Do: g2init
+
+Q: shut down the G2 glasses
+Do: g2deinit
+
+Q: disconnect the G2 display
+Do: g2deinit
+
+Q: clear the G2 glasses screen
+Do: g2clear
+
+Q: wipe the G2 display
+Do: g2clear
+
+Q: display content on G2 glasses
+Do: g2show
+
+Q: show text on the G2 screen
+Do: g2show
+
+Q: scan for G2 glasses nearby
+Do: g2scan
+
+Q: find G2 smart glasses
+Do: g2scan
+
+Q: navigate G2 menu
+Do: g2nav
+
+Q: control G2 glasses menu
+Do: g2nav
+
+Q: turn on verbose G2 output
+Do: g2verbose on
+
+Q: enable detailed G2 logging
+Do: g2verbose on
+
+Q: check Edge Impulse inference status
+Do: eistatus
+
+Q: is Edge Impulse running
+Do: eistatus
+
+Q: enable Edge Impulse processing
+Do: eienable
+
+Q: start Edge Impulse inference
+Do: eienable
+
+Q: run Edge Impulse continuously
+Do: eicontinuous
+
+Q: start continuous EI classification
+Do: eicontinuous
+
+Q: list Edge Impulse TFLite models
+Do: eimodellist
+
+Q: show available EI models
+Do: eimodellist
+
+Q: show loaded Edge Impulse model
+Do: eimodelinfo
+
+Q: what EI model is active
+Do: eimodelinfo
+
+Q: unload the Edge Impulse model
+Do: eimodelunload
+
+Q: remove the current EI model from memory
+Do: eimodelunload
+
+Q: upload an Edge Impulse model file
+Do: eifile
+
+Q: load an EI TFLite file
+Do: eifile
+
+Q: check EI object tracking status
+Do: eitrackstatus
+
+Q: is EI tracking enabled
+Do: eitrackstatus
+
+Q: enable EI object tracking
+Do: eitrackenable
+
+Q: start Edge Impulse tracking
+Do: eitrackenable
+
+Q: check voice snippet capture state
+Do: srsnipstatus
+
+Q: is SR snippet recording active
+Do: srsnipstatus
+
+ESP-NOW mesh networking extends the range of device-to-device communication by relaying messages through intermediate nodes. Enable relay with espnowrelay. Devices can join named rooms with espnowroomjoin to create logical groups. Messages sent with espnowroomsend reach all room members even across multiple hops.
+
+The map system stores named key-value pairs on the device. Use mapset to save a waypoint or value, mapget to retrieve it, and maplist to see all stored entries. Waypoints can be used with mapnav to calculate routes between named locations.
+
+HardwareOne has a built-in HTTP server that serves the web dashboard. Type httpstart to launch it and httpstop to shut it down. Type httpstatus to check whether the server is running and which port it listens on. The dashboard is accessible from any browser on the same network.
+
+The ban system blocks specific MAC addresses from connecting to the device. Type ban followed by a MAC address to block it. Type banlist to see all banned addresses and banclear to remove all bans. Banned devices cannot connect over WiFi, BLE, or ESP-NOW.
+
+MQTT configuration commands set the broker connection parameters. Use mqttsetbroker for the server address, mqttsetport for the port, mqttsetuser and mqttsetpass for credentials, and mqttsettopic for the publish topic. Use mqttsetinterval to control how often sensor data is published.
+
+BLE settings control the Bluetooth Low Energy radio. Type blesetname to change the advertised device name, blesetpower to adjust transmit strength, blesetinterval to set the connection timing, and blesetmtu to configure the maximum packet size. Use bleautostart on to start BLE at boot.
+
+Edge Impulse runs TFLite machine learning models on the device. Load a model with eifile, start inference with eienable, and run it continuously with eicontinuous. Models can classify audio, motion, or other sensor data. Check results with eistatus and tracking with eitrackstatus.
+
+The image system manages pictures stored on the device. Type imagelist to see all stored images, imageupload to add one from a browser, imagedownload to retrieve one, and imagedelete to remove one. Images are stored on the SD card or internal flash.

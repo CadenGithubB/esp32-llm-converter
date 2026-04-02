@@ -237,124 +237,67 @@ def train_bpe_tokenizer(text_paths: list[Path], vocab_size: int, out_dir: Path) 
         special_tokens=[
             # Infrastructure
             "<|endoftext|>", "<pad>", "<unk>", "Q:", "A:", "Do:",
-            # Sensor open/close commands — BPE would otherwise split these
-            "opentof", "closetof",
-            "openimu", "closeimu",
-            "opengps", "closegps",
-            "openthermal", "closethermal",
-            "openpresence", "closepresence",
-            "openapds", "closeapds",
-            "openfmradio", "closefmradio",
-            "opengamepad", "closegamepad",
-            "openrtc", "closertc",
-            "opencamera", "closecamera",
-            "openmic", "closemic",
-            "openespnow", "closeespnow",
-            "opensr", "closesr",
+            # Sensor open commands — compound words BPE would fragment
+            "opentof", "openimu", "opengps", "openthermal",
+            "openpresence", "openapds", "openfmradio", "opengamepad",
+            "openrtc", "opencamera", "openmic", "openespnow", "opensr",
             # WiFi commands
             "openwifi", "closewifi", "wifiadd", "wifiscan", "wifistatus",
-            "wifilist", "wifirm", "wifipromote",
-            "wifiautoreconnect", "wifitxpower", "wifigettxpower",
+            "wifilist", "wifipromote",
             # BLE commands
-            "openble", "closeble",
-            "bleinfo", "blesend", "blestatus", "bleautostart",
+            "openble", "closeble", "bleinfo", "blestatus",
             # MQTT commands
-            "openmqtt", "closemqtt", "mqttstatus", "mqttautostart",
-            "mqttHost", "mqttUser", "mqttPassword",
-            "mqttSubscribeTopics", "mqttPublishIMU", "mqttPublishThermal",
+            "openmqtt", "mqttstatus",
             # ESP-NOW commands
             "espnowsend", "espnowsendfile", "espnowstats",
             "espnowpair", "espnowunpair", "espnowdevices",
-            "espnowsetname", "espnowmode", "espnowremote",
-            "espnowbroadcast", "espnowpairsecure", "espnowlist",
+            "espnowsetname", "espnowbroadcast", "espnowpairsecure",
+            "espnowlist",
             # Bond commands
             "bondconnect", "bonddisconnect", "bondstatus",
             # User commands
             "useradd", "userdelete", "userlist",
             "userchangepassword", "userresetpassword",
-            "userapprove", "userdeny", "userpromote", "userdemote",
-            "userrequest", "usersync",
             # Session commands
             "sessionlist", "sessionrevoke", "pendinglist",
             # Battery and system
-            "batterystatus", "status", "reboot",
-            "cpufreq", "temperature", "voltage", "uptime", "time",
-            "sleep", "lightsleep",
-            "login", "logout", "savesettings", "taskstats",
+            "batterystatus", "savesettings", "lightsleep",
             # OLED commands
-            "oledbrightness", "oledmode", "oledstatus", "oledtext", "oledclear",
+            "oledbrightness", "oledmode", "oledstatus", "oledclear",
             # LED commands
             "ledcolor", "ledclear", "ledeffect", "ledbrightness",
-            "ledstartupeffect", "ledstartupcolor", "ledstartupcolor2",
-            "ledstartupduration", "ledstartupenabled",
             # File commands
-            "files", "filecreate", "filedelete", "filerename", "fileview", "mkdir",
-            "fsusage",
+            "filecreate", "filedelete", "filerename", "fileview",
             # SD card commands
-            "sdinfo", "sdformat", "sdmount", "sdunmount", "sddiag",
+            "sdinfo", "sdformat",
             # Camera commands
-            "cameracapture", "camerasave", "cameraread", "cameraautostart",
+            "cameracapture", "camerasave",
             # Microphone commands
-            "micrecord", "micread", "miclevel", "miclist", "micdelete",
-            "micgain", "micautostart",
+            "micrecord", "micdelete",
             # GPS commands
-            "gpsread", "gpsautostart",
+            "gpsread",
             # FM radio commands
             "fmradiotune", "fmradioseek", "fmradiovolume",
             "fmradiomute", "fmradiounmute", "fmradioread",
             # RTC commands
-            "rtcread", "rtcset", "rtcsync", "rtcautostart",
+            "rtcread", "rtcsync",
             # Presence sensor
-            "presenceread", "presencestatus", "presenceautostart",
+            "presenceread", "presencestatus",
             # APDS sensor
-            "apdsread", "apdscolor", "apdsproximity", "apdsgesture", "apdsmode",
+            "apdscolor", "apdsproximity", "apdsgesture",
             # Servo commands
-            "servolist", "servoprofile", "servocalibrate",
+            "servoprofile", "servocalibrate",
             # LLM commands
-            "llmload", "llmunload", "llmmodels", "llmstatus",
+            "llmload", "llmunload",
             # Edge Impulse commands
-            "eienable", "eidetect", "eifile", "eicontinuous",
-            "eiconfidence", "eistatus",
-            "eimodellist", "eimodelload", "eimodelinfo", "eimodelunload",
-            "eitrackstatus", "eitrackenable", "eitrackclear",
-            # G2 glasses commands
-            "g2show", "g2scan", "g2init", "g2deinit",
-            "g2clear", "g2status", "g2verbose", "g2nav",
+            "eienable", "eidetect", "eicontinuous", "eiconfidence",
             # Speech recognition commands
-            "srstatus", "srcmdslist",
-            "srconfidence", "sraccept", "srdyngain", "srraw",
-            "srautotune", "srtuning",
-            "srtuningswgain", "srtuninggain", "srtuningagc",
-            "srtuningvad", "srtuningfilters",
-            "srsnipon", "srsnipoff", "srsnipstart", "srsnipstop",
-            "srsnipstatus", "srsnipconfig",
-            "srdebuglevel", "srdebugstats", "srdebugtelem", "srdebugreset",
-            # Voice commands
-            "voicearm", "voicedisarm", "voicestatus",
-            "voicecancel", "voicehelp",
-            # Certificate commands
-            "certgen", "certinfo",
-            # Logging commands
-            "log", "loglevel", "autolog",
-            # Automation commands
-            "automationlist", "automationadd", "automationrun",
-            # Sensor and diagnostics
-            "sensors", "sensorinfo", "i2cscan",
+            "srconfidence", "srautotune", "srcmdslist",
+            # Sensor reads and diagnostics
+            "thermalread", "gamepadread", "sensorinfo", "i2cscan",
             "memsample", "memreport",
-            "help",
-            # Autostart commands
-            "imuautostart", "fmradioautostart", "apdsautostart",
-            "thermalautostart", "gamepadautostart", "tofautostart",
-            # Standalone domain keywords
-            "tof", "imu", "mqtt", "apds", "espnow",
-            "thermalread", "tofread", "imuread", "gamepadread",
-            "ntpsync",
-            "debugtof", "debugwifi", "debugespnow",
-            # Platform names — hyphens and mixed case cause bad splits
-            "HardwareOne", "ESP-NOW", "ESP-IDF", "ESP32-S3",
-            # Chip part numbers — BPE fragments these into meaningless pieces
-            "VL53L4CX", "BNO055", "MLX90640", "STHS34PF80",
-            "PA1010D", "DS3231", "APDS9960", "RDA5807", "PCA9685",
+            # Misc
+            "ntpsync", "automationlist", "automationadd",
         ],
     )
     tokenizer_core.train([str(p) for p in text_paths], trainer)
