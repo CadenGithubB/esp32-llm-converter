@@ -109,7 +109,7 @@ PRESETS: dict[str, dict[str, int]] = {
     # "HW1HelpAgent192_deep": dim=192 / 16 layers / 6 heads / FFN=512 — recommended for Hardware One.
     # FFN=512 (2.67×dim) balances factual storage width with 16 layers of routing depth.
     # Est. PSRAM at ctx=64: ~7688 KB with ~504 KB headroom on 8 MB ESP32-S3.
-    "HW1HelpAgent192_deep": {"vocab_size": 4096, "n_embd": 192, "n_layer": 16, "n_head": 6, "seq_len": 128, "n_inner": 512},
+    "HW1HelpAgent192_deep": {"vocab_size": 3328, "n_embd": 192, "n_layer": 16, "n_head": 6, "seq_len": 128, "n_inner": 512},
     # "HW1HelpAgent256": dim=256 / 8 layers / 8 heads / FFN=768 — wider representation for better topic separation.
     "HW1HelpAgent256": {"vocab_size": 4096, "n_embd": 256, "n_layer": 8, "n_head": 8, "seq_len": 128, "n_inner": 768},
 }
